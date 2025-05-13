@@ -762,6 +762,20 @@ export default function ProjectDetails() {
                                           Upload Files
                                         </Button>
                                         
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => {
+                                            setSelectedStep(step);
+                                            setCommentText('');
+                                            fetchComments(step.id);
+                                            setShowCommentDialog(true);
+                                          }}
+                                        >
+                                          <MessageSquare className="h-4 w-4 mr-2" />
+                                          Comments
+                                        </Button>
+                                        
                                         <Button 
                                           size="sm"
                                           variant="outline"
