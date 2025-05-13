@@ -660,11 +660,15 @@ export class MemStorage implements IStorage {
     // Editorial work generally finishes after coloring is done
     const editorialEndDate = addDays(editorialStartDate, editorialDuration);
     
+    // Add final editorial date (one week after colors)
+    const finalEditorialDate = addDays(colorEndDate, 7);
+    
     // Production starts after everything else is done
     const productionStartDate = new Date(Math.max(
       colorEndDate.getTime(),
       letterEndDate.getTime(),
-      editorialEndDate.getTime()
+      editorialEndDate.getTime(),
+      finalEditorialDate.getTime()
     ));
     const productionEndDate = addDays(productionStartDate, productionDuration);
     
@@ -752,6 +756,16 @@ export class MemStorage implements IStorage {
       },
       {
         projectId,
+        stepType: "proofs",
+        title: "Proofs",
+        description: "Editorial review of colored pages before final approval",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 75,
+        dueDate: colorEndDate, // Due same day as colors
+      },
+      {
+        projectId,
         stepType: "editorial",
         title: "Editorial Pages",
         description: `Create ${fillerPageCount} supplementary editorial pages`,
@@ -759,6 +773,16 @@ export class MemStorage implements IStorage {
         progress: 0,
         sortOrder: 80,
         dueDate: editorialEndDate,
+      },
+      {
+        projectId,
+        stepType: "final_editorial",
+        title: "Final Editorial Pages",
+        description: "Final editorial review and approval of all pages",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 85,
+        dueDate: addDays(colorEndDate, 7), // Due one week after proofs/colors
       },
       {
         projectId,
