@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
-import { Project, FeedbackItem, Deadline, Collaborator, Asset } from '@shared/schema';
+import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,14 +9,25 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar, MessageCircle } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar, MessageCircle, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-import { formatDate, formatStatusLabel, getStatusColor, DEFAULT_USER_ID } from '@/lib/utils';
+import { 
+  formatDate, 
+  formatDateRelative, 
+  formatStatusLabel, 
+  getStatusColor, 
+  DEFAULT_USER_ID,
+  calculateDaysUntil,
+  getTalentProgressStatus,
+  getTalentProgressStatusColor,
+  type TalentProgressStatus
+} from '@/lib/utils';
 import { FileUpload } from '@/components/ui/custom/file-upload';
 import { Helmet } from 'react-helmet-async';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
@@ -41,6 +52,11 @@ export default function ProjectDetails() {
 
   const { data: assets, isLoading: isAssetsLoading } = useQuery<Asset[]>({
     queryKey: [`/api/projects/${id}/assets`],
+    enabled: !!id,
+  });
+  
+  const { data: workflowSteps, isLoading: isWorkflowLoading } = useQuery<WorkflowStep[]>({
+    queryKey: [`/api/projects/${id}/workflow`],
     enabled: !!id,
   });
 
@@ -157,15 +173,29 @@ export default function ProjectDetails() {
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(`/script-editor/${id}`)}
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 Script
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  toast({
+                    title: "Preview not available",
+                    description: "Preview functionality is currently under development.",
+                    variant: "default"
+                  });
+                }}
+              >
                 <Book className="h-4 w-4 mr-2" />
                 Preview
               </Button>
-              <Button>
+              <Button 
+                onClick={() => navigate(`/projects/edit/${id}`)}
+              >
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </Button>
@@ -277,12 +307,182 @@ export default function ProjectDetails() {
             </Card>
 
             <div className="mt-6">
-              <Tabs defaultValue="feedback">
+              <Tabs defaultValue="workflow">
                 <TabsList className="w-full max-w-md">
+                  <TabsTrigger value="workflow">Workflow</TabsTrigger>
                   <TabsTrigger value="feedback">Feedback</TabsTrigger>
                   <TabsTrigger value="assets">Assets</TabsTrigger>
                   <TabsTrigger value="team">Team</TabsTrigger>
                 </TabsList>
+                
+                <TabsContent value="workflow" className="mt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold">Comic Production Workflow</h2>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline">
+                            <ArrowRight className="h-4 w-4 mr-2" />
+                            Initialize Workflow
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Create workflow steps based on the project's configuration</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  {isWorkflowLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="border border-slate-200 rounded-lg p-6 animate-pulse">
+                          <div className="flex items-start">
+                            <div className="mr-4">
+                              <div className="h-8 w-8 rounded-full bg-slate-200"></div>
+                            </div>
+                            <div className="flex-1">
+                              <div className="h-5 bg-slate-200 rounded w-1/3 mb-4"></div>
+                              <div className="h-4 bg-slate-200 rounded w-2/3 mb-2"></div>
+                              <div className="h-3 bg-slate-200 rounded w-full"></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : workflowSteps && workflowSteps.length > 0 ? (
+                    <div className="space-y-8">
+                      {workflowSteps
+                        .sort((a, b) => a.sortOrder - b.sortOrder)
+                        .map((step, index) => {
+                          // Calculate dates and status
+                          const daysUntil = step.dueDate ? calculateDaysUntil(step.dueDate) : null;
+                          let progressStatus: TalentProgressStatus = 'on_time';
+                          
+                          if (step.stepType === 'pencils' && project.pencilerPagesPerWeek) {
+                            progressStatus = getTalentProgressStatus({
+                              totalPages: project.interiorPageCount,
+                              completedPages: Math.floor((project.interiorPageCount * step.progress) / 100),
+                              pagesPerWeek: project.pencilerPagesPerWeek,
+                              startDate: step.startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                              dueDate: step.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                            });
+                          } else if (step.stepType === 'inks' && project.inkerPagesPerWeek) {
+                            progressStatus = getTalentProgressStatus({
+                              totalPages: project.interiorPageCount,
+                              completedPages: Math.floor((project.interiorPageCount * step.progress) / 100),
+                              pagesPerWeek: project.inkerPagesPerWeek,
+                              startDate: step.startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                              dueDate: step.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                            });
+                          } else if (step.stepType === 'colors' && project.coloristPagesPerWeek) {
+                            progressStatus = getTalentProgressStatus({
+                              totalPages: project.interiorPageCount,
+                              completedPages: Math.floor((project.interiorPageCount * step.progress) / 100),
+                              pagesPerWeek: project.coloristPagesPerWeek,
+                              startDate: step.startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                              dueDate: step.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                            });
+                          } else if (step.stepType === 'letters' && project.lettererPagesPerWeek) {
+                            progressStatus = getTalentProgressStatus({
+                              totalPages: project.interiorPageCount,
+                              completedPages: Math.floor((project.interiorPageCount * step.progress) / 100),
+                              pagesPerWeek: project.lettererPagesPerWeek,
+                              startDate: step.startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                              dueDate: step.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                            });
+                          }
+                          
+                          const progressStatusColors = getTalentProgressStatusColor(progressStatus);
+                          const statusColors = getStatusColor(step.status);
+                          
+                          return (
+                            <Card key={step.id} className="relative overflow-hidden">
+                              {/* Colored indicator strip on left edge */}
+                              <div className={`absolute left-0 top-0 bottom-0 w-1 ${progressStatusColors.bg}`}></div>
+                              
+                              <CardContent className="p-6">
+                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                  <div className="flex items-start gap-4">
+                                    <div className={`mt-1 flex-shrink-0 rounded-full h-10 w-10 flex items-center justify-center ${progressStatusColors.bgLight}`}>
+                                      {progressStatus === 'on_time' ? (
+                                        <CheckCircle2 className={`h-5 w-5 ${progressStatusColors.text}`} />
+                                      ) : (
+                                        <AlertCircle className={`h-5 w-5 ${progressStatusColors.text}`} />
+                                      )}
+                                    </div>
+                                    
+                                    <div>
+                                      <div className="flex items-center gap-2">
+                                        <h3 className="text-lg font-medium">{step.title}</h3>
+                                        <Badge className={`${statusColors.bgLight} ${statusColors.text}`}>
+                                          {formatStatusLabel(step.status)}
+                                        </Badge>
+                                      </div>
+                                      
+                                      <p className="text-sm text-slate-500 mt-1">{step.description}</p>
+                                      
+                                      <div className="flex items-center gap-4 mt-4">
+                                        <div className="flex items-center">
+                                          <Clock className="h-4 w-4 text-slate-400 mr-1" />
+                                          <span className="text-sm text-slate-600">
+                                            {step.dueDate ? (
+                                              <>Due {formatDate(step.dueDate)} ({daysUntil !== null ? `${daysUntil} days` : ''})</>
+                                            ) : (
+                                              'No due date set'
+                                            )}
+                                          </span>
+                                        </div>
+                                        
+                                        <div className="flex items-center">
+                                          <span className="text-sm text-slate-600">Progress: {step.progress}%</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex-none">
+                                    <div className="flex flex-col items-end gap-2">
+                                      <div className="flex gap-2">
+                                        <Button size="sm" variant="outline">
+                                          <Pencil className="h-4 w-4 mr-2" />
+                                          Update
+                                        </Button>
+                                        
+                                        <Button size="sm">
+                                          <Plus className="h-4 w-4 mr-2" />
+                                          Upload Files
+                                        </Button>
+                                      </div>
+                                      
+                                      <Progress 
+                                        value={step.progress} 
+                                        className={`h-2 w-32 mt-2`} 
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                    </div>
+                  ) : (
+                    <Card>
+                      <CardContent className="py-6 flex flex-col items-center justify-center text-center">
+                        <div className="text-3xl text-slate-300 mb-2">
+                          <i className="ri-flow-chart"></i>
+                        </div>
+                        <h3 className="text-lg font-medium text-slate-600 mb-1">No workflow steps defined</h3>
+                        <p className="text-sm text-slate-500 mb-4">Initialize the workflow to create steps based on your project configuration</p>
+                        <Button>
+                          <ArrowRight className="h-4 w-4 mr-2" />
+                          Initialize Workflow
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
                 
                 <TabsContent value="feedback" className="mt-6">
                   <div className="flex items-center justify-between mb-4">
