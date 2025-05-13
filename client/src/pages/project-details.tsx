@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { useToast } from '@/hooks/use-toast';
@@ -379,9 +379,62 @@ export default function ProjectDetails() {
                       <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
                         <Clock className="h-5 w-5" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <p className="text-xs text-slate-500">Due Date</p>
-                        <p className="font-medium">{project.dueDate ? formatDate(project.dueDate) : 'Not set'}</p>
+                        {isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="project-due-date"
+                                  variant={"outline"}
+                                  className="w-full justify-start text-left font-normal"
+                                  size="sm"
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {project.dueDate ? format(new Date(project.dueDate), 'PPP') : <span>Pick a date</span>}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                  mode="single"
+                                  selected={project.dueDate ? new Date(project.dueDate) : undefined}
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      updateProjectMutation.mutate({
+                                        id: parseInt(id as string),
+                                        dueDate: date
+                                      });
+                                      setEditing(false);
+                                    }
+                                  }}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              onClick={() => setEditing(false)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center">
+                            <p className="font-medium mr-2">
+                              {project.dueDate ? formatDate(project.dueDate) : 'Not set'}
+                            </p>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6" 
+                              onClick={() => setEditing(true)}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -922,47 +975,7 @@ export default function ProjectDetails() {
           </div>
           
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Upcoming Deadlines</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {isDeadlinesLoading ? (
-                  Array(3).fill(0).map((_, i) => (
-                    <div key={i} className="border-l-4 border-slate-200 pl-3 py-2 animate-pulse">
-                      <div className="h-4 bg-slate-200 rounded w-3/4 mb-1"></div>
-                      <div className="h-3 bg-slate-200 rounded w-1/2 mb-1"></div>
-                      <div className="h-3 bg-slate-200 rounded w-1/4"></div>
-                    </div>
-                  ))
-                ) : deadlines && deadlines.length > 0 ? (
-                  <>
-                    {deadlines.slice(0, 4).map((deadline) => (
-                      <DeadlineItem key={deadline.id} deadline={deadline} />
-                    ))}
-                    
-                    {deadlines.length > 4 && (
-                      <Button variant="ghost" className="w-full text-primary" asChild>
-                        <div className="flex items-center justify-center">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          <span>View All ({deadlines.length})</span>
-                        </div>
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  <div className="py-6 flex flex-col items-center justify-center text-center">
-                    <Calendar className="h-10 w-10 text-slate-300 mb-2" />
-                    <h3 className="text-base font-medium text-slate-600 mb-1">No deadlines yet</h3>
-                    <p className="text-sm text-slate-500 mb-4">Create workflow steps to track project milestones</p>
-                  </div>
-                )}
-                
-                {/* "Add Deadline" button removed per user request */}
-              </CardContent>
-            </Card>
+            {/* Upcoming Deadlines card removed per user request */}
             
             <Card>
               <CardHeader>
