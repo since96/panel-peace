@@ -97,21 +97,21 @@ export default function ProjectDetails() {
   });
 
   const updateProjectMutation = useMutation({
-    mutationFn: async (progress: number) => {
-      const res = await apiRequest("PATCH", `/api/projects/${id}`, { progress });
+    mutationFn: async (updateData: { id: number; dueDate?: Date; progress?: number }) => {
+      const res = await apiRequest("PATCH", `/api/projects/${updateData.id}`, updateData);
       return res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Progress updated",
-        description: "Project progress has been updated successfully"
+        title: "Project updated",
+        description: "Project has been updated successfully"
       });
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}`] });
       setEditing(false);
     },
     onError: (error) => {
       toast({
-        title: "Failed to update progress",
+        title: "Failed to update project",
         description: error.message,
         variant: "destructive"
       });
@@ -194,7 +194,10 @@ export default function ProjectDetails() {
 
   const handleProgressUpdate = () => {
     if (projectProgress !== project?.progress) {
-      updateProjectMutation.mutateAsync(projectProgress);
+      updateProjectMutation.mutateAsync({
+        id: parseInt(id as string),
+        progress: projectProgress
+      });
     } else {
       setEditing(false);
     }
@@ -381,7 +384,7 @@ export default function ProjectDetails() {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs text-slate-500">Due Date</p>
-                        {isEditing ? (
+                        {editing ? (
                           <div className="flex items-center gap-2">
                             <Popover>
                               <PopoverTrigger asChild>
