@@ -609,24 +609,55 @@ export class MemStorage implements IStorage {
     // Calculate script deadline based on plot completion
     const scriptEndDate = addDays(plotEndDate, scriptDuration);
     
-    // Calculate page-based task durations with exact math
-    const pencilDuration = Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7;
-    const inkDuration = Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7;
-    const colorDuration = Math.ceil(interiorPageCount / coloristPagesPerWeek) * 7;
-    const letterDuration = Math.ceil(interiorPageCount / lettererPagesPerWeek) * 7;
+    // Calculate task durations for the entire process
+    // These are total durations if one person did all pages from start to finish
+    const pencilTotalDays = Math.ceil(interiorPageCount / (pencilerPagesPerWeek / 7)); // Convert pages per week to pages per day
+    const inkTotalDays = Math.ceil(interiorPageCount / (inkerPagesPerWeek / 7));
+    const colorTotalDays = Math.ceil(interiorPageCount / (coloristPagesPerWeek / 7));
+    const letterTotalDays = Math.ceil(interiorPageCount / (lettererPagesPerWeek / 7));
     const editorialDuration = Math.ceil(fillerPageCount / 5) * 7; // Assuming 5 filler pages per week
     const productionDuration = 7; // Final assembly typically takes a week
     
-    // Account for parallel work and batching
+    // Calculate time needed for first batch
+    const daysForFirstPencilBatch = Math.ceil(pencilBatchSize / (pencilerPagesPerWeek / 7));
+    const daysForFirstInkBatch = Math.ceil(inkBatchSize / (inkerPagesPerWeek / 7));
+    const daysForLetterBatch = Math.ceil((project.letterBatchSize || 5) / (lettererPagesPerWeek / 7));
+    
+    // Account for sequential work and batching
+    // Pencils can start after script approval
     const pencilStartDate = addDays(scriptEndDate, approvalDays);
-    const inkStartDate = addDays(pencilStartDate, Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7);
-    const colorStartDate = addDays(inkStartDate, Math.ceil(inkBatchSize / inkerPagesPerWeek) * 7);
-    const letterStartDate = colorStartDate; // Lettering can start in parallel with colors
-    const editorialStartDate = addDays(colorStartDate, Math.ceil(colorDuration / 2)); // Start halfway through coloring
-    const pencilEndDate = addDays(pencilStartDate, pencilDuration);
-    const inkEndDate = addDays(inkStartDate, inkDuration);
-    const colorEndDate = addDays(colorStartDate, colorDuration);
-    const letterEndDate = addDays(letterStartDate, letterDuration);
+    
+    // Inks can only start after the first pencil batch is complete plus approval time
+    const inkStartDate = addDays(pencilStartDate, daysForFirstPencilBatch + approvalDays);
+    
+    // Colors can only start after the first ink batch is complete plus approval time
+    const colorStartDate = addDays(inkStartDate, daysForFirstInkBatch + approvalDays);
+    
+    // Lettering can start in parallel with colors after the first ink batch
+    const letterStartDate = colorStartDate;
+    
+    // Editorial work can start when about half of the pages are colored
+    const editorialStartDate = addDays(colorStartDate, Math.ceil(colorTotalDays / 2));
+    
+    // Calculate end dates by adding the full duration to each start date
+    // This accounts for the overlapping batch work
+    const pencilEndDate = addDays(pencilStartDate, pencilTotalDays);
+    
+    // Inks finish after all pencils are done and the full ink duration
+    // But we need to account for batching - the last batch of pencils needs to be inked
+    const lastPencilBatchDoneDate = pencilEndDate;
+    const inkEndDate = addDays(lastPencilBatchDoneDate, 
+                               daysForFirstInkBatch + approvalDays);
+    
+    // Same logic applies to colors - they can't finish until the last ink batch is done
+    const lastInkBatchDoneDate = inkEndDate;
+    const colorEndDate = addDays(lastInkBatchDoneDate, 
+                                Math.ceil((project.inkBatchSize || 5) / (coloristPagesPerWeek / 7)) + approvalDays);
+    
+    // Lettering depends on the last color batch
+    const letterEndDate = addDays(colorEndDate, daysForLetterBatch);
+    
+    // Editorial work generally finishes after coloring is done
     const editorialEndDate = addDays(editorialStartDate, editorialDuration);
     
     // Production starts after everything else is done
