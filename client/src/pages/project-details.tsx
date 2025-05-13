@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
-import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep, User } from '@shared/schema';
+import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep, User, Comment } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useState, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { useToast } from '@/hooks/use-toast';
@@ -1407,11 +1407,11 @@ export default function ProjectDetails() {
                         <div className="flex items-center gap-2">
                           <Avatar className="h-6 w-6">
                             <AvatarFallback>
-                              {comment.authorName ? comment.authorName.substring(0, 2).toUpperCase() : 'ED'}
+                              {users?.find(user => user.id === comment.userId)?.username?.substring(0, 2).toUpperCase() || 'ED'}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-sm font-medium">
-                            {comment.authorName || 'Editor'}
+                            {users?.find(user => user.id === comment.userId)?.username || 'Editor'}
                           </span>
                         </div>
                         <span className="text-xs text-slate-500">
