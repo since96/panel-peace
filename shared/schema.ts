@@ -30,6 +30,10 @@ export const projects = pgTable("projects", {
   coverImage: text("cover_image"),
   progress: integer("progress").notNull().default(0),
   
+  // Deadline fields
+  plotDeadline: timestamp("plot_deadline"), // Manual plot deadline
+  coverDeadline: timestamp("cover_deadline"), // Manual cover deadline
+  
   // Comic book metrics
   coverCount: integer("cover_count").default(1), // Number of covers
   interiorPageCount: integer("interior_page_count").notNull().default(22), // Number of interior comic pages

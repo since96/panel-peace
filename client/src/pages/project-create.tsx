@@ -22,6 +22,8 @@ import { Helmet } from "react-helmet-async";
 const createProjectSchema = insertProjectSchema.extend({
   title: z.string().min(1, "Title is required"),
   dueDate: z.date().optional(),
+  plotDeadline: z.date().optional(),
+  coverDeadline: z.date().optional(),
   // Comic book metrics
   coverCount: z.number().min(1, "Must have at least 1 cover").default(1),
   interiorPageCount: z.number().min(1, "Must have at least 1 interior page").default(22),
