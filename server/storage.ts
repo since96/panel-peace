@@ -571,52 +571,75 @@ export class MemStorage implements IStorage {
   }
 
   async initializeProjectWorkflow(projectId: number): Promise<WorkflowStep[]> {
+    // Get the project to access its metrics
+    const project = await this.getProject(projectId);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    
+    // Calculate due dates for each stage based on project metrics
+    const today = new Date();
+    
+    // Get metrics with defaults if null
+    const coverCount = project.coverCount || 1;
+    const interiorPageCount = project.interiorPageCount;
+    const fillerPageCount = project.fillerPageCount || 0;
+    const pencilerPagesPerWeek = project.pencilerPagesPerWeek || 5;
+    const inkerPagesPerWeek = project.inkerPagesPerWeek || 7;
+    const coloristPagesPerWeek = project.coloristPagesPerWeek || 10;
+    const lettererPagesPerWeek = project.lettererPagesPerWeek || 15;
+    const pencilBatchSize = project.pencilBatchSize || 5;
+    const inkBatchSize = project.inkBatchSize || 5;
+    const approvalDays = project.approvalDays || 2;
+    
     // Define the standard comic book workflow steps
     const workflowSteps: InsertWorkflowStep[] = [
+      // Initial stages happen in parallel
       {
         projectId,
         stepType: "plot",
         title: "Plot Development",
-        description: "Create the story outline and plot points",
+        description: "Create and approve the story outline and plot points",
         status: "not_started",
         progress: 0,
         sortOrder: 10,
+        // Plot approval typically takes a week
+        dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000),
+      },
+      {
+        projectId,
+        stepType: "covers",
+        title: "Cover Art",
+        description: `Create ${coverCount} covers for the issue`,
+        status: "not_started",
+        progress: 0,
+        sortOrder: 20,
+        // Cover art typically done in parallel with plot
+        dueDate: new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000),
       },
       {
         projectId,
         stepType: "script",
         title: "Script Writing",
-        description: "Convert plot into full script with dialogue and panel descriptions",
-        status: "not_started",
-        progress: 0,
-        sortOrder: 20,
-      },
-      {
-        projectId,
-        stepType: "cover_art_lines",
-        title: "Cover Art - Lines",
-        description: "Line art for the cover illustration",
+        description: "Convert approved plot into full script with dialogue and panel descriptions",
         status: "not_started",
         progress: 0,
         sortOrder: 30,
-      },
-      {
-        projectId,
-        stepType: "cover_art_colors",
-        title: "Cover Art - Colors",
-        description: "Coloring the cover illustration",
-        status: "not_started",
-        progress: 0,
-        sortOrder: 40,
+        // Script typically takes 2 weeks after plot approval
+        dueDate: new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000),
       },
       {
         projectId,
         stepType: "pencils",
         title: "Pencils/Roughs",
-        description: "Initial sketches and layouts for interior pages",
+        description: `Initial sketches and layouts for ${interiorPageCount} interior pages`,
         status: "not_started",
         progress: 0,
-        sortOrder: 50,
+        sortOrder: 40,
+        // Calculate based on penciler speed
+        dueDate: new Date(today.getTime() + 
+          (Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7 + 
+           approvalDays) * 24 * 60 * 60 * 1000),
       },
       {
         projectId,
@@ -625,7 +648,12 @@ export class MemStorage implements IStorage {
         description: "Final line work over the pencils",
         status: "not_started",
         progress: 0,
-        sortOrder: 60,
+        sortOrder: 50,
+        // Calculate based on inker speed (starts after first pencil batch)
+        dueDate: new Date(today.getTime() + 
+          ((Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7) + 
+           Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7 + 
+           approvalDays * 2) * 24 * 60 * 60 * 1000),
       },
       {
         projectId,
@@ -634,7 +662,13 @@ export class MemStorage implements IStorage {
         description: "Coloring the interior pages",
         status: "not_started",
         progress: 0,
-        sortOrder: 70,
+        sortOrder: 60,
+        // Calculate based on colorist speed (starts after first ink batch)
+        dueDate: new Date(today.getTime() + 
+          ((Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7) + 
+           (Math.ceil(inkBatchSize / inkerPagesPerWeek) * 7) + 
+           Math.ceil(interiorPageCount / coloristPagesPerWeek) * 7 + 
+           approvalDays * 3) * 24 * 60 * 60 * 1000),
       },
       {
         projectId,
@@ -643,16 +677,43 @@ export class MemStorage implements IStorage {
         description: "Adding text, speech bubbles, and sound effects",
         status: "not_started",
         progress: 0,
+        sortOrder: 70,
+        // Lettering can start with colors
+        dueDate: new Date(today.getTime() + 
+          ((Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7) + 
+           (Math.ceil(inkBatchSize / inkerPagesPerWeek) * 7) + 
+           Math.ceil(interiorPageCount / lettererPagesPerWeek) * 7 + 
+           approvalDays * 3) * 24 * 60 * 60 * 1000),
+      },
+      {
+        projectId,
+        stepType: "editorial",
+        title: "Editorial Pages",
+        description: `Create ${fillerPageCount} supplementary editorial pages`,
+        status: "not_started",
+        progress: 0,
         sortOrder: 80,
+        // Editorial pages typically done near the end
+        dueDate: new Date(today.getTime() + 
+          ((Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7) + 
+           (Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7) + 
+           approvalDays * 3) * 24 * 60 * 60 * 1000),
       },
       {
         projectId,
         stepType: "production",
-        title: "Production",
+        title: "Final Production",
         description: "Final assembly, file preparation and prepress",
         status: "not_started",
         progress: 0,
         sortOrder: 90,
+        // Production happens after everything else is complete
+        dueDate: new Date(today.getTime() + 
+          ((Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7) + 
+           (Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7) + 
+           (Math.ceil(interiorPageCount / coloristPagesPerWeek) * 7) + 
+           (Math.ceil(interiorPageCount / lettererPagesPerWeek) * 7) + 
+           approvalDays * 4) * 24 * 60 * 60 * 1000),
       }
     ];
     

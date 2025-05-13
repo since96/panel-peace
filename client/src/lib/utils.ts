@@ -162,3 +162,86 @@ export function getDueDateInfo(dueDate: Date | string): {
     };
   }
 }
+
+export type TalentProgressStatus = 'on_time' | 'one_day_late' | 'behind_schedule';
+
+// Talent progress status utility to check if a task is on schedule
+export function getTalentProgressStatus(
+  params: {
+    totalPages: number;
+    completedPages: number;
+    pagesPerWeek: number;
+    startDate: Date | string;
+    dueDate: Date | string;
+  }
+): TalentProgressStatus {
+  const { totalPages, completedPages, pagesPerWeek, startDate, dueDate } = params;
+  
+  if (!startDate || !dueDate) return 'on_time';
+  
+  const startDateObj = typeof startDate === 'string' ? new Date(startDate) : startDate;
+  const dueDateObj = typeof dueDate === 'string' ? new Date(dueDate) : dueDate;
+  const today = new Date();
+  
+  // Calculate total working days available
+  const totalDays = Math.ceil((dueDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
+  const workingDays = Math.max(Math.round(totalDays * 5/7), 1); // Assuming 5-day work week
+  
+  // Calculate pages per day
+  const pagesPerDay = pagesPerWeek / 5; // Convert weekly rate to daily
+  
+  // Calculate how many days have passed since start
+  const daysPassed = Math.ceil((today.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
+  const workingDaysPassed = Math.max(Math.round(daysPassed * 5/7), 0);
+  
+  // Expected completed pages by now
+  const expectedCompletedPages = Math.min(totalPages, Math.floor(workingDaysPassed * pagesPerDay));
+  
+  // Calculate how far behind schedule (in pages)
+  const pagesBehind = expectedCompletedPages - completedPages;
+  
+  // Convert pages behind to days behind
+  const daysBehind = Math.ceil(pagesBehind / pagesPerDay);
+  
+  if (daysBehind <= 0) {
+    return 'on_time'; // On time or ahead of schedule
+  } else if (daysBehind === 1) {
+    return 'one_day_late'; // One day late
+  } else {
+    return 'behind_schedule'; // More than one day late
+  }
+}
+
+// Get color codes for talent progress status
+export function getTalentProgressStatusColor(status: TalentProgressStatus): {
+  bg: string;
+  text: string;
+  bgLight: string;
+} {
+  switch (status) {
+    case 'on_time':
+      return {
+        bg: 'bg-success',
+        text: 'text-success',
+        bgLight: 'bg-success/10'
+      };
+    case 'one_day_late':
+      return {
+        bg: 'bg-warning',
+        text: 'text-warning',
+        bgLight: 'bg-warning/10'
+      };
+    case 'behind_schedule':
+      return {
+        bg: 'bg-danger',
+        text: 'text-danger',
+        bgLight: 'bg-danger/10'
+      };
+    default:
+      return {
+        bg: 'bg-slate-500',
+        text: 'text-slate-500',
+        bgLight: 'bg-slate-100'
+      };
+  }
+}

@@ -29,9 +29,30 @@ export const projects = pgTable("projects", {
   status: text("status").notNull().default("in_progress"),
   coverImage: text("cover_image"),
   progress: integer("progress").notNull().default(0),
-  pageCount: integer("page_count").notNull().default(22), // Default comic page count
+  
+  // Comic book metrics
+  coverCount: integer("cover_count").default(1), // Number of covers
+  interiorPageCount: integer("interior_page_count").notNull().default(22), // Number of interior comic pages
+  fillerPageCount: integer("filler_page_count").default(0), // Number of supplementary editorial pages
+  
+  // Talent speed metrics
+  pencilerPagesPerWeek: integer("penciler_pages_per_week").default(5),
+  inkerPagesPerWeek: integer("inker_pages_per_week").default(7),
+  coloristPagesPerWeek: integer("colorist_pages_per_week").default(10),
+  lettererPagesPerWeek: integer("letterer_pages_per_week").default(15),
+  
+  // Batch processing metrics
+  pencilBatchSize: integer("pencil_batch_size").default(5), // How many pages before moving to inks
+  inkBatchSize: integer("ink_batch_size").default(5), // How many pages before moving to colors
+  letterBatchSize: integer("letter_batch_size").default(5), // How many pages before final approval
+  
+  // Approval metrics
+  approvalDays: integer("approval_days").default(2), // Days needed for approval between stages
+  
+  // Format info
   pageSize: text("page_size").default("standard"), // standard, oversized, etc.
   formatType: text("format_type").default("print"), // print, digital, web, etc.
+  
   dueDate: timestamp("due_date"),
   createdBy: integer("created_by").notNull(),
 });

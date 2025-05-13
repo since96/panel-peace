@@ -21,7 +21,25 @@ import { Helmet } from "react-helmet-async";
 
 const createProjectSchema = insertProjectSchema.extend({
   title: z.string().min(1, "Title is required"),
-  dueDate: z.date().optional()
+  dueDate: z.date().optional(),
+  // Comic book metrics
+  coverCount: z.number().min(1, "Must have at least 1 cover").default(1),
+  interiorPageCount: z.number().min(1, "Must have at least 1 interior page").default(22),
+  fillerPageCount: z.number().min(0, "Can't have negative pages").default(0),
+  
+  // Talent speed metrics
+  pencilerPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(5),
+  inkerPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(7),
+  coloristPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(10),
+  lettererPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(15),
+  
+  // Batch processing metrics
+  pencilBatchSize: z.number().min(1, "Batch size must be at least 1 page").default(5),
+  inkBatchSize: z.number().min(1, "Batch size must be at least 1 page").default(5),
+  letterBatchSize: z.number().min(1, "Batch size must be at least 1 page").default(5),
+  
+  // Approval metrics
+  approvalDays: z.number().min(1, "Must allow at least 1 day for approvals").default(2),
 });
 
 type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
@@ -40,6 +58,25 @@ export default function ProjectCreate() {
       status: "in_progress",
       progress: 0,
       createdBy: 1, // Default user ID
+      
+      // Comic book metrics
+      coverCount: 1,
+      interiorPageCount: 22,
+      fillerPageCount: 0,
+      
+      // Talent speed metrics
+      pencilerPagesPerWeek: 5,
+      inkerPagesPerWeek: 7,
+      coloristPagesPerWeek: 10,
+      lettererPagesPerWeek: 15,
+      
+      // Batch processing metrics
+      pencilBatchSize: 5,
+      inkBatchSize: 5,
+      letterBatchSize: 5,
+      
+      // Approval metrics
+      approvalDays: 2,
     }
   });
   
@@ -169,79 +206,358 @@ export default function ProjectCreate() {
                   )}
                 />
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="in_progress">In Progress</SelectItem>
-                            <SelectItem value="needs_review">Needs Review</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="delayed">Delayed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Current status of the project
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                {/* Comic Book Metrics Section */}
+                <div className="pt-6 pb-2 border-t">
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Comic Book Metrics</h3>
+                  <p className="text-sm text-slate-500 mb-4">Enter the basic specifications for this comic book</p>
                   
-                  <FormField
-                    control={form.control}
-                    name="dueDate"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Due Date</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  formatDate(field.value)
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date < new Date()}
-                              initialFocus
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="coverCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Cover Count</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                             />
-                          </PopoverContent>
-                        </Popover>
-                        <FormDescription>
-                          Target completion date for this project
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          </FormControl>
+                          <FormDescription>
+                            Number of covers for this issue
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="interiorPageCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Interior Pages</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 22)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Number of interior comic pages
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="fillerPageCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Editorial Filler Pages</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={0} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Additional editorial content pages
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {/* Talent Speed Metrics Section */}
+                <div className="pt-6 pb-2 border-t">
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Talent Speed Metrics</h3>
+                  <p className="text-sm text-slate-500 mb-4">Define how many pages per week each role can complete</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="pencilerPagesPerWeek"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Penciler Speed</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 5)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Pages per week
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="inkerPagesPerWeek"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Inker Speed</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 7)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Pages per week
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="coloristPagesPerWeek"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Colorist Speed</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 10)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Pages per week
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="lettererPagesPerWeek"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Letterer Speed</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 15)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Pages per week
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {/* Batch Processing Section */}
+                <div className="pt-6 pb-2 border-t">
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Batch Processing</h3>
+                  <p className="text-sm text-slate-500 mb-4">Configure how many pages are needed before moving to the next stage</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="pencilBatchSize"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pencil Batch Size</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 5)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Pages needed before inking
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="inkBatchSize"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ink Batch Size</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 5)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Pages needed before coloring
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="letterBatchSize"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Letter Batch Size</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 5)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Pages needed before final approval
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {/* Approval Section */}
+                <div className="pt-6 pb-2 border-t">
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Approval Process</h3>
+                  <p className="text-sm text-slate-500 mb-4">Configure the approval timeline between stages</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="approvalDays"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Approval Days</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min={1} 
+                              {...field} 
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 2)}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Days needed for approval between stages
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="dueDate"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Final Due Date</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    formatDate(field.value)
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormDescription>
+                            Final deadline for the entire project
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                {/* Status Section */}
+                <div className="pt-6 pb-2 border-t">
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Project Status</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="in_progress">In Progress</SelectItem>
+                              <SelectItem value="needs_review">Needs Review</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="delayed">Delayed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            Current status of the project
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
                 
                 <div className="flex justify-end space-x-2 pt-4 border-t">
