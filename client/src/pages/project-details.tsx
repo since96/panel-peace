@@ -440,9 +440,39 @@ export default function ProjectDetails() {
                               <p className="text-sm mt-1">
                                 Based on the current page count and production speeds, this project is scheduled to complete 
                                 <strong> {daysLate} day{daysLate !== 1 ? 's' : ''} after </strong> 
-                                the due date ({formatDate(projectDueDate)}). Consider adjusting the project deadline or 
-                                increasing production speeds.
+                                the due date ({formatDate(projectDueDate)}).
                               </p>
+                              <div className="flex mt-3 space-x-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-xs bg-white"
+                                  onClick={() => {
+                                    setEditing(true);
+                                    document.getElementById('project-due-date')?.scrollIntoView({ behavior: 'smooth' });
+                                  }}
+                                >
+                                  <CalendarIcon className="h-3 w-3 mr-1" />
+                                  Adjust Deadline
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-xs bg-white"
+                                  onClick={() => {
+                                    if (workflowSteps && workflowSteps.length > 0) {
+                                      if (confirm("Re-initializing will replace all existing workflow steps. Continue?")) {
+                                        initializeWorkflowMutation.mutate();
+                                      }
+                                    } else {
+                                      initializeWorkflowMutation.mutate();
+                                    }
+                                  }}
+                                >
+                                  <ArrowRight className="h-3 w-3 mr-1" />
+                                  Re-initialize Workflow
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -467,6 +497,25 @@ export default function ProjectDetails() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  ) : workflowSteps && workflowSteps.length === 0 ? (
+                    <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-md p-6 mb-6 text-center">
+                      <div className="flex flex-col items-center">
+                        <ArrowRight className="h-12 w-12 text-blue-500 mb-4" />
+                        <h3 className="text-xl font-medium mb-2">Let's Get Started!</h3>
+                        <p className="text-base mb-6">
+                          Click "Initialize Workflow" to generate your comic's editorial schedule based on your project settings.
+                        </p>
+                        <Button 
+                          size="lg"
+                          onClick={() => initializeWorkflowMutation.mutate()}
+                          disabled={initializeWorkflowMutation.isPending}
+                        >
+                          {initializeWorkflowMutation.isPending 
+                            ? "Creating Schedule..." 
+                            : "Initialize Workflow"}
+                        </Button>
+                      </div>
                     </div>
                   ) : workflowSteps && workflowSteps.length > 0 ? (
                     <div className="space-y-8">
