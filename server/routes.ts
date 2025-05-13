@@ -413,15 +413,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Workflow step not found" });
       }
 
+      // For debugging
+      console.log("Update payload:", req.body);
+
+      // Handle date parsing for dueDate if it's a string
+      const requestData = { ...req.body };
+      if (requestData.dueDate && typeof requestData.dueDate === 'string') {
+        try {
+          requestData.dueDate = new Date(requestData.dueDate);
+        } catch (e) {
+          return res.status(400).json({ 
+            message: "Invalid date format", 
+            errors: { dueDate: { _errors: ["Invalid date format"] } } 
+          });
+        }
+      }
+
       const updateSchema = insertWorkflowStepSchema.partial();
-      const parsedData = updateSchema.safeParse(req.body);
+      const parsedData = updateSchema.safeParse(requestData);
       if (!parsedData.success) {
-        return res.status(400).json({ message: "Invalid workflow step data", errors: parsedData.error.format() });
+        return res.status(400).json({ 
+          message: "Invalid workflow step data", 
+          errors: parsedData.error.format(),
+          received: requestData 
+        });
       }
 
       const updatedWorkflowStep = await storage.updateWorkflowStep(id, parsedData.data);
       res.json(updatedWorkflowStep);
     } catch (error) {
+      console.error("Update workflow step error:", error);
       res.status(500).json({ message: "Failed to update workflow step" });
     }
   });

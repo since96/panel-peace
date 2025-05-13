@@ -139,9 +139,10 @@ export default function ProjectDetails() {
       progress?: number;
       status?: string;
       dueDate?: Date | null;
-      comments?: string;
+      description?: string | null;
     }) => {
       const { stepId, ...updateData } = data;
+      console.log("Sending update:", updateData);
       const res = await apiRequest("PATCH", `/api/workflow-steps/${stepId}`, updateData);
       return res.json();
     },
