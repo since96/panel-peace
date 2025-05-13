@@ -46,6 +46,12 @@ export const collaborators = pgTable("collaborators", {
   userId: integer("user_id").notNull(),
   projectId: integer("project_id").notNull(),
   role: text("role").notNull(),
+  pagesPerDay: integer("pages_per_day"), // Productivity metric
+  specialties: text("specialties").array(), // Areas of expertise
+  hourlyRate: integer("hourly_rate"), // For budget calculations  
+  availability: text("availability").default("full_time"), // Availability status
+  startDate: timestamp("start_date"), // When they start on the project
+  endDate: timestamp("end_date"), // When their work is expected to be complete
 });
 
 export const insertCollaboratorSchema = createInsertSchema(collaborators).omit({
@@ -190,3 +196,32 @@ export const insertWorkflowStepSchema = createInsertSchema(workflowSteps).omit({
 
 export type WorkflowStep = typeof workflowSteps.$inferSelect;
 export type InsertWorkflowStep = z.infer<typeof insertWorkflowStepSchema>;
+
+// File uploads table for submissions and feedback
+export const fileUploads = pgTable("file_uploads", {
+  id: serial("id").primaryKey(),
+  fileName: text("file_name").notNull(),
+  originalName: text("original_name").notNull(),
+  fileSize: integer("file_size").notNull(),
+  mimeType: text("mime_type").notNull(),
+  filePath: text("file_path").notNull(),
+  thumbnailPath: text("thumbnail_path"),
+  uploadedBy: integer("uploaded_by").notNull(),
+  workflowStepId: integer("workflow_step_id"),
+  feedbackItemId: integer("feedback_item_id"),
+  projectId: integer("project_id").notNull(),
+  version: integer("version").notNull().default(1),
+  notes: text("notes"),
+  status: text("status").notNull().default("pending_review"),
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFileUploadSchema = createInsertSchema(fileUploads).omit({
+  id: true,
+  uploadedAt: true,
+  updatedAt: true,
+});
+
+export type FileUpload = typeof fileUploads.$inferSelect;
+export type InsertFileUpload = z.infer<typeof insertFileUploadSchema>;

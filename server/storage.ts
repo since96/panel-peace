@@ -7,7 +7,8 @@ import {
   deadlines, Deadline, InsertDeadline,
   panelLayouts, PanelLayout, InsertPanelLayout,
   comments, Comment, InsertComment,
-  workflowSteps, WorkflowStep, InsertWorkflowStep
+  workflowSteps, WorkflowStep, InsertWorkflowStep,
+  fileUploads, FileUpload, InsertFileUpload
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -72,6 +73,15 @@ export interface IStorage {
   updateWorkflowStep(id: number, step: Partial<InsertWorkflowStep>): Promise<WorkflowStep | undefined>;
   deleteWorkflowStep(id: number): Promise<boolean>;
   initializeProjectWorkflow(projectId: number): Promise<WorkflowStep[]>;
+  
+  // File upload operations
+  getFileUpload(id: number): Promise<FileUpload | undefined>;
+  getFileUploadsByProject(projectId: number): Promise<FileUpload[]>;
+  getFileUploadsByWorkflowStep(workflowStepId: number): Promise<FileUpload[]>;
+  getFileUploadsByFeedback(feedbackItemId: number): Promise<FileUpload[]>;
+  createFileUpload(upload: InsertFileUpload): Promise<FileUpload>;
+  updateFileUpload(id: number, upload: Partial<InsertFileUpload>): Promise<FileUpload | undefined>;
+  deleteFileUpload(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -95,6 +105,9 @@ export class MemStorage implements IStorage {
   private commentIdCounter: number;
   private workflowStepIdCounter: number;
 
+  private fileUploads: Map<number, FileUpload>;
+  private fileUploadIdCounter: number;
+
   constructor() {
     this.users = new Map();
     this.projects = new Map();
@@ -104,6 +117,8 @@ export class MemStorage implements IStorage {
     this.deadlines = new Map();
     this.panelLayouts = new Map();
     this.comments = new Map();
+    this.workflowSteps = new Map();
+    this.fileUploads = new Map();
     
     this.userIdCounter = 1;
     this.projectIdCounter = 1;
@@ -113,6 +128,8 @@ export class MemStorage implements IStorage {
     this.deadlineIdCounter = 1;
     this.panelLayoutIdCounter = 1;
     this.commentIdCounter = 1;
+    this.workflowStepIdCounter = 1;
+    this.fileUploadIdCounter = 1;
     
     // Create default admin user
     this.createUser({
