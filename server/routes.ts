@@ -47,7 +47,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/projects", async (req, res) => {
     try {
-      const parsedData = insertProjectSchema.safeParse(req.body);
+      // Pre-process the date field to handle string date from client
+      const requestData = { ...req.body };
+      
+      // If dueDate is a string, convert it to a Date object for Zod validation
+      if (requestData.dueDate && typeof requestData.dueDate === 'string') {
+        try {
+          // Parse the ISO date string to a JavaScript Date
+          requestData.dueDate = new Date(requestData.dueDate);
+        } catch (e) {
+          return res.status(400).json({ 
+            message: "Invalid date format", 
+            errors: { dueDate: { _errors: ["Invalid date format"] } } 
+          });
+        }
+      }
+      
+      const parsedData = insertProjectSchema.safeParse(requestData);
       if (!parsedData.success) {
         return res.status(400).json({ message: "Invalid project data", errors: parsedData.error.format() });
       }
@@ -55,6 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newProject = await storage.createProject(parsedData.data);
       res.status(201).json(newProject);
     } catch (error) {
+      console.error("Project creation error:", error);
       res.status(500).json({ message: "Failed to create project" });
     }
   });

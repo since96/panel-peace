@@ -44,7 +44,7 @@ export default function ProjectCreate() {
   });
   
   const createProjectMutation = useMutation({
-    mutationFn: async (data: CreateProjectFormValues) => {
+    mutationFn: async (data: any) => {
       const res = await apiRequest("POST", "/api/projects", data);
       return res.json();
     },
@@ -68,7 +68,19 @@ export default function ProjectCreate() {
   
   const onSubmit = (data: CreateProjectFormValues) => {
     setIsSubmitting(true);
-    createProjectMutation.mutateAsync(data);
+    
+    // Create a copy of the data for the mutation that we can safely modify
+    const submissionData = { ...data };
+    
+    // Convert dueDate to string format for API submission
+    // The server expects a string that it can parse into a database timestamp
+    const apiData = {
+      ...submissionData,
+      // If dueDate exists, convert to ISO string for the API
+      dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined
+    };
+    
+    createProjectMutation.mutateAsync(apiData);
   };
   
   const handleCancel = () => {
