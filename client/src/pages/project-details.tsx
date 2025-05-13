@@ -1259,27 +1259,46 @@ export default function ProjectDetails() {
                 </p>
               </div>
               
-              <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                <div className="mb-4 text-slate-400">
-                  <Plus className="h-12 w-12 mx-auto" />
-                </div>
-                <h4 className="mb-1 font-medium">Drag & drop files or click to browse</h4>
-                <p className="text-sm text-slate-500 mb-4">
-                  Supports PDF, JPG, PNG, and AI files up to 25MB
-                </p>
-                <Button>Browse Files</Button>
-              </div>
+              <FileUpload 
+                allowedTypes={['image/jpeg', 'image/png', 'application/pdf', 'application/postscript']}
+                maxSize={25}
+                multiple={true}
+                onUploadComplete={(urls) => {
+                  // Create file upload entries in the database
+                  if (selectedStep && urls.length > 0) {
+                    urls.forEach(url => {
+                      const fileUpload = {
+                        projectId: parseInt(id as string),
+                        workflowStepId: selectedStep.id,
+                        name: url.split('/').pop() || 'uploaded-file',
+                        url: url,
+                        uploadedBy: DEFAULT_USER_ID,
+                        type: url.endsWith('.pdf') ? 'pdf' : url.endsWith('.ai') ? 'ai' : 'image',
+                      };
+                      
+                      // Submit to API
+                      apiRequest('POST', '/api/file-uploads', fileUpload)
+                        .then(() => {
+                          toast({
+                            title: "File uploaded",
+                            description: "File has been uploaded successfully"
+                          });
+                        })
+                        .catch(error => {
+                          toast({
+                            title: "Upload failed",
+                            description: error.message || "Failed to save file metadata",
+                            variant: "destructive"
+                          });
+                        });
+                    });
+                    
+                    setShowUploadDialog(false);
+                  }
+                }}
+              />
             </div>
           )}
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
-              Cancel
-            </Button>
-            <Button disabled={true}>
-              Upload Files
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
