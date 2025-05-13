@@ -706,6 +706,26 @@ export default function ProjectDetails() {
                                           size="sm"
                                           variant="outline"
                                           onClick={() => {
+                                            setEditingStep(step);
+                                            setShowEditStepDialog(true);
+                                            // Focus on the due date field when opened
+                                            setTimeout(() => {
+                                              const dueDateElement = document.getElementById('due-date');
+                                              if (dueDateElement) {
+                                                dueDateElement.scrollIntoView({ behavior: 'smooth' });
+                                                dueDateElement.focus();
+                                              }
+                                            }, 100);
+                                          }}
+                                        >
+                                          <CalendarIcon className="h-4 w-4 mr-2" />
+                                          Adjust Deadline
+                                        </Button>
+                                        
+                                        <Button 
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => {
                                             setSelectedStep(step);
                                             setShowCommentDialog(true);
                                           }}
