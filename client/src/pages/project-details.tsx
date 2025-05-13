@@ -102,7 +102,7 @@ export default function ProjectDetails() {
     addCommentMutation.mutate({
       content: commentText,
       feedbackId: selectedStep.id, // Using step ID since we're attaching to a workflow step
-      authorId: DEFAULT_USER_ID
+      userId: DEFAULT_USER_ID
     });
   };
 
@@ -132,7 +132,7 @@ export default function ProjectDetails() {
   
   // Add comment mutation
   const addCommentMutation = useMutation({
-    mutationFn: async (data: { content: string; feedbackId: number; authorId: number }) => {
+    mutationFn: async (data: { content: string; feedbackId: number; userId: number }) => {
       const res = await apiRequest("POST", `/api/comments`, data);
       return res.json();
     },
