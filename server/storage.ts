@@ -588,7 +588,7 @@ export class MemStorage implements IStorage {
     
     // Get metrics with defaults if null
     const coverCount = project.coverCount || 1;
-    const interiorPageCount = project.interiorPageCount;
+    const interiorPageCount = project.interiorPageCount || 22; // Default to 22 pages (standard comic)
     const fillerPageCount = project.fillerPageCount || 0;
     const pencilerPagesPerWeek = project.pencilerPagesPerWeek || 5;
     const inkerPagesPerWeek = project.inkerPagesPerWeek || 7;
@@ -627,7 +627,8 @@ export class MemStorage implements IStorage {
     // Calculate time needed for first batch
     const daysForFirstPencilBatch = Math.ceil(pencilBatchSize / (pencilerPagesPerWeek / 7));
     const daysForFirstInkBatch = Math.ceil(inkBatchSize / (inkerPagesPerWeek / 7));
-    const daysForLetterBatch = Math.ceil((project.letterBatchSize || 5) / (lettererPagesPerWeek / 7));
+    const letterBatchSize = project.letterBatchSize || 5;
+    const daysForLetterBatch = Math.ceil(letterBatchSize / (lettererPagesPerWeek / 7));
     
     // Account for sequential work and batching
     // Pencils can start after script approval
