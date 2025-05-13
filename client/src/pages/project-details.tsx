@@ -705,6 +705,7 @@ export default function ProjectDetails() {
                                         <Button 
                                           size="sm"
                                           variant="outline"
+                                          className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
                                           onClick={() => {
                                             setEditingStep(step);
                                             setShowEditStepDialog(true);
@@ -714,6 +715,7 @@ export default function ProjectDetails() {
                                               if (dueDateElement) {
                                                 dueDateElement.scrollIntoView({ behavior: 'smooth' });
                                                 dueDateElement.focus();
+                                                dueDateElement.click(); // Automatically open the calendar
                                               }
                                             }, 100);
                                           }}
@@ -1183,6 +1185,7 @@ export default function ProjectDetails() {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
+                        id="due-date"
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
                       >
