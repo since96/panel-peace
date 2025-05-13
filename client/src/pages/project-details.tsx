@@ -1028,11 +1028,13 @@ export default function ProjectDetails() {
                       <Calendar
                         mode="single"
                         selected={editingStep.dueDate ? new Date(editingStep.dueDate) : undefined}
-                        onSelect={(date) => {
+                        onSelect={(date: Date | undefined) => {
                           if (editingStep) {
+                            // Convert undefined to null for the database schema compatibility
+                            const newDueDate = date === undefined ? null : date;
                             setEditingStep({
                               ...editingStep,
-                              dueDate: date
+                              dueDate: newDueDate
                             });
                           }
                         }}
@@ -1051,12 +1053,12 @@ export default function ProjectDetails() {
                   id="comments"
                   placeholder="Add internal notes for the editorial team (not shared with talent)"
                   className="col-span-3"
-                  value={editingStep.comments || ""}
+                  value={editingStep.description || ""}
                   onChange={(e) => {
                     if (editingStep) {
                       setEditingStep({
                         ...editingStep,
-                        comments: e.target.value
+                        description: e.target.value
                       });
                     }
                   }}
@@ -1075,13 +1077,14 @@ export default function ProjectDetails() {
             <Button 
               onClick={() => {
                 if (editingStep) {
-                  updateWorkflowStepMutation.mutate({
+                  const updateData = {
                     stepId: editingStep.id,
                     progress: editingStep.progress,
                     status: editingStep.status,
                     dueDate: editingStep.dueDate,
-                    comments: editingStep.comments
-                  });
+                    description: editingStep.description
+                  };
+                  updateWorkflowStepMutation.mutate(updateData);
                 }
               }}
               disabled={updateWorkflowStepMutation.isPending}
