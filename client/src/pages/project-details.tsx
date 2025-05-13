@@ -976,9 +976,6 @@ export default function ProjectDetails() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Upcoming Deadlines</span>
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <Plus className="h-4 w-4" />
-                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -1009,11 +1006,7 @@ export default function ProjectDetails() {
                   <div className="py-6 flex flex-col items-center justify-center text-center">
                     <Calendar className="h-10 w-10 text-slate-300 mb-2" />
                     <h3 className="text-base font-medium text-slate-600 mb-1">No deadlines yet</h3>
-                    <p className="text-sm text-slate-500 mb-4">Add deadlines to track project milestones</p>
-                    <Button size="sm">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Deadline
-                    </Button>
+                    <p className="text-sm text-slate-500 mb-4">Create workflow steps to track project milestones</p>
                   </div>
                 )}
                 
@@ -1065,31 +1058,7 @@ export default function ProjectDetails() {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start" asChild>
-                  <a href={`/script-editor?project=${id}`}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Edit Script
-                  </a>
-                </Button>
-                <Button variant="outline" className="w-full justify-start" asChild>
-                  <a href={`/panel-editor?project=${id}`}>
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Panel Editor
-                  </a>
-                </Button>
-                <Button variant="outline" className="w-full justify-start" asChild>
-                  <a href={`/publication?project=${id}`}>
-                    <Book className="h-4 w-4 mr-2" />
-                    Preview Publication
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </div>
@@ -1195,7 +1164,7 @@ export default function ProjectDetails() {
                           : "Select a date"}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto p-0 bg-white border border-gray-200 shadow-lg">
                       <Calendar
                         mode="single"
                         selected={editingStep.dueDate ? new Date(editingStep.dueDate) : undefined}
@@ -1210,7 +1179,24 @@ export default function ProjectDetails() {
                           }
                         }}
                         initialFocus
+                        className="bg-white p-3"
                       />
+                      <div className="p-2 border-t border-gray-200 flex justify-end">
+                        <Button 
+                          size="sm" 
+                          onClick={() => {
+                            const popoverElements = document.querySelectorAll('[data-radix-popper-content-wrapper]');
+                            popoverElements.forEach(el => {
+                              if (el.contains(document.activeElement)) {
+                                (document.activeElement as HTMLElement).blur();
+                              }
+                            });
+                          }}
+                          className="bg-primary text-white hover:bg-primary/90"
+                        >
+                          Confirm Date
+                        </Button>
+                      </div>
                     </PopoverContent>
                   </Popover>
                 </div>
