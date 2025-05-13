@@ -282,57 +282,7 @@ export default function ProjectDetails() {
               <p className="text-slate-500 mt-1">{project.description}</p>
             </div>
             
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate(`/script-editor/${id}`)}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Script
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  toast({
-                    title: "Preview not available",
-                    description: "Preview functionality is currently under development.",
-                    variant: "default"
-                  });
-                }}
-              >
-                <Book className="h-4 w-4 mr-2" />
-                Preview
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate(`/projects/edit/${id}`)}
-              >
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="outline"
-                      className="border-red-200 text-red-600 hover:bg-red-50"
-                      onClick={() => {
-                        if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
-                          deleteProjectMutation.mutate();
-                        }
-                      }}
-                      disabled={deleteProjectMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      {deleteProjectMutation.isPending ? "Deleting..." : "Delete"}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Permanently delete this project and all associated data</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            {/* Quick Actions section removed per user request */}
           </div>
         </div>
 
@@ -1010,14 +960,7 @@ export default function ProjectDetails() {
                   </div>
                 )}
                 
-                {deadlines && deadlines.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-slate-200">
-                    <Button variant="outline" className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Deadline
-                    </Button>
-                  </div>
-                )}
+                {/* "Add Deadline" button removed per user request */}
               </CardContent>
             </Card>
             
