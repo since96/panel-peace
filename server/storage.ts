@@ -6,7 +6,8 @@ import {
   assets, Asset, InsertAsset,
   deadlines, Deadline, InsertDeadline,
   panelLayouts, PanelLayout, InsertPanelLayout,
-  comments, Comment, InsertComment
+  comments, Comment, InsertComment,
+  workflowSteps, WorkflowStep, InsertWorkflowStep
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -63,6 +64,14 @@ export interface IStorage {
   getCommentsByFeedback(feedbackId: number): Promise<Comment[]>;
   createComment(comment: InsertComment): Promise<Comment>;
   deleteComment(id: number): Promise<boolean>;
+  
+  // Workflow step operations
+  getWorkflowStep(id: number): Promise<WorkflowStep | undefined>;
+  getWorkflowStepsByProject(projectId: number): Promise<WorkflowStep[]>;
+  createWorkflowStep(step: InsertWorkflowStep): Promise<WorkflowStep>;
+  updateWorkflowStep(id: number, step: Partial<InsertWorkflowStep>): Promise<WorkflowStep | undefined>;
+  deleteWorkflowStep(id: number): Promise<boolean>;
+  initializeProjectWorkflow(projectId: number): Promise<WorkflowStep[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -74,6 +83,7 @@ export class MemStorage implements IStorage {
   private deadlines: Map<number, Deadline>;
   private panelLayouts: Map<number, PanelLayout>;
   private comments: Map<number, Comment>;
+  private workflowSteps: Map<number, WorkflowStep>;
   
   private userIdCounter: number;
   private projectIdCounter: number;
@@ -83,6 +93,7 @@ export class MemStorage implements IStorage {
   private deadlineIdCounter: number;
   private panelLayoutIdCounter: number;
   private commentIdCounter: number;
+  private workflowStepIdCounter: number;
 
   constructor() {
     this.users = new Map();

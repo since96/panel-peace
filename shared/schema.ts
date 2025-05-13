@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -29,6 +29,9 @@ export const projects = pgTable("projects", {
   status: text("status").notNull().default("in_progress"),
   coverImage: text("cover_image"),
   progress: integer("progress").notNull().default(0),
+  pageCount: integer("page_count").notNull().default(22), // Default comic page count
+  pageSize: text("page_size").default("standard"), // standard, oversized, etc.
+  formatType: text("format_type").default("print"), // print, digital, web, etc.
   dueDate: timestamp("due_date"),
   createdBy: integer("created_by").notNull(),
 });
@@ -158,3 +161,32 @@ export type InsertPanelLayout = z.infer<typeof insertPanelLayoutSchema>;
 
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
+
+// Workflow steps table for tracking comic book production process
+export const workflowSteps = pgTable("workflow_steps", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  stepType: varchar("step_type", { length: 50 }).notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: varchar("status", { length: 20 }).notNull().default("not_started"),
+  progress: integer("progress").notNull().default(0),
+  assignedTo: integer("assigned_to"),
+  startDate: timestamp("start_date"),
+  dueDate: timestamp("due_date"),
+  completedDate: timestamp("completed_date"),
+  sortOrder: integer("sort_order").notNull(),
+  prevStepId: integer("prev_step_id"),
+  nextStepId: integer("next_step_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertWorkflowStepSchema = createInsertSchema(workflowSteps).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type WorkflowStep = typeof workflowSteps.$inferSelect;
+export type InsertWorkflowStep = z.infer<typeof insertWorkflowStepSchema>;
