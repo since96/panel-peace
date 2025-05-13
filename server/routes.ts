@@ -441,7 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const workflowSteps = await storage.initializeProjectWorkflow(projectId);
       res.status(201).json(workflowSteps);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error initializing workflow:", error);
       res.status(500).json({ message: `Failed to initialize workflow: ${error.message}` });
     }
