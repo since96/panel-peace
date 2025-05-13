@@ -72,18 +72,15 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               key={item.name}
               href={item.href}
               onClick={onClose}
+              className={cn(
+                'flex items-center space-x-2 py-2 px-3 rounded-lg transition-colors',
+                location === item.href 
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'hover:bg-slate-100'
+              )}
             >
-              <a
-                className={cn(
-                  'flex items-center space-x-2 py-2 px-3 rounded-lg transition-colors',
-                  location === item.href 
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'hover:bg-slate-100'
-                )}
-              >
-                <i className={item.icon}></i>
-                <span>{item.name}</span>
-              </a>
+              <i className={item.icon}></i>
+              <span>{item.name}</span>
             </Link>
           ))}
           
@@ -95,11 +92,10 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   key={project.id}
                   href={`/projects/${project.id}`}
                   onClick={onClose}
+                  className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-slate-100 transition-colors"
                 >
-                  <a className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-slate-100 transition-colors">
-                    <span className={`w-2 h-2 rounded-full ${getStatusIndicator(project.status)}`}></span>
-                    <span className="truncate">{project.title} {project.issue}</span>
-                  </a>
+                  <span className={`w-2 h-2 rounded-full ${getStatusIndicator(project.status)}`}></span>
+                  <span className="truncate">{project.title} {project.issue}</span>
                 </Link>
               ))}
               
