@@ -106,7 +106,9 @@ export default function ProjectDetails() {
         title: "Project updated",
         description: "Project has been updated successfully"
       });
+      // Invalidate both project and workflow steps queries to ensure UI updates
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
       setEditing(false);
     },
     onError: (error) => {
@@ -384,60 +386,54 @@ export default function ProjectDetails() {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs text-slate-500">Due Date</p>
-                        {editing ? (
-                          <div className="flex items-center gap-2">
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  id="project-due-date"
-                                  variant={"outline"}
-                                  className="w-full justify-start text-left font-normal"
-                                  size="sm"
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
-                                  {project.dueDate ? format(new Date(project.dueDate), 'PPP') : <span>Pick a date</span>}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                  mode="single"
-                                  selected={project.dueDate ? new Date(project.dueDate) : undefined}
-                                  onSelect={(date) => {
-                                    if (date) {
-                                      updateProjectMutation.mutate({
-                                        id: parseInt(id as string),
-                                        dueDate: date
-                                      });
-                                      setEditing(false);
-                                    }
-                                  }}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <Button 
-                              size="icon" 
-                              variant="ghost" 
-                              onClick={() => setEditing(false)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center">
-                            <p className="font-medium mr-2">
-                              {project.dueDate ? formatDate(project.dueDate) : 'Not set'}
-                            </p>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-6 w-6" 
-                              onClick={() => setEditing(true)}
-                            >
-                              <Pencil className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        )}
+                        <div className="flex items-center">
+                          {editing ? (
+                            <div className="w-full">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    id="project-due-date"
+                                    variant="outline"
+                                    className="w-full justify-start text-left font-medium h-9"
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {project.dueDate ? format(new Date(project.dueDate), 'MMMM d, yyyy') : <span>Pick a date</span>}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={project.dueDate ? new Date(project.dueDate) : undefined}
+                                    onSelect={(date) => {
+                                      if (date) {
+                                        updateProjectMutation.mutate({
+                                          id: parseInt(id as string),
+                                          dueDate: date
+                                        });
+                                        setEditing(false);
+                                      }
+                                    }}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="font-medium">
+                                {project.dueDate ? formatDate(project.dueDate) : 'Not set'}
+                              </p>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 ml-2" 
+                                onClick={() => setEditing(true)}
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

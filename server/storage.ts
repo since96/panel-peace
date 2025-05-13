@@ -577,6 +577,12 @@ export class MemStorage implements IStorage {
       throw new Error("Project not found");
     }
     
+    // First, delete any existing workflow steps for this project
+    const existingSteps = await this.getWorkflowStepsByProject(projectId);
+    for (const step of existingSteps) {
+      await this.deleteWorkflowStep(step.id);
+    }
+    
     // Calculate due dates for each stage based on project metrics and user-defined deadlines
     const today = new Date();
     

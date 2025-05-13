@@ -95,15 +95,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Project not found" });
       }
 
+      // Pre-process the date field to handle string date from client
+      const requestData = { ...req.body };
+      
+      // Handle all date fields by converting string dates to Date objects for Zod validation
+      const dateFields = ['dueDate', 'plotDeadline', 'coverDeadline'];
+      
+      for (const field of dateFields) {
+        if (requestData[field] && typeof requestData[field] === 'string') {
+          try {
+            // Parse the ISO date string to a JavaScript Date
+            requestData[field] = new Date(requestData[field]);
+          } catch (e) {
+            return res.status(400).json({ 
+              message: `Invalid date format for ${field}`, 
+              errors: { [field]: { _errors: ["Invalid date format"] } } 
+            });
+          }
+        }
+      }
+
       const updateSchema = insertProjectSchema.partial();
-      const parsedData = updateSchema.safeParse(req.body);
+      const parsedData = updateSchema.safeParse(requestData);
       if (!parsedData.success) {
         return res.status(400).json({ message: "Invalid project data", errors: parsedData.error.format() });
       }
 
+      // Check if due date is being updated
+      const dueDateChanged = 'dueDate' in parsedData.data && 
+        parsedData.data.dueDate !== null && parsedData.data.dueDate !== undefined &&
+        (!project.dueDate || parsedData.data.dueDate.getTime() !== new Date(project.dueDate).getTime());
+
       const updatedProject = await storage.updateProject(id, parsedData.data);
+      
+      // If due date changed and there are workflow steps, reinitialize them
+      if (dueDateChanged) {
+        console.log("Project due date: " + parsedData.data.dueDate);
+        // Check if there are already workflow steps for this project
+        const existingSteps = await storage.getWorkflowStepsByProject(id);
+        if (existingSteps.length > 0) {
+          // Reinitialize workflow with the new due date
+          await storage.initializeProjectWorkflow(id);
+        }
+      }
+
       res.json(updatedProject);
     } catch (error) {
+      console.error("Update project error:", error);
       res.status(500).json({ message: "Failed to update project" });
     }
   });
