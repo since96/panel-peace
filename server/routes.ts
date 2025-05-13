@@ -52,21 +52,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Pre-process the date field to handle string date from client
       const requestData = { ...req.body };
       
-      // If dueDate is a string, convert it to a Date object for Zod validation
-      if (requestData.dueDate && typeof requestData.dueDate === 'string') {
-        try {
-          // Parse the ISO date string to a JavaScript Date
-          requestData.dueDate = new Date(requestData.dueDate);
-        } catch (e) {
-          return res.status(400).json({ 
-            message: "Invalid date format", 
-            errors: { dueDate: { _errors: ["Invalid date format"] } } 
-          });
+      // Handle all date fields by converting string dates to Date objects for Zod validation
+      const dateFields = ['dueDate', 'plotDeadline', 'coverDeadline'];
+      
+      for (const field of dateFields) {
+        if (requestData[field] && typeof requestData[field] === 'string') {
+          try {
+            // Parse the ISO date string to a JavaScript Date
+            requestData[field] = new Date(requestData[field]);
+          } catch (e) {
+            return res.status(400).json({ 
+              message: `Invalid date format for ${field}`, 
+              errors: { [field]: { _errors: ["Invalid date format"] } } 
+            });
+          }
         }
       }
       
       const parsedData = insertProjectSchema.safeParse(requestData);
       if (!parsedData.success) {
+        console.error("Project validation errors:", JSON.stringify(parsedData.error.format()));
         return res.status(400).json({ message: "Invalid project data", errors: parsedData.error.format() });
       }
 

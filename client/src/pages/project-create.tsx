@@ -95,10 +95,35 @@ export default function ProjectCreate() {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       navigate(`/projects/${data.id}`);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Project creation error:', error);
+      
+      // Extract error message if available
+      let errorMessage = "Failed to create project. Please try again.";
+      
+      // Attempt to extract validation errors from the response
+      if (error.response) {
+        if (error.response.message) {
+          errorMessage = error.response.message;
+        }
+        
+        if (error.response.errors) {
+          console.error('Validation errors:', JSON.stringify(error.response.errors));
+          
+          // Create a more user-friendly message detailing the validation errors
+          const errorFields = Object.keys(error.response.errors)
+            .filter(field => field !== '_errors')
+            .map(field => field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1'));
+          
+          if (errorFields.length > 0) {
+            errorMessage = `Please check these fields: ${errorFields.join(', ')}`;
+          }
+        }
+      }
+      
       toast({
         title: "Error creating project",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
       setIsSubmitting(false);
