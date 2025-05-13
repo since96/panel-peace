@@ -1,0 +1,56 @@
+import { StatsOverview } from '@/components/dashboard/stats-overview';
+import { CurrentProjects } from '@/components/dashboard/current-projects';
+import { ActionItems } from '@/components/dashboard/action-items';
+import { CreativeTools } from '@/components/dashboard/creative-tools';
+import { PanelLayoutPreview } from '@/components/dashboard/panel-layout-preview';
+import { Button } from '@/components/ui/button';
+import { Helmet } from 'react-helmet-async';
+
+export default function Dashboard() {
+  return (
+    <>
+      <Helmet>
+        <title>Dashboard - Comic Editor Pro</title>
+        <meta name="description" content="Manage your comic projects and collaborations with Comic Editor Pro's comprehensive dashboard." />
+      </Helmet>
+      
+      <div className="max-w-7xl mx-auto">
+        {/* Dashboard Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-slate-500 mt-1">Manage your comic projects and collaborations</p>
+          </div>
+          <div className="mt-4 md:mt-0 flex items-center space-x-2">
+            <select className="appearance-none bg-white border border-slate-300 rounded-lg px-3 py-1.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
+              <option>All Projects</option>
+              <option>In Progress</option>
+              <option>Needs Review</option>
+              <option>Completed</option>
+              <option>Delayed</option>
+            </select>
+            <Button variant="default" size="sm" className="flex items-center space-x-1">
+              <i className="ri-filter-3-line"></i>
+              <span>Filters</span>
+            </Button>
+          </div>
+        </div>
+        
+        {/* Stats Overview */}
+        <StatsOverview />
+        
+        {/* Current Projects */}
+        <CurrentProjects />
+        
+        {/* Action Items (Pending Feedback + Upcoming Deadlines) */}
+        <ActionItems />
+        
+        {/* Tools Quick Access */}
+        <CreativeTools />
+        
+        {/* Preview of Panel Layout Tool */}
+        <PanelLayoutPreview />
+      </div>
+    </>
+  );
+}

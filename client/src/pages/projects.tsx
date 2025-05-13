@@ -1,0 +1,133 @@
+import { useQuery } from '@tanstack/react-query';
+import { Project } from '@shared/schema';
+import { ProjectCard } from '@/components/ui/custom/project-card';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Helmet } from 'react-helmet-async';
+
+export default function Projects() {
+  const { data: projects, isLoading } = useQuery<Project[]>({
+    queryKey: ['/api/projects'],
+  });
+  
+  const [statusFilter, setStatusFilter] = useState('all');
+  
+  // Filter projects by status
+  const filteredProjects = projects?.filter((project) => {
+    if (statusFilter === 'all') return true;
+    return project.status === statusFilter;
+  });
+  
+  // Sample collaborators (in a real app, fetch from API)
+  const sampleCollaborators = [
+    { id: 1, name: 'Alex Rodriguez', avatarUrl: '' },
+    { id: 2, name: 'Sarah Lee', avatarUrl: '' },
+    { id: 3, name: 'James King', avatarUrl: '' },
+    { id: 4, name: 'Mina Tan', avatarUrl: '' },
+  ];
+  
+  // Assign random collaborators to each project
+  const getCollaboratorsForProject = (projectId: number) => {
+    // In a real app, we would fetch this data from the API
+    const count = Math.floor(Math.random() * 5) + 1; // 1-5 collaborators
+    return sampleCollaborators.slice(0, count);
+  };
+  
+  return (
+    <>
+      <Helmet>
+        <title>My Projects - Comic Editor Pro</title>
+        <meta name="description" content="View and manage all your comic book projects. Create new projects, track progress, and collaborate with team members." />
+      </Helmet>
+      
+      <div className="max-w-7xl mx-auto">
+        {/* Projects Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">My Projects</h1>
+            <p className="text-slate-500 mt-1">Manage your comic book projects</p>
+          </div>
+          <div className="mt-4 md:mt-0">
+            <Link href="/projects/new">
+              <Button className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                <span>New Project</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+        
+        {/* Project Filters */}
+        <Tabs
+          defaultValue="all"
+          className="mb-6"
+          value={statusFilter}
+          onValueChange={setStatusFilter}
+        >
+          <TabsList className="grid grid-cols-5 w-full max-w-xl">
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="in_progress">In Progress</TabsTrigger>
+            <TabsTrigger value="needs_review">Needs Review</TabsTrigger>
+            <TabsTrigger value="delayed">Delayed</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
+        {/* Projects Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-xl shadow-sm h-80 animate-pulse">
+                <div className="h-48 bg-slate-200"></div>
+                <div className="p-4 space-y-2">
+                  <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+                  <div className="h-6 bg-slate-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-slate-200 rounded w-full"></div>
+                  <div className="h-2 bg-slate-200 rounded w-full mt-4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {filteredProjects && filteredProjects.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProjects.map((project) => (
+                  <Link key={project.id} href={`/projects/${project.id}`}>
+                    <a>
+                      <ProjectCard
+                        project={project}
+                        collaborators={getCollaboratorsForProject(project.id)}
+                      />
+                    </a>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+                <div className="text-5xl text-slate-300 mb-4">
+                  <i className="ri-inbox-line"></i>
+                </div>
+                <h2 className="text-xl font-bold text-slate-800 mb-2">No projects found</h2>
+                <p className="text-slate-500 mb-6">
+                  {statusFilter === 'all' 
+                    ? "You haven't created any projects yet. Create your first project to get started."
+                    : `You don't have any projects with '${statusFilter.replace('_', ' ')}' status.`}
+                </p>
+                <Link href="/projects/new">
+                  <Button className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    <span>Create New Project</span>
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+}
