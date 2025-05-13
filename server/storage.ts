@@ -763,12 +763,12 @@ export class MemStorage implements IStorage {
       {
         projectId,
         stepType: "proofs",
-        title: "Proofs",
+        title: "Final Assembled Reader Proof",
         description: "Editorial review of colored pages before final approval",
         status: "not_started",
         progress: 0,
         sortOrder: 75,
-        dueDate: colorEndDate, // Due same day as colors
+        dueDate: addDays(letterEndDate, 7), // Due one week after letters
       },
       {
         projectId,
