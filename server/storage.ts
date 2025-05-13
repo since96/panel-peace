@@ -592,6 +592,58 @@ export class MemStorage implements IStorage {
     const inkBatchSize = project.inkBatchSize || 5;
     const approvalDays = project.approvalDays || 2;
     
+    // Create a helper function to add days to a date
+    const addDays = (date: Date, days: number): Date => {
+      return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+    };
+    
+    // Calculate realistic durations in days
+    const plotDuration = 7; // Plot development typically takes a week
+    const coverDuration = Math.max(7, Math.ceil(coverCount / 1) * 7); // At least a week, more if multiple covers
+    const scriptDuration = 14; // Script typically takes 2 weeks after plot
+    
+    // Calculate page-based task durations with exact math
+    const pencilDuration = Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7;
+    const inkDuration = Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7;
+    const colorDuration = Math.ceil(interiorPageCount / coloristPagesPerWeek) * 7;
+    const letterDuration = Math.ceil(interiorPageCount / lettererPagesPerWeek) * 7;
+    const editorialDuration = Math.ceil(fillerPageCount / 5) * 7; // Assuming 5 filler pages per week
+    const productionDuration = 7; // Final assembly typically takes a week
+    
+    // Account for parallel work and batching
+    const pencilStartDate = addDays(today, plotDuration + scriptDuration + approvalDays);
+    const inkStartDate = addDays(pencilStartDate, Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7);
+    const colorStartDate = addDays(inkStartDate, Math.ceil(inkBatchSize / inkerPagesPerWeek) * 7);
+    const letterStartDate = colorStartDate; // Lettering can start in parallel with colors
+    const editorialStartDate = addDays(colorStartDate, Math.ceil(colorDuration / 2)); // Start halfway through coloring
+    
+    // Calculate end dates for each step
+    const plotEndDate = addDays(today, plotDuration);
+    const coverEndDate = addDays(today, coverDuration);
+    const scriptEndDate = addDays(plotEndDate, scriptDuration);
+    const pencilEndDate = addDays(pencilStartDate, pencilDuration);
+    const inkEndDate = addDays(inkStartDate, inkDuration);
+    const colorEndDate = addDays(colorStartDate, colorDuration);
+    const letterEndDate = addDays(letterStartDate, letterDuration);
+    const editorialEndDate = addDays(editorialStartDate, editorialDuration);
+    
+    // Production starts after everything else is done
+    const productionStartDate = new Date(Math.max(
+      colorEndDate.getTime(),
+      letterEndDate.getTime(),
+      editorialEndDate.getTime()
+    ));
+    const productionEndDate = addDays(productionStartDate, productionDuration);
+    
+    // Comparison with project due date
+    const projectDueDate = project.dueDate ? new Date(project.dueDate) : null;
+    console.log(`Project due date: ${projectDueDate?.toISOString()}`);
+    console.log(`Calculated completion date: ${productionEndDate.toISOString()}`);
+    
+    if (projectDueDate && productionEndDate > projectDueDate) {
+      console.log(`Warning: Project completion date (${productionEndDate.toISOString()}) is after the project due date (${projectDueDate.toISOString()})`);
+    }
+    
     // Define the standard comic book workflow steps
     const workflowSteps: InsertWorkflowStep[] = [
       // Initial stages happen in parallel
@@ -603,8 +655,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 10,
-        // Plot approval typically takes a week
-        dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000),
+        dueDate: plotEndDate,
       },
       {
         projectId,
@@ -614,8 +665,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 20,
-        // Cover art typically done in parallel with plot
-        dueDate: new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000),
+        dueDate: coverEndDate,
       },
       {
         projectId,
@@ -625,65 +675,47 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 30,
-        // Script typically takes 2 weeks after plot approval
-        dueDate: new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000),
+        dueDate: scriptEndDate,
       },
       {
         projectId,
         stepType: "pencils",
         title: "Pencils/Roughs",
-        description: `Initial sketches and layouts for ${interiorPageCount} interior pages`,
+        description: `Initial sketches and layouts for ${interiorPageCount} interior pages (${pencilerPagesPerWeek} pages/week)`,
         status: "not_started",
         progress: 0,
         sortOrder: 40,
-        // Calculate based on penciler speed
-        dueDate: new Date(today.getTime() + 
-          (Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7 + 
-           approvalDays) * 24 * 60 * 60 * 1000),
+        dueDate: pencilEndDate,
       },
       {
         projectId,
         stepType: "inks",
         title: "Inks/Finishes",
-        description: "Final line work over the pencils",
+        description: `Final line work over the pencils (${inkerPagesPerWeek} pages/week)`,
         status: "not_started",
         progress: 0,
         sortOrder: 50,
-        // Calculate based on inker speed (starts after first pencil batch)
-        dueDate: new Date(today.getTime() + 
-          ((Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7) + 
-           Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7 + 
-           approvalDays * 2) * 24 * 60 * 60 * 1000),
+        dueDate: inkEndDate,
       },
       {
         projectId,
         stepType: "colors",
         title: "Colors",
-        description: "Coloring the interior pages",
+        description: `Coloring the interior pages (${coloristPagesPerWeek} pages/week)`,
         status: "not_started",
         progress: 0,
         sortOrder: 60,
-        // Calculate based on colorist speed (starts after first ink batch)
-        dueDate: new Date(today.getTime() + 
-          ((Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7) + 
-           (Math.ceil(inkBatchSize / inkerPagesPerWeek) * 7) + 
-           Math.ceil(interiorPageCount / coloristPagesPerWeek) * 7 + 
-           approvalDays * 3) * 24 * 60 * 60 * 1000),
+        dueDate: colorEndDate,
       },
       {
         projectId,
         stepType: "letters",
         title: "Letters",
-        description: "Adding text, speech bubbles, and sound effects",
+        description: `Adding text, speech bubbles, and sound effects (${lettererPagesPerWeek} pages/week)`,
         status: "not_started",
         progress: 0,
         sortOrder: 70,
-        // Lettering can start with colors
-        dueDate: new Date(today.getTime() + 
-          ((Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7) + 
-           (Math.ceil(inkBatchSize / inkerPagesPerWeek) * 7) + 
-           Math.ceil(interiorPageCount / lettererPagesPerWeek) * 7 + 
-           approvalDays * 3) * 24 * 60 * 60 * 1000),
+        dueDate: letterEndDate,
       },
       {
         projectId,
@@ -693,11 +725,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 80,
-        // Editorial pages typically done near the end
-        dueDate: new Date(today.getTime() + 
-          ((Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7) + 
-           (Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7) + 
-           approvalDays * 3) * 24 * 60 * 60 * 1000),
+        dueDate: editorialEndDate,
       },
       {
         projectId,
@@ -707,13 +735,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 90,
-        // Production happens after everything else is complete
-        dueDate: new Date(today.getTime() + 
-          ((Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7) + 
-           (Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7) + 
-           (Math.ceil(interiorPageCount / coloristPagesPerWeek) * 7) + 
-           (Math.ceil(interiorPageCount / lettererPagesPerWeek) * 7) + 
-           approvalDays * 4) * 24 * 60 * 60 * 1000),
+        dueDate: productionEndDate,
       }
     ];
     
