@@ -90,6 +90,12 @@ export default function ProjectDetails() {
     enabled: !!id,
   });
 
+  // Get all users to display in talent assignment dropdown
+  const { data: users, isLoading: isUsersLoading } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+    enabled: !!id,
+  });
+
   const updateProjectMutation = useMutation({
     mutationFn: async (progress: number) => {
       const res = await apiRequest("PATCH", `/api/projects/${id}`, { progress });
