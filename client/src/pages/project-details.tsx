@@ -656,6 +656,23 @@ export default function ProjectDetails() {
                                           <span className="text-sm text-slate-600">Progress: {step.progress}%</span>
                                         </div>
                                       </div>
+                                      
+                                      {/* Display assigned user information */}
+                                      <div className="mt-3 flex items-center">
+                                        <Users className="h-4 w-4 text-slate-400 mr-1" />
+                                        <span className="text-sm text-slate-600">
+                                          {step.assignedTo ? (
+                                            <>
+                                              Assigned to: {
+                                                users?.find(user => user.id === step.assignedTo)?.username || 
+                                                `User #${step.assignedTo}`
+                                              }
+                                            </>
+                                          ) : (
+                                            'Unassigned'
+                                          )}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
                                   
@@ -1245,7 +1262,8 @@ export default function ProjectDetails() {
                     progress: editingStep.progress,
                     status: editingStep.status,
                     dueDate: editingStep.dueDate,
-                    description: editingStep.description
+                    description: editingStep.description,
+                    assignedTo: editingStep.assignedTo
                   };
                   updateWorkflowStepMutation.mutate(updateData);
                 }
