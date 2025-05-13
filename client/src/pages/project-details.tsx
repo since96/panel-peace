@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
-import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep } from '@shared/schema';
+import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep, User } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -167,6 +167,7 @@ export default function ProjectDetails() {
       status?: string;
       dueDate?: Date | null;
       description?: string | null;
+      assignedTo?: number | null;
     }) => {
       const { stepId, ...updateData } = data;
       console.log("Sending update:", updateData);
@@ -1172,6 +1173,38 @@ export default function ProjectDetails() {
                       />
                     </PopoverContent>
                   </Popover>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="assigned-to" className="text-right">
+                  Assigned To
+                </Label>
+                <div className="col-span-3">
+                  <Select 
+                    defaultValue={editingStep.assignedTo?.toString() || ""}
+                    onValueChange={(value) => {
+                      if (editingStep) {
+                        const assignedToValue = value === "" ? null : parseInt(value, 10);
+                        setEditingStep({
+                          ...editingStep,
+                          assignedTo: assignedToValue
+                        });
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Assign talent" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Unassigned</SelectItem>
+                      {users?.map(user => (
+                        <SelectItem key={user.id} value={user.id.toString()}>
+                          {user.username} {user.fullName ? `(${user.fullName})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
