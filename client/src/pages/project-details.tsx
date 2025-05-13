@@ -2,7 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
 import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep, User } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,6 +65,10 @@ export default function ProjectDetails() {
   const [showEditStepDialog, setShowEditStepDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  
+  // The comments we'll fetch from the API
+  const [comments, setComments] = useState<Comment[]>([]);
 
   const { data: project, isLoading: isProjectLoading } = useQuery<Project>({
     queryKey: [`/api/projects/${id}`],
@@ -89,11 +93,65 @@ export default function ProjectDetails() {
     queryKey: [`/api/projects/${id}/workflow-steps`],
     enabled: !!id,
   });
+  
+  // Handle adding a comment
+  const handleAddComment = () => {
+    if (!selectedStep || !commentText.trim()) return;
+    
+    // Create and post the comment
+    addCommentMutation.mutate({
+      content: commentText,
+      feedbackId: selectedStep.id, // Using step ID since we're attaching to a workflow step
+      authorId: DEFAULT_USER_ID
+    });
+  };
 
   // Get all users to display in talent assignment dropdown
   const { data: users, isLoading: isUsersLoading } = useQuery<User[]>({
     queryKey: ['/api/users'],
     enabled: !!id,
+  });
+  
+  // Fetch comments when a step is selected for comments
+  const fetchComments = useCallback(async (feedbackId: number) => {
+    if (feedbackId) {
+      try {
+        const res = await fetch(`/api/feedback/${feedbackId}/comments`);
+        const data = await res.json();
+        setComments(data);
+      } catch (error) {
+        console.error('Failed to fetch comments:', error);
+        toast({
+          title: "Failed to load comments",
+          description: "Could not retrieve comments for this step",
+          variant: "destructive"
+        });
+      }
+    }
+  }, [toast]);
+  
+  // Add comment mutation
+  const addCommentMutation = useMutation({
+    mutationFn: async (data: { content: string; feedbackId: number; authorId: number }) => {
+      const res = await apiRequest("POST", `/api/comments`, data);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Comment added",
+        description: "Your comment has been posted successfully"
+      });
+      setCommentText('');
+      // Add the new comment to the list
+      setComments(prev => [data, ...prev]);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to add comment",
+        description: error.message || "An error occurred while posting your comment",
+        variant: "destructive"
+      });
+    }
   });
 
   const updateProjectMutation = useMutation({
@@ -1308,7 +1366,7 @@ export default function ProjectDetails() {
           <DialogHeader>
             <DialogTitle>Editorial Comments</DialogTitle>
             <DialogDescription>
-              Add internal comments for the editorial team.
+              {selectedStep ? `Comments for "${selectedStep.title}" step` : 'Add internal comments for the editorial team.'}
             </DialogDescription>
           </DialogHeader>
           
@@ -1319,41 +1377,41 @@ export default function ProjectDetails() {
                 id="comment"
                 placeholder="Add comment for editorial team (not shared with talent)"
                 className="mt-2"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                disabled={!selectedStep}
               />
             </div>
             
             <div className="mt-6">
               <h3 className="text-sm font-medium mb-3">Previous Comments</h3>
-              <div className="space-y-4">
-                <div className="bg-slate-50 p-3 rounded-lg">
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback>AR</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">Alex Rodriguez</span>
+              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                {comments && comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="bg-slate-50 p-3 rounded-lg">
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback>
+                              {comment.authorName ? comment.authorName.substring(0, 2).toUpperCase() : 'ED'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium">
+                            {comment.authorName || 'Editor'}
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-500">
+                          {formatDateRelative(comment.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-sm">{comment.content}</p>
                     </div>
-                    <span className="text-xs text-slate-500">2 days ago</span>
+                  ))
+                ) : (
+                  <div className="text-center text-sm text-slate-500 py-4">
+                    No comments yet. Be the first to add one!
                   </div>
-                  <p className="text-sm">
-                    The color saturation on pages 12-15 needs to be toned down a bit.
-                  </p>
-                </div>
-                
-                <div className="bg-slate-50 p-3 rounded-lg">
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback>SL</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">Sarah Lee</span>
-                    </div>
-                    <span className="text-xs text-slate-500">5 days ago</span>
-                  </div>
-                  <p className="text-sm">
-                    Panel composition on page 8 looks great. Let's keep this layout style for the action sequences.
-                  </p>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -1362,8 +1420,11 @@ export default function ProjectDetails() {
             <Button variant="outline" onClick={() => setShowCommentDialog(false)}>
               Cancel
             </Button>
-            <Button>
-              Add Comment
+            <Button 
+              onClick={handleAddComment}
+              disabled={!selectedStep || !commentText.trim() || addCommentMutation.isPending}
+            >
+              {addCommentMutation.isPending ? "Posting..." : "Add Comment"}
             </Button>
           </DialogFooter>
         </DialogContent>
