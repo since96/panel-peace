@@ -56,7 +56,7 @@ export default function ProjectDetails() {
   });
   
   const { data: workflowSteps, isLoading: isWorkflowLoading } = useQuery<WorkflowStep[]>({
-    queryKey: [`/api/projects/${id}/workflow`],
+    queryKey: [`/api/projects/${id}/workflow-steps`],
     enabled: !!id,
   });
 
@@ -76,6 +76,27 @@ export default function ProjectDetails() {
     onError: (error) => {
       toast({
         title: "Failed to update progress",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const initializeWorkflowMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/projects/${id}/initialize-workflow`, {});
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Workflow initialized",
+        description: "Comic production workflow has been set up successfully"
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to initialize workflow",
         description: error.message,
         variant: "destructive"
       });
@@ -321,9 +342,15 @@ export default function ProjectDetails() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline">
+                          <Button 
+                            variant="outline"
+                            onClick={() => initializeWorkflowMutation.mutate()}
+                            disabled={initializeWorkflowMutation.isPending}
+                          >
                             <ArrowRight className="h-4 w-4 mr-2" />
-                            Initialize Workflow
+                            {initializeWorkflowMutation.isPending 
+                              ? "Initializing..." 
+                              : "Initialize Workflow"}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -475,9 +502,14 @@ export default function ProjectDetails() {
                         </div>
                         <h3 className="text-lg font-medium text-slate-600 mb-1">No workflow steps defined</h3>
                         <p className="text-sm text-slate-500 mb-4">Initialize the workflow to create steps based on your project configuration</p>
-                        <Button>
+                        <Button
+                          onClick={() => initializeWorkflowMutation.mutate()}
+                          disabled={initializeWorkflowMutation.isPending}
+                        >
                           <ArrowRight className="h-4 w-4 mr-2" />
-                          Initialize Workflow
+                          {initializeWorkflowMutation.isPending 
+                            ? "Initializing..." 
+                            : "Initialize Workflow"}
                         </Button>
                       </CardContent>
                     </Card>
