@@ -297,11 +297,34 @@ export default function ProjectDetails() {
                 Preview
               </Button>
               <Button 
+                variant="outline" 
                 onClick={() => navigate(`/projects/edit/${id}`)}
               >
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline"
+                      className="border-red-200 text-red-600 hover:bg-red-50"
+                      onClick={() => {
+                        if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+                          deleteProjectMutation.mutate();
+                        }
+                      }}
+                      disabled={deleteProjectMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {deleteProjectMutation.isPending ? "Deleting..." : "Delete"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Permanently delete this project and all associated data</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
         </div>

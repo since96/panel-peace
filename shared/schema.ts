@@ -206,6 +206,16 @@ export const workflowSteps = pgTable("workflow_steps", {
   prevStepId: integer("prev_step_id"),
   nextStepId: integer("next_step_id"),
   comments: text("comments"), // Internal comments for editorial team
+  
+  // Talent rating metrics (1-10 scale)
+  qualityRating: integer("quality_rating"), // Overall quality of work
+  attentionToDetailRating: integer("attention_detail_rating"), // Attention to detail 
+  storytellingRating: integer("storytelling_rating"), // Following the script/storytelling
+  communicationRating: integer("communication_rating"), // Communication
+  punctualityRating: integer("punctuality_rating"), // Meeting deadlines
+  dispositionRating: integer("disposition_rating"), // Attitude and collaboration
+  ratingComments: text("rating_comments"), // Additional notes on talent performance
+  
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
