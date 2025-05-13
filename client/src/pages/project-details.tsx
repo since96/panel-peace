@@ -530,7 +530,7 @@ export default function ProjectDetails() {
                                   
                                   <div className="flex-none">
                                     <div className="flex flex-col items-end gap-2">
-                                      <div className="flex gap-2">
+                                      <div className="flex gap-2 flex-wrap">
                                         <Button 
                                           size="sm" 
                                           variant="outline"
@@ -552,6 +552,18 @@ export default function ProjectDetails() {
                                         >
                                           <Plus className="h-4 w-4 mr-2" />
                                           Upload Files
+                                        </Button>
+                                        
+                                        <Button 
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => {
+                                            setSelectedStep(step);
+                                            setShowCommentDialog(true);
+                                          }}
+                                        >
+                                          <MessageCircle className="h-4 w-4 mr-2" />
+                                          Comments
                                         </Button>
                                       </div>
                                       
@@ -911,6 +923,284 @@ export default function ProjectDetails() {
           </div>
         </div>
       </div>
+
+      {/* Edit Step Dialog */}
+      <Dialog open={showEditStepDialog} onOpenChange={setShowEditStepDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Update Workflow Step</DialogTitle>
+            <DialogDescription>
+              Update the progress, status, or deadline for this step.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingStep && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="step-title" className="text-right">
+                  Step
+                </Label>
+                <div className="col-span-3 font-medium">
+                  {editingStep.title}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="current-status" className="text-right">
+                  Current Status
+                </Label>
+                <div className="col-span-3">
+                  <Badge variant="outline">{editingStep.status}</Badge>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="progress" className="text-right">
+                  Progress
+                </Label>
+                <div className="col-span-3 flex items-center gap-2">
+                  <Slider 
+                    id="progress"
+                    defaultValue={[editingStep.progress]} 
+                    max={100} 
+                    step={5}
+                    className="w-full"
+                    onValueChange={(values) => {
+                      if (editingStep) {
+                        setEditingStep({
+                          ...editingStep,
+                          progress: values[0]
+                        });
+                      }
+                    }}
+                  />
+                  <span className="w-12 text-sm">{editingStep.progress}%</span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">
+                  Status
+                </Label>
+                <Select 
+                  defaultValue={editingStep.status}
+                  onValueChange={(value) => {
+                    if (editingStep) {
+                      setEditingStep({
+                        ...editingStep,
+                        status: value
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_started">Not Started</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="review">Under Review</SelectItem>
+                    <SelectItem value="revision">Needs Revision</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="due-date" className="text-right">
+                  Due Date
+                </Label>
+                <div className="col-span-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editingStep.dueDate
+                          ? format(new Date(editingStep.dueDate), "PPP")
+                          : "Select a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={editingStep.dueDate ? new Date(editingStep.dueDate) : undefined}
+                        onSelect={(date) => {
+                          if (editingStep) {
+                            setEditingStep({
+                              ...editingStep,
+                              dueDate: date
+                            });
+                          }
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="comments" className="text-right">
+                  Internal Notes
+                </Label>
+                <Textarea 
+                  id="comments"
+                  placeholder="Add internal notes for the editorial team (not shared with talent)"
+                  className="col-span-3"
+                  value={editingStep.comments || ""}
+                  onChange={(e) => {
+                    if (editingStep) {
+                      setEditingStep({
+                        ...editingStep,
+                        comments: e.target.value
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowEditStepDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (editingStep) {
+                  updateWorkflowStepMutation.mutate({
+                    stepId: editingStep.id,
+                    progress: editingStep.progress,
+                    status: editingStep.status,
+                    dueDate: editingStep.dueDate,
+                    comments: editingStep.comments
+                  });
+                }
+              }}
+              disabled={updateWorkflowStepMutation.isPending}
+            >
+              {updateWorkflowStepMutation.isPending ? "Updating..." : "Update Step"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Upload Dialog */}
+      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Upload Files</DialogTitle>
+            <DialogDescription>
+              Upload files related to this workflow step.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedStep && (
+            <div className="py-4">
+              <div className="mb-4">
+                <h3 className="text-sm font-medium mb-2">Uploading files for: {selectedStep.title}</h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  Files will be associated with this workflow step and visible to the editorial team.
+                </p>
+              </div>
+              
+              <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                <div className="mb-4 text-slate-400">
+                  <Plus className="h-12 w-12 mx-auto" />
+                </div>
+                <h4 className="mb-1 font-medium">Drag & drop files or click to browse</h4>
+                <p className="text-sm text-slate-500 mb-4">
+                  Supports PDF, JPG, PNG, and AI files up to 25MB
+                </p>
+                <Button>Browse Files</Button>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
+              Cancel
+            </Button>
+            <Button disabled={true}>
+              Upload Files
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Comment Dialog */}
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Editorial Comments</DialogTitle>
+            <DialogDescription>
+              Add internal comments for the editorial team.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="mb-4">
+              <Label htmlFor="comment" className="text-sm font-medium">Add New Comment</Label>
+              <Textarea 
+                id="comment"
+                placeholder="Add comment for editorial team (not shared with talent)"
+                className="mt-2"
+              />
+            </div>
+            
+            <div className="mt-6">
+              <h3 className="text-sm font-medium mb-3">Previous Comments</h3>
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback>AR</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">Alex Rodriguez</span>
+                    </div>
+                    <span className="text-xs text-slate-500">2 days ago</span>
+                  </div>
+                  <p className="text-sm">
+                    The color saturation on pages 12-15 needs to be toned down a bit.
+                  </p>
+                </div>
+                
+                <div className="bg-slate-50 p-3 rounded-lg">
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback>SL</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">Sarah Lee</span>
+                    </div>
+                    <span className="text-xs text-slate-500">5 days ago</span>
+                  </div>
+                  <p className="text-sm">
+                    Panel composition on page 8 looks great. Let's keep this layout style for the action sequences.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCommentDialog(false)}>
+              Cancel
+            </Button>
+            <Button>
+              Add Comment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

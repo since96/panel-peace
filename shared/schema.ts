@@ -205,6 +205,7 @@ export const workflowSteps = pgTable("workflow_steps", {
   sortOrder: integer("sort_order").notNull(),
   prevStepId: integer("prev_step_id"),
   nextStepId: integer("next_step_id"),
+  comments: text("comments"), // Internal comments for editorial team
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
