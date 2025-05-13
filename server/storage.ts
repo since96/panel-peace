@@ -523,6 +523,217 @@ export class MemStorage implements IStorage {
   async deleteComment(id: number): Promise<boolean> {
     return this.comments.delete(id);
   }
+  
+  // Workflow step operations
+  async getWorkflowStep(id: number): Promise<WorkflowStep | undefined> {
+    return this.workflowSteps.get(id);
+  }
+
+  async getWorkflowStepsByProject(projectId: number): Promise<WorkflowStep[]> {
+    return Array.from(this.workflowSteps.values())
+      .filter(step => step.projectId === projectId)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+
+  async createWorkflowStep(step: InsertWorkflowStep): Promise<WorkflowStep> {
+    const id = this.workflowStepIdCounter++;
+    const now = new Date();
+    
+    const newStep: WorkflowStep = {
+      id,
+      ...step,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.workflowSteps.set(id, newStep);
+    return newStep;
+  }
+
+  async updateWorkflowStep(id: number, step: Partial<InsertWorkflowStep>): Promise<WorkflowStep | undefined> {
+    const existing = this.workflowSteps.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    
+    const updated: WorkflowStep = {
+      ...existing,
+      ...step,
+      updatedAt: new Date()
+    };
+    
+    this.workflowSteps.set(id, updated);
+    return updated;
+  }
+
+  async deleteWorkflowStep(id: number): Promise<boolean> {
+    return this.workflowSteps.delete(id);
+  }
+
+  async initializeProjectWorkflow(projectId: number): Promise<WorkflowStep[]> {
+    // Define the standard comic book workflow steps
+    const workflowSteps: InsertWorkflowStep[] = [
+      {
+        projectId,
+        stepType: "plot",
+        title: "Plot Development",
+        description: "Create the story outline and plot points",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 10,
+      },
+      {
+        projectId,
+        stepType: "script",
+        title: "Script Writing",
+        description: "Convert plot into full script with dialogue and panel descriptions",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 20,
+      },
+      {
+        projectId,
+        stepType: "cover_art_lines",
+        title: "Cover Art - Lines",
+        description: "Line art for the cover illustration",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 30,
+      },
+      {
+        projectId,
+        stepType: "cover_art_colors",
+        title: "Cover Art - Colors",
+        description: "Coloring the cover illustration",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 40,
+      },
+      {
+        projectId,
+        stepType: "pencils",
+        title: "Pencils/Roughs",
+        description: "Initial sketches and layouts for interior pages",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 50,
+      },
+      {
+        projectId,
+        stepType: "inks",
+        title: "Inks/Finishes",
+        description: "Final line work over the pencils",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 60,
+      },
+      {
+        projectId,
+        stepType: "colors",
+        title: "Colors",
+        description: "Coloring the interior pages",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 70,
+      },
+      {
+        projectId,
+        stepType: "letters",
+        title: "Letters",
+        description: "Adding text, speech bubbles, and sound effects",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 80,
+      },
+      {
+        projectId,
+        stepType: "production",
+        title: "Production",
+        description: "Final assembly, file preparation and prepress",
+        status: "not_started",
+        progress: 0,
+        sortOrder: 90,
+      }
+    ];
+    
+    // Create each workflow step
+    const createdSteps: WorkflowStep[] = [];
+    for (const step of workflowSteps) {
+      const createdStep = await this.createWorkflowStep(step);
+      createdSteps.push(createdStep);
+    }
+    
+    // Connect steps with prev/next references
+    for (let i = 0; i < createdSteps.length; i++) {
+      const prevId = i > 0 ? createdSteps[i-1].id : null;
+      const nextId = i < createdSteps.length - 1 ? createdSteps[i+1].id : null;
+      
+      await this.updateWorkflowStep(createdSteps[i].id, {
+        prevStepId: prevId,
+        nextStepId: nextId
+      });
+    }
+    
+    return this.getWorkflowStepsByProject(projectId);
+  }
+  
+  // File upload operations
+  async getFileUpload(id: number): Promise<FileUpload | undefined> {
+    return this.fileUploads.get(id);
+  }
+
+  async getFileUploadsByProject(projectId: number): Promise<FileUpload[]> {
+    return Array.from(this.fileUploads.values())
+      .filter(upload => upload.projectId === projectId)
+      .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime()); // Newest first
+  }
+
+  async getFileUploadsByWorkflowStep(workflowStepId: number): Promise<FileUpload[]> {
+    return Array.from(this.fileUploads.values())
+      .filter(upload => upload.workflowStepId === workflowStepId)
+      .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime()); // Newest first
+  }
+
+  async getFileUploadsByFeedback(feedbackItemId: number): Promise<FileUpload[]> {
+    return Array.from(this.fileUploads.values())
+      .filter(upload => upload.feedbackItemId === feedbackItemId)
+      .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime()); // Newest first
+  }
+
+  async createFileUpload(upload: InsertFileUpload): Promise<FileUpload> {
+    const id = this.fileUploadIdCounter++;
+    const now = new Date();
+    
+    const newUpload: FileUpload = {
+      id,
+      ...upload,
+      uploadedAt: now,
+      updatedAt: now
+    };
+    
+    this.fileUploads.set(id, newUpload);
+    return newUpload;
+  }
+
+  async updateFileUpload(id: number, upload: Partial<InsertFileUpload>): Promise<FileUpload | undefined> {
+    const existing = this.fileUploads.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    
+    const updated: FileUpload = {
+      ...existing,
+      ...upload,
+      updatedAt: new Date()
+    };
+    
+    this.fileUploads.set(id, updated);
+    return updated;
+  }
+
+  async deleteFileUpload(id: number): Promise<boolean> {
+    return this.fileUploads.delete(id);
+  }
 }
 
 export const storage = new MemStorage();

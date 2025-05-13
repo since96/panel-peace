@@ -7,7 +7,9 @@ import {
   insertAssetSchema,
   insertDeadlineSchema,
   insertPanelLayoutSchema,
-  insertCommentSchema
+  insertCommentSchema,
+  insertWorkflowStepSchema,
+  insertFileUploadSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -330,6 +332,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(newComment);
     } catch (error) {
       res.status(500).json({ message: "Failed to create comment" });
+    }
+  });
+
+  // Workflow steps routes
+  app.get("/api/projects/:projectId/workflow-steps", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      if (isNaN(projectId)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+
+      const workflowSteps = await storage.getWorkflowStepsByProject(projectId);
+      res.json(workflowSteps);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workflow steps" });
+    }
+  });
+
+  app.get("/api/workflow-steps/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid workflow step ID" });
+      }
+
+      const workflowStep = await storage.getWorkflowStep(id);
+      if (!workflowStep) {
+        return res.status(404).json({ message: "Workflow step not found" });
+      }
+
+      res.json(workflowStep);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workflow step" });
+    }
+  });
+
+  app.post("/api/workflow-steps", async (req, res) => {
+    try {
+      const parsedData = insertWorkflowStepSchema.safeParse(req.body);
+      if (!parsedData.success) {
+        return res.status(400).json({ message: "Invalid workflow step data", errors: parsedData.error.format() });
+      }
+
+      const newWorkflowStep = await storage.createWorkflowStep(parsedData.data);
+      res.status(201).json(newWorkflowStep);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create workflow step" });
+    }
+  });
+
+  app.post("/api/projects/:projectId/initialize-workflow", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      if (isNaN(projectId)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      const workflowSteps = await storage.initializeProjectWorkflow(projectId);
+      res.status(201).json(workflowSteps);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to initialize workflow" });
+    }
+  });
+
+  app.patch("/api/workflow-steps/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid workflow step ID" });
+      }
+
+      const workflowStep = await storage.getWorkflowStep(id);
+      if (!workflowStep) {
+        return res.status(404).json({ message: "Workflow step not found" });
+      }
+
+      const updateSchema = insertWorkflowStepSchema.partial();
+      const parsedData = updateSchema.safeParse(req.body);
+      if (!parsedData.success) {
+        return res.status(400).json({ message: "Invalid workflow step data", errors: parsedData.error.format() });
+      }
+
+      const updatedWorkflowStep = await storage.updateWorkflowStep(id, parsedData.data);
+      res.json(updatedWorkflowStep);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update workflow step" });
+    }
+  });
+
+  // File upload routes
+  app.get("/api/projects/:projectId/file-uploads", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      if (isNaN(projectId)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+
+      const fileUploads = await storage.getFileUploadsByProject(projectId);
+      res.json(fileUploads);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch file uploads" });
+    }
+  });
+
+  app.get("/api/workflow-steps/:stepId/file-uploads", async (req, res) => {
+    try {
+      const stepId = parseInt(req.params.stepId);
+      if (isNaN(stepId)) {
+        return res.status(400).json({ message: "Invalid workflow step ID" });
+      }
+
+      const fileUploads = await storage.getFileUploadsByWorkflowStep(stepId);
+      res.json(fileUploads);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch file uploads" });
+    }
+  });
+
+  app.get("/api/feedback/:feedbackId/file-uploads", async (req, res) => {
+    try {
+      const feedbackId = parseInt(req.params.feedbackId);
+      if (isNaN(feedbackId)) {
+        return res.status(400).json({ message: "Invalid feedback ID" });
+      }
+
+      const fileUploads = await storage.getFileUploadsByFeedback(feedbackId);
+      res.json(fileUploads);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch file uploads" });
+    }
+  });
+
+  app.post("/api/file-uploads", async (req, res) => {
+    try {
+      const parsedData = insertFileUploadSchema.safeParse(req.body);
+      if (!parsedData.success) {
+        return res.status(400).json({ message: "Invalid file upload data", errors: parsedData.error.format() });
+      }
+
+      const newFileUpload = await storage.createFileUpload(parsedData.data);
+      res.status(201).json(newFileUpload);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create file upload record" });
+    }
+  });
+
+  app.patch("/api/file-uploads/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid file upload ID" });
+      }
+
+      const fileUpload = await storage.getFileUpload(id);
+      if (!fileUpload) {
+        return res.status(404).json({ message: "File upload not found" });
+      }
+
+      const updateSchema = insertFileUploadSchema.partial();
+      const parsedData = updateSchema.safeParse(req.body);
+      if (!parsedData.success) {
+        return res.status(400).json({ message: "Invalid file upload data", errors: parsedData.error.format() });
+      }
+
+      const updatedFileUpload = await storage.updateFileUpload(id, parsedData.data);
+      res.json(updatedFileUpload);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update file upload" });
     }
   });
 
