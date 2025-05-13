@@ -111,12 +111,14 @@ export default function ProjectCreate() {
     // Create a copy of the data for the mutation that we can safely modify
     const submissionData = { ...data };
     
-    // Convert dueDate to string format for API submission
-    // The server expects a string that it can parse into a database timestamp
+    // Convert date fields to string format for API submission
+    // The server expects strings that it can parse into database timestamps
     const apiData = {
       ...submissionData,
-      // If dueDate exists, convert to ISO string for the API
-      dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined
+      // Convert date fields to ISO strings for the API
+      dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined,
+      plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
+      coverDeadline: submissionData.coverDeadline ? submissionData.coverDeadline.toISOString() : undefined
     };
     
     createProjectMutation.mutateAsync(apiData);
@@ -479,7 +481,101 @@ export default function ProjectCreate() {
                         </FormItem>
                       )}
                     />
-                    
+                  </div>
+                </div>
+
+                {/* Deadline Section */}
+                <div className="pt-6 pb-2 border-t">
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Project Deadlines</h3>
+                  <p className="text-sm text-slate-500 mb-4">Set deadlines for key production stages</p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="plotDeadline"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Plot Deadline</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    formatDate(field.value)
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormDescription>
+                            Deadline for plot completion
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="coverDeadline"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Cover Artwork Deadline</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={"outline"}
+                                  className={cn(
+                                    "pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    formatDate(field.value)
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormDescription>
+                            Deadline for cover artwork
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={form.control}
                       name="dueDate"

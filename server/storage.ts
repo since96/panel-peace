@@ -577,7 +577,7 @@ export class MemStorage implements IStorage {
       throw new Error("Project not found");
     }
     
-    // Calculate due dates for each stage based on project metrics
+    // Calculate due dates for each stage based on project metrics and user-defined deadlines
     const today = new Date();
     
     // Get metrics with defaults if null
@@ -602,6 +602,13 @@ export class MemStorage implements IStorage {
     const coverDuration = Math.max(7, Math.ceil(coverCount / 1) * 7); // At least a week, more if multiple covers
     const scriptDuration = 14; // Script typically takes 2 weeks after plot
     
+    // Use manual deadlines if set, otherwise calculate them
+    const plotEndDate = project.plotDeadline || addDays(today, plotDuration);
+    const coverEndDate = project.coverDeadline || addDays(today, coverDuration);
+    
+    // Calculate script deadline based on plot completion
+    const scriptEndDate = addDays(plotEndDate, scriptDuration);
+    
     // Calculate page-based task durations with exact math
     const pencilDuration = Math.ceil(interiorPageCount / pencilerPagesPerWeek) * 7;
     const inkDuration = Math.ceil(interiorPageCount / inkerPagesPerWeek) * 7;
@@ -611,16 +618,11 @@ export class MemStorage implements IStorage {
     const productionDuration = 7; // Final assembly typically takes a week
     
     // Account for parallel work and batching
-    const pencilStartDate = addDays(today, plotDuration + scriptDuration + approvalDays);
+    const pencilStartDate = addDays(scriptEndDate, approvalDays);
     const inkStartDate = addDays(pencilStartDate, Math.ceil(pencilBatchSize / pencilerPagesPerWeek) * 7);
     const colorStartDate = addDays(inkStartDate, Math.ceil(inkBatchSize / inkerPagesPerWeek) * 7);
     const letterStartDate = colorStartDate; // Lettering can start in parallel with colors
     const editorialStartDate = addDays(colorStartDate, Math.ceil(colorDuration / 2)); // Start halfway through coloring
-    
-    // Calculate end dates for each step
-    const plotEndDate = addDays(today, plotDuration);
-    const coverEndDate = addDays(today, coverDuration);
-    const scriptEndDate = addDays(plotEndDate, scriptDuration);
     const pencilEndDate = addDays(pencilStartDate, pencilDuration);
     const inkEndDate = addDays(inkStartDate, inkDuration);
     const colorEndDate = addDays(colorStartDate, colorDuration);
