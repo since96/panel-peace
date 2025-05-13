@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { useToast } from '@/hooks/use-toast';
@@ -420,6 +420,36 @@ export default function ProjectDetails() {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
+                  
+                  {/* Timeline feasibility warning */}
+                  {project && project.dueDate && workflowSteps && workflowSteps.length > 0 && (() => {
+                    const productionStep = workflowSteps.find(step => step.stepType === 'production');
+                    if (!productionStep || !productionStep.dueDate) return null;
+                    
+                    const projectDueDate = new Date(project.dueDate);
+                    const calculatedEndDate = new Date(productionStep.dueDate);
+                    
+                    if (calculatedEndDate > projectDueDate) {
+                      const daysLate = Math.ceil((calculatedEndDate.getTime() - projectDueDate.getTime()) / (1000 * 60 * 60 * 24));
+                      return (
+                        <div className="bg-red-50 border border-red-200 text-red-800 rounded-md p-4 mb-6">
+                          <div className="flex">
+                            <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+                            <div>
+                              <h3 className="font-medium">Timeline Warning</h3>
+                              <p className="text-sm mt-1">
+                                Based on the current page count and production speeds, this project is scheduled to complete 
+                                <strong> {daysLate} day{daysLate !== 1 ? 's' : ''} after </strong> 
+                                the due date ({formatDate(projectDueDate)}). Consider adjusting the project deadline or 
+                                increasing production speeds.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                   
                   {isWorkflowLoading ? (
                     <div className="space-y-4">
