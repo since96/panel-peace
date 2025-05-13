@@ -47,15 +47,15 @@ export default function Collaborators() {
   return (
     <>
       <Helmet>
-        <title>Collaborators - Comic Editor Pro</title>
-        <meta name="description" content="Manage your team of collaborators. Invite artists, writers, and other team members to work on your comic book projects." />
+        <title>Talent Management - Comic Editor Pro</title>
+        <meta name="description" content="Manage your creative team of artists, writers, and other talent. Track assignments, deadlines, and communication for your comic book projects." />
       </Helmet>
       
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Collaborators</h1>
-            <p className="text-slate-500 mt-1">Manage your team and project assignments</p>
+            <h1 className="text-2xl font-bold text-slate-900">Talent Management</h1>
+            <p className="text-slate-500 mt-1">Manage your creative team, track assignments and deliverables</p>
           </div>
           <div className="mt-4 md:mt-0">
             <div className="relative">
@@ -74,10 +74,11 @@ export default function Collaborators() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Tabs defaultValue="team" className="mb-6">
-              <TabsList className="grid w-full max-w-md grid-cols-3">
+              <TabsList className="grid w-full max-w-md grid-cols-4">
                 <TabsTrigger value="team">My Team</TabsTrigger>
-                <TabsTrigger value="artists">Available Artists</TabsTrigger>
-                <TabsTrigger value="requests">Requests</TabsTrigger>
+                <TabsTrigger value="assignments">Assignments</TabsTrigger>
+                <TabsTrigger value="available">Available Talent</TabsTrigger>
+                <TabsTrigger value="requests">Applications</TabsTrigger>
               </TabsList>
               
               <TabsContent value="team" className="mt-4">
@@ -129,12 +130,123 @@ export default function Collaborators() {
                   )}
                 </div>
               </TabsContent>
-              
-              <TabsContent value="artists" className="mt-4">
+
+              <TabsContent value="assignments" className="mt-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Available Artists</CardTitle>
-                    <CardDescription>Find artists to collaborate with on your projects</CardDescription>
+                    <CardTitle>Current Assignments</CardTitle>
+                    <CardDescription>Track deliverables and deadlines for your team</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="rounded-lg border overflow-hidden">
+                        <div className="bg-muted px-4 py-3 font-medium flex items-center">
+                          <span className="flex-1">Stellar Adventures Issue #1 - Character Designs</span>
+                          <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">In Progress</Badge>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center mb-3">
+                            <Avatar className="h-8 w-8 mr-2">
+                              <AvatarFallback>MT</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">Mina Tan</p>
+                              <p className="text-xs text-muted-foreground">Character Designer</p>
+                            </div>
+                            <div className="ml-auto text-sm text-muted-foreground flex items-center">
+                              <Clock className="h-3.5 w-3.5 mr-1" />
+                              Due in 5 days
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center">
+                              <span className="text-slate-500 mr-2">Progress:</span>
+                              <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-primary rounded-full" style={{ width: '70%' }}></div>
+                              </div>
+                              <span className="ml-2 text-slate-700">70%</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">View Details</Button>
+                              <Button size="sm">Send Reminder</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border overflow-hidden">
+                        <div className="bg-muted px-4 py-3 font-medium flex items-center">
+                          <span className="flex-1">Cosmic Tales Volume 3 - Script Draft</span>
+                          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Needs Review</Badge>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center mb-3">
+                            <Avatar className="h-8 w-8 mr-2">
+                              <AvatarFallback>SL</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">Sarah Lee</p>
+                              <p className="text-xs text-muted-foreground">Writer</p>
+                            </div>
+                            <div className="ml-auto text-sm text-muted-foreground flex items-center">
+                              <Clock className="h-3.5 w-3.5 mr-1" />
+                              Submitted yesterday
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center">
+                              <span className="text-slate-500 mr-2">Status:</span>
+                              <span className="text-slate-700">Ready for review</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">Download Draft</Button>
+                              <Button size="sm">Review Now</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg border overflow-hidden">
+                        <div className="bg-muted px-4 py-3 font-medium flex items-center">
+                          <span className="flex-1">Shadow Quest Issue #5 - Page Inks</span>
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Completed</Badge>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center mb-3">
+                            <Avatar className="h-8 w-8 mr-2">
+                              <AvatarFallback>JK</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">James King</p>
+                              <p className="text-xs text-muted-foreground">Artist</p>
+                            </div>
+                            <div className="ml-auto text-sm text-muted-foreground flex items-center">
+                              <Clock className="h-3.5 w-3.5 mr-1" />
+                              Completed 2 days ago
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center">
+                              <span className="text-slate-500 mr-2">Pages:</span>
+                              <span className="text-slate-700">22 pages delivered</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">Archive</Button>
+                              <Button size="sm">Send to Colorist</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="available" className="mt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Available Creative Talent</CardTitle>
+                    <CardDescription>Find writers, artists, colorists and other professionals for your projects</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -183,8 +295,8 @@ export default function Collaborators() {
               <TabsContent value="requests" className="mt-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Collaboration Requests</CardTitle>
-                    <CardDescription>People who want to join your projects</CardDescription>
+                    <CardTitle>Talent Applications</CardTitle>
+                    <CardDescription>Creative professionals who want to join your projects</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col gap-4 p-4 border border-slate-200 rounded-lg">

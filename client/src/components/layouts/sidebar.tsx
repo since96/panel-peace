@@ -25,10 +25,10 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: 'ri-dashboard-line' },
     { name: 'My Projects', href: '/projects', icon: 'ri-file-list-line' },
-    { name: 'Scripts', href: '/script-editor', icon: 'ri-file-text-line' },
-    { name: 'Panel Editor', href: '/panel-editor', icon: 'ri-layout-3-line' },
-    { name: 'Collaborators', href: '/collaborators', icon: 'ri-team-line' },
-    { name: 'Asset Library', href: '/asset-library', icon: 'ri-folder-line' },
+    { name: 'Talent Management', href: '/collaborators', icon: 'ri-team-line' },
+    { name: 'Assets & Deliverables', href: '/asset-library', icon: 'ri-folder-line' },
+    { name: 'Feedback & Reviews', href: '/feedback', icon: 'ri-message-2-line' },
+    { name: 'Deadlines & Schedule', href: '/deadlines', icon: 'ri-calendar-line' },
     { name: 'Publication', href: '/publication', icon: 'ri-book-2-line' },
   ];
   
