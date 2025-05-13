@@ -675,17 +675,12 @@ export class MemStorage implements IStorage {
     // Editorial work generally finishes after coloring is done
     const editorialEndDate = addDays(editorialStartDate, editorialDuration);
     
-    // Add final editorial date (one week after colors)
+    // Final editorial date (one week after colors)
     const finalEditorialDate = addDays(colorEndDate, 7);
     
-    // Production starts after everything else is done
-    const productionStartDate = new Date(Math.max(
-      colorEndDate.getTime(),
-      letterEndDate.getTime(),
-      editorialEndDate.getTime(),
-      finalEditorialDate.getTime()
-    ));
-    const productionEndDate = addDays(productionStartDate, productionDuration);
+    // Production date is now explicitly set relative to colorEndDate
+    const productionStartDate = addDays(colorEndDate, 7); // Start production same time as final editorial
+    const productionEndDate = addDays(colorEndDate, 14); // Due two weeks after colors
     
     // Comparison with project due date
     const projectDueDate = project.dueDate ? new Date(project.dueDate) : null;
@@ -787,7 +782,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 80,
-        dueDate: editorialEndDate,
+        dueDate: colorEndDate, // Due same day as colors
       },
       {
         projectId,
@@ -797,7 +792,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 85,
-        dueDate: addDays(colorEndDate, 7), // Due one week after proofs/colors
+        dueDate: addDays(colorEndDate, 7), // Due one week after colors
       },
       {
         projectId,
@@ -807,7 +802,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 90,
-        dueDate: productionEndDate,
+        dueDate: addDays(colorEndDate, 14), // Due two weeks after colors (one week after final editorial)
       }
     ];
     
