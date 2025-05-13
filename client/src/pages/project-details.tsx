@@ -133,6 +133,27 @@ export default function ProjectDetails() {
     }
   });
   
+  const deleteProjectMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("DELETE", `/api/projects/${id}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Project deleted",
+        description: "The project has been deleted successfully"
+      });
+      navigate('/projects');
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete project",
+        description: error.message || "An error occurred while deleting the project",
+        variant: "destructive"
+      });
+    }
+  });
+  
   const updateWorkflowStepMutation = useMutation({
     mutationFn: async (data: {
       stepId: number;

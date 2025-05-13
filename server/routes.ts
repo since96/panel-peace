@@ -110,59 +110,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid project ID" });
       }
 
-      // Check if project exists
-      const project = await storage.getProject(id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-      
-      // Delete all related data (workflow steps, feedback, assets, deadlines, etc.)
-      // This prevents orphaned data in the database
-      const workflowSteps = await storage.getWorkflowStepsByProject(id);
-      for (const step of workflowSteps) {
-        await storage.deleteWorkflowStep(step.id);
-      }
-      
-      const feedbackItems = await storage.getFeedbackByProject(id);
-      for (const feedback of feedbackItems) {
-        await storage.deleteFeedbackItem(feedback.id);
-      }
-      
-      const assets = await storage.getAssetsByProject(id);
-      for (const asset of assets) {
-        await storage.deleteAsset(asset.id);
-      }
-      
-      const deadlines = await storage.getDeadlinesByProject(id);
-      for (const deadline of deadlines) {
-        await storage.deleteDeadline(deadline.id);
-      }
-      
-      const collaborators = await storage.getCollaboratorsByProject(id);
-      for (const collaborator of collaborators) {
-        await storage.removeCollaborator(collaborator.userId, id);
-      }
-      
-      // Finally delete the project
-      const deleted = await storage.deleteProject(id);
-      if (!deleted) {
-        return res.status(500).json({ message: "Failed to delete project" });
-      }
-
-      res.status(200).json({ message: "Project deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting project:", error);
-      res.status(500).json({ message: "Failed to delete project" });
-    }
-  });
-
-  app.delete("/api/projects/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid project ID" });
-      }
-
       const project = await storage.getProject(id);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
