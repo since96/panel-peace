@@ -29,11 +29,9 @@ export function CurrentProjects() {
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-slate-900">Current Projects</h2>
-        <Link href="/projects">
-          <a className="text-primary text-sm font-medium flex items-center">
-            <span>View all projects</span>
-            <i className="ri-arrow-right-s-line ml-1"></i>
-          </a>
+        <Link href="/projects" className="text-primary text-sm font-medium flex items-center">
+          <span>View all projects</span>
+          <i className="ri-arrow-right-s-line ml-1"></i>
         </Link>
       </div>
       
@@ -55,12 +53,10 @@ export function CurrentProjects() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects?.map((project) => (
             <Link key={project.id} href={`/projects/${project.id}`}>
-              <a>
-                <ProjectCard
-                  project={project}
-                  collaborators={getCollaboratorsForProject(project.id)}
-                />
-              </a>
+              <ProjectCard
+                project={project}
+                collaborators={getCollaboratorsForProject(project.id)}
+              />
             </Link>
           ))}
           
@@ -71,11 +67,9 @@ export function CurrentProjects() {
               </div>
               <h3 className="text-lg font-medium text-slate-600 mb-1">No projects yet</h3>
               <p className="text-sm text-slate-500 mb-4">Create your first comic book project to get started</p>
-              <Link href="/projects/new">
-                <a className="inline-flex items-center text-sm font-medium text-primary">
-                  <i className="ri-add-line mr-1"></i>
-                  <span>Create a new project</span>
-                </a>
+              <Link href="/projects/new" className="inline-flex items-center text-sm font-medium text-primary">
+                <i className="ri-add-line mr-1"></i>
+                <span>Create a new project</span>
               </Link>
             </div>
           )}

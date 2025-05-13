@@ -37,8 +37,8 @@ export function ActionItems() {
       <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-slate-900">Pending Feedback</h2>
-          <Link href="/feedback">
-            <a className="text-primary text-sm font-medium">View all</a>
+          <Link href="/feedback" className="text-primary text-sm font-medium">
+            View all
           </Link>
         </div>
         
@@ -83,8 +83,8 @@ export function ActionItems() {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-slate-900">Upcoming Deadlines</h2>
-          <Link href="/deadlines">
-            <a className="text-primary text-sm font-medium">View calendar</a>
+          <Link href="/deadlines" className="text-primary text-sm font-medium">
+            View calendar
           </Link>
         </div>
         
@@ -116,11 +116,9 @@ export function ActionItems() {
             
             <div className="mt-4 pt-4 border-t border-slate-200">
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/deadlines/new">
-                  <a className="flex items-center justify-center">
-                    <Plus className="h-4 w-4 mr-1" />
-                    <span>Add deadline</span>
-                  </a>
+                <Link href="/deadlines/new" className="flex items-center justify-center">
+                  <Plus className="h-4 w-4 mr-1" />
+                  <span>Add deadline</span>
                 </Link>
               </Button>
             </div>
