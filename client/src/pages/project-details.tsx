@@ -9,11 +9,36 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar, MessageCircle, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
+import { 
+  Popover, 
+  PopoverContent, 
+  PopoverTrigger 
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Slider } from '@/components/ui/slider';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { format } from 'date-fns';
 import { 
   formatDate, 
   formatDateRelative, 
@@ -35,6 +60,11 @@ export default function ProjectDetails() {
   const [_, navigate] = useLocation();
   const [projectProgress, setProjectProgress] = useState<number>(0);
   const [editing, setEditing] = useState(false);
+  const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
+  const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
+  const [showEditStepDialog, setShowEditStepDialog] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
 
   const { data: project, isLoading: isProjectLoading } = useQuery<Project>({
     queryKey: [`/api/projects/${id}`],
@@ -97,6 +127,36 @@ export default function ProjectDetails() {
     onError: (error) => {
       toast({
         title: "Failed to initialize workflow",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const updateWorkflowStepMutation = useMutation({
+    mutationFn: async (data: {
+      stepId: number;
+      progress?: number;
+      status?: string;
+      dueDate?: Date | null;
+      comments?: string;
+    }) => {
+      const { stepId, ...updateData } = data;
+      const res = await apiRequest("PATCH", `/api/workflow-steps/${stepId}`, updateData);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Step updated",
+        description: "Workflow step has been updated successfully"
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
+      setShowEditStepDialog(false);
+      setEditingStep(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to update step",
         description: error.message,
         variant: "destructive"
       });
@@ -471,12 +531,25 @@ export default function ProjectDetails() {
                                   <div className="flex-none">
                                     <div className="flex flex-col items-end gap-2">
                                       <div className="flex gap-2">
-                                        <Button size="sm" variant="outline">
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => {
+                                            setEditingStep(step);
+                                            setShowEditStepDialog(true);
+                                          }}
+                                        >
                                           <Pencil className="h-4 w-4 mr-2" />
-                                          Update
+                                          Update Status
                                         </Button>
                                         
-                                        <Button size="sm">
+                                        <Button 
+                                          size="sm"
+                                          onClick={() => {
+                                            setSelectedStep(step);
+                                            setShowUploadDialog(true);
+                                          }}
+                                        >
                                           <Plus className="h-4 w-4 mr-2" />
                                           Upload Files
                                         </Button>
