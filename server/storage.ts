@@ -571,17 +571,25 @@ export class MemStorage implements IStorage {
   }
 
   async initializeProjectWorkflow(projectId: number): Promise<WorkflowStep[]> {
-    // Get the project to access its metrics
-    const project = await this.getProject(projectId);
-    if (!project) {
-      throw new Error("Project not found");
-    }
-    
-    // First, delete any existing workflow steps for this project
-    const existingSteps = await this.getWorkflowStepsByProject(projectId);
-    for (const step of existingSteps) {
-      await this.deleteWorkflowStep(step.id);
-    }
+    try {
+      console.log(`Starting workflow initialization for project ${projectId}`);
+      
+      // Get the project to access its metrics
+      const project = await this.getProject(projectId);
+      if (!project) {
+        throw new Error("Project not found");
+      }
+      
+      console.log(`Project found: ${project.title}`);
+      
+      // First, delete any existing workflow steps for this project
+      const existingSteps = await this.getWorkflowStepsByProject(projectId);
+      console.log(`Found ${existingSteps.length} existing workflow steps to delete`);
+      
+      for (const step of existingSteps) {
+        await this.deleteWorkflowStep(step.id);
+      }
+      console.log("Existing workflow steps deleted successfully");
     
     // Calculate due dates for each stage based on project metrics and user-defined deadlines
     const today = new Date();
@@ -821,7 +829,12 @@ export class MemStorage implements IStorage {
       });
     }
     
+    console.log(`Workflow initialization completed successfully with ${createdSteps.length} steps`);
     return this.getWorkflowStepsByProject(projectId);
+    } catch (error) {
+      console.error(`Error in initializeProjectWorkflow:`, error);
+      throw error;
+    }
   }
   
   // File upload operations

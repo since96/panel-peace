@@ -437,10 +437,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Project not found" });
       }
 
+      console.log("Initializing workflow for project:", JSON.stringify(project, null, 2));
+      
       const workflowSteps = await storage.initializeProjectWorkflow(projectId);
       res.status(201).json(workflowSteps);
     } catch (error) {
-      res.status(500).json({ message: "Failed to initialize workflow" });
+      console.error("Error initializing workflow:", error);
+      res.status(500).json({ message: `Failed to initialize workflow: ${error.message}` });
     }
   });
 
