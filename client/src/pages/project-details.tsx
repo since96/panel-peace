@@ -1503,10 +1503,12 @@ export default function ProjectDetails() {
             <Button 
               onClick={() => {
                 if (editingStep) {
+                  // Convert assignees from string[] | null to string[] | undefined for the API
+                  const assignees = editingStep.assignees === null ? undefined : editingStep.assignees;
                   updateWorkflowStepMutation.mutate({
                     stepId: editingStep.id,
                     assignedTo: editingStep.assignedTo,
-                    assignees: editingStep.assignees || []
+                    assignees
                   });
                   setShowAssignDialog(false);
                 }
