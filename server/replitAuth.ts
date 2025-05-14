@@ -212,58 +212,117 @@ export async function setupAuth(app: Express) {
         }
         
         const code = req.query.code as string;
+        console.log("Auth code received:", code.substring(0, 10) + "...");
         
         // Exchange the code for an access token
-        const tokenResponse = await axios.post(
-          REPLIT_OAUTH_CONFIG.tokenURL,
-          {
-            client_id: process.env.REPL_ID,
-            code,
-            redirect_uri: REPLIT_OAUTH_CONFIG.callbackURL,
-            grant_type: "authorization_code",
-          },
-          {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
+        try {
+          const tokenResponse = await axios.post(
+            REPLIT_OAUTH_CONFIG.tokenURL,
+            {
+              client_id: process.env.REPL_ID,
+              code,
+              redirect_uri: REPLIT_OAUTH_CONFIG.callbackURL,
+              grant_type: "authorization_code",
             },
-          }
-        );
-        
-        console.log("Token response status:", tokenResponse.status);
-        
-        if (tokenResponse.data.access_token) {
-          // Get user profile with the access token
-          const userProfile = await fetchUserProfile(tokenResponse.data.access_token);
-          
-          // Create a user object 
-          const user: any = {
-            profile: userProfile,
-            access_token: tokenResponse.data.access_token,
-            expires_at: Date.now() + (tokenResponse.data.expires_in || 3600) * 1000,
-          };
-          
-          // Process and store in database
-          const dbUser = await processUser(userProfile);
-          user.dbUser = dbUser;
-          
-          // Log the user in by setting up the session
-          req.login(user, (err) => {
-            if (err) {
-              console.error("Error logging in user:", err);
-              return res.redirect("/api/login");
+            {
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
             }
+          );
+          
+          console.log("Token response status:", tokenResponse.status);
+          
+          if (tokenResponse.data.access_token) {
+            console.log("Access token received, fetching user profile");
             
-            // Redirect to the app
-            return res.redirect("/");
-          });
-        } else {
-          console.error("No access token found in response");
-          return res.redirect("/api/login");
+            // Get user profile with the access token
+            const userProfile = await fetchUserProfile(tokenResponse.data.access_token);
+            console.log("User profile received:", JSON.stringify(userProfile));
+            
+            // Create a user object 
+            const user: any = {
+              profile: userProfile,
+              access_token: tokenResponse.data.access_token,
+              expires_at: Date.now() + (tokenResponse.data.expires_in || 3600) * 1000,
+            };
+            
+            // Process and store in database
+            const dbUser = await processUser(userProfile);
+            user.dbUser = dbUser;
+            console.log("User stored in database:", dbUser.id);
+            
+            // Log the user in
+            req.login(user, (err) => {
+              if (err) {
+                console.error("Error logging in user:", err);
+                return res.status(500).send(`
+                  <html>
+                    <head>
+                      <title>Authentication Error</title>
+                      <script>
+                        setTimeout(function() {
+                          window.location.href = "/";
+                        }, 2000);
+                      </script>
+                    </head>
+                    <body>
+                      <h1>Authentication Error</h1>
+                      <p>There was an error during login. Redirecting you to the home page...</p>
+                    </body>
+                  </html>
+                `);
+              }
+              
+              // Send HTML with a JavaScript redirect
+              console.log("Authentication successful, sending redirect to home page");
+              res.status(200).send(`
+                <html>
+                  <head>
+                    <title>Authentication Successful</title>
+                    <script>
+                      // Redirect immediately
+                      window.location.href = "/";
+                    </script>
+                  </head>
+                  <body>
+                    <h1>Authentication Successful</h1>
+                    <p>Redirecting to the application...</p>
+                  </body>
+                </html>
+              `);
+            });
+          } else {
+            console.error("No access token found in response");
+            return res.redirect("/api/login");
+          }
+        } catch (tokenError: any) {
+          console.error("Error exchanging code for token:", tokenError.message);
+          if (tokenError.response) {
+            console.error("Response status:", tokenError.response.status);
+            console.error("Response data:", tokenError.response.data);
+          }
+          throw tokenError;
         }
       } catch (error) {
         console.error("Error in callback:", error);
-        return res.redirect("/api/login");
+        return res.status(500).send(`
+          <html>
+            <head>
+              <title>Authentication Error</title>
+              <script>
+                setTimeout(function() {
+                  window.location.href = "/";
+                }, 3000);
+              </script>
+            </head>
+            <body>
+              <h1>Authentication Error</h1>
+              <p>There was an error during authentication. Redirecting to the home page in 3 seconds...</p>
+            </body>
+          </html>
+        `);
       }
     });
 
