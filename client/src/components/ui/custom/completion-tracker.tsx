@@ -89,6 +89,7 @@ export function CompletionTracker({
   const updateProgress = (count: number) => {
     setSelectedCount(count);
     const newProgress = isBinaryStep ? (count > 0 ? 100 : 0) : Math.round((count / totalCount) * 100);
+    // Call the parent component's update function with the new progress percentage
     onProgressUpdate(newProgress);
   };
   
