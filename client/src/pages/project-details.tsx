@@ -88,6 +88,9 @@ export default function ProjectDetails() {
   
   // File links state
   const [fileLinks, setFileLinks] = useState<any[]>([]);
+  
+  // Map to store file links by workflow step ID
+  const [fileLinksMap, setFileLinksMap] = useState<Record<number, any[]>>({});
 
 
   const { data: project, isLoading: isProjectLoading } = useQuery<Project>({
@@ -114,6 +117,32 @@ export default function ProjectDetails() {
     enabled: !!id
   });
   
+  // Fetch file links for workflow steps
+  useEffect(() => {
+    async function fetchFileLinks() {
+      if (!workflowSteps || workflowSteps.length === 0) return;
+      
+      const linksMap: Record<number, any[]> = {};
+      
+      // Fetch links for each workflow step
+      for (const step of workflowSteps) {
+        try {
+          const response = await fetch(`/api/workflow-steps/${step.id}/file-links`);
+          if (response.ok) {
+            const links = await response.json();
+            linksMap[step.id] = links;
+          }
+        } catch (error) {
+          console.error(`Error fetching links for step ${step.id}:`, error);
+        }
+      }
+      
+      setFileLinksMap(linksMap);
+    }
+    
+    fetchFileLinks();
+  }, [workflowSteps]);
+
   // Use an effect to check schedule feasibility whenever workflow steps or project changes
   useEffect(() => {
     if (workflowSteps && workflowSteps.length > 0 && project?.dueDate) {

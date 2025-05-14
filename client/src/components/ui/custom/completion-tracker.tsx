@@ -98,7 +98,7 @@ export function CompletionTracker({
     setIsAddingLink(true);
     try {
       // Send the link to the server using the provided mutation
-      const apiRequest = await fetch(`/api/workflow-steps/${stepId}/file-links`, {
+      const response = await fetch(`/api/workflow-steps/${stepId}/file-links`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,12 +110,15 @@ export function CompletionTracker({
         }),
       });
       
-      if (!apiRequest.ok) {
+      if (!response.ok) {
         throw new Error('Failed to save file link');
       }
       
+      // Get the newly created link from the response
+      const newLink = await response.json();
+      
       // Add the new link to the local state
-      setLinks([...links, fileLink]);
+      setLinks([...links, newLink]);
       setFileLink("");
       toast({
         title: "Link added",
@@ -129,6 +132,33 @@ export function CompletionTracker({
       });
     } finally {
       setIsAddingLink(false);
+    }
+  };
+  
+  // Function to handle link deletion
+  const handleDeleteLink = async (linkId: number) => {
+    try {
+      const response = await fetch(`/api/file-links/${linkId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete file link');
+      }
+      
+      // Remove the deleted link from state
+      setLinks(links.filter(link => link.id !== linkId));
+      
+      toast({
+        title: "Link removed",
+        description: "File link has been removed successfully."
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to remove link",
+        description: "There was an error removing the file link.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -189,22 +219,50 @@ export function CompletionTracker({
         </p>
       </div>
       
-      {links.length > 0 && (
+      {isLoadingLinks ? (
+        <div className="flex items-center justify-center py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+          <span className="ml-2 text-sm text-slate-500">Loading file links...</span>
+        </div>
+      ) : links.length > 0 ? (
         <div>
-          <Label>File Links</Label>
+          <div className="flex items-center justify-between">
+            <Label>File Links</Label>
+            <Badge variant="outline" className="bg-slate-100">
+              {links.length} {links.length === 1 ? 'link' : 'links'}
+            </Badge>
+          </div>
           <div className="space-y-2 mt-1">
-            {links.map((link, index) => (
-              <Card key={index}>
+            {links.map((link) => (
+              <Card key={link.id}>
                 <CardContent className="p-3 flex justify-between items-center">
                   <div className="flex items-center gap-2 text-sm">
                     <LinkIcon className="h-4 w-4 text-blue-500" />
                     <a 
-                      href={link} 
+                      href={link.url} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:underline truncate max-w-[200px]"
                     >
-                      {link}
+                      {link.url}
+                    </a>
+                  </div>
+                  <div className="flex items-center">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                      onClick={() => handleDeleteLink(link.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-8 w-8 p-0 flex items-center justify-center text-slate-400 hover:text-blue-500"
+                    >
+                      <ExternalLink className="h-4 w-4" />
                     </a>
                   </div>
                 </CardContent>
@@ -212,7 +270,7 @@ export function CompletionTracker({
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
