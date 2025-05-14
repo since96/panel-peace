@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileSidebar } from "@/hooks/use-mobile-sidebar";
 import { AppLayout } from "@/components/layouts/app-layout";
+import { ProtectedRoute } from "@/components/auth/protected-route";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
@@ -28,17 +29,59 @@ function Router() {
       closeSidebar={closeMobileSidebar}
     >
       <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/projects" component={Projects} />
-        <Route path="/projects/new" component={ProjectCreate} />
-        <Route path="/projects/:id" component={ProjectDetails} />
-        <Route path="/script-editor" component={ScriptEditor} />
-        <Route path="/panel-editor" component={PanelEditor} />
-        <Route path="/feedback/:id" component={FeedbackDetails} />
-        <Route path="/collaborators" component={Collaborators} />
-        <Route path="/asset-library" component={AssetLibrary} />
-        <Route path="/publication" component={Publication} />
-        <Route component={NotFound} />
+        <Route path="/">
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/projects">
+          <ProtectedRoute>
+            <Projects />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/projects/new">
+          <ProtectedRoute>
+            <ProjectCreate />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/projects/:id">
+          <ProtectedRoute>
+            <ProjectDetails />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/script-editor">
+          <ProtectedRoute>
+            <ScriptEditor />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/panel-editor">
+          <ProtectedRoute>
+            <PanelEditor />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/feedback/:id">
+          <ProtectedRoute>
+            <FeedbackDetails />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/collaborators">
+          <ProtectedRoute>
+            <Collaborators />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/asset-library">
+          <ProtectedRoute>
+            <AssetLibrary />
+          </ProtectedRoute>
+        </Route>
+        <Route path="/publication">
+          <ProtectedRoute>
+            <Publication />
+          </ProtectedRoute>
+        </Route>
+        <Route>
+          <NotFound />
+        </Route>
       </Switch>
     </AppLayout>
   );

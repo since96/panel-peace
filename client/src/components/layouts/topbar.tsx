@@ -2,6 +2,7 @@ import { Bell, Search, Menu, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AuthButtons } from '@/components/auth/auth-buttons';
 
 interface TopbarProps {
   toggleSidebar: () => void;
@@ -43,6 +44,9 @@ export function Topbar({ toggleSidebar }: TopbarProps) {
         <Button variant="ghost" size="icon" className="md:hidden text-slate-600 hover:text-slate-900">
           <Search className="h-5 w-5" />
         </Button>
+        <div className="border-l pl-4 ml-2 border-slate-200">
+          <AuthButtons />
+        </div>
       </div>
     </header>
   );
