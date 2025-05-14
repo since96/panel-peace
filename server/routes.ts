@@ -440,17 +440,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
       // Pre-process the date field to handle string date from client
       const requestData = { ...req.body };
       
-      // Get the user ID of the creator (from request or default to admin)
-      // In a real auth system, this would come from the session
-      const userId = req.body.userId || 1; // Default to admin user if not specified
+      // Get the authenticated user
+      const userId = req.user.claims.sub;
+      const dbUser = await storage.getUser(userId);
+      
+      if (!dbUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Only editors can create projects
+      if (!dbUser.isEditor) {
+        return res.status(403).json({ message: "Only editors can create projects" });
+      }
       
       // Store the creator's user ID
-      requestData.createdBy = userId;
+      requestData.createdBy = dbUser.id;
       
       // Handle all date fields by converting string dates to Date objects for Zod validation
       const dateFields = ['dueDate', 'plotDeadline', 'coverDeadline'];
@@ -477,8 +486,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const newProject = await storage.createProject({
         ...parsedData.data,
-        createdBy: userId // Ensure createdBy is included
+        createdBy: dbUser.id // Ensure createdBy is the authenticated user
       });
+      
+      // Automatically assign the creator as an editor of the project
+      await storage.assignEditorToProject({
+        userId: dbUser.id,
+        projectId: newProject.id,
+        assignedBy: dbUser.id,
+        assignmentRole: dbUser.editorRole || "editor",
+        assignedAt: new Date()
+      });
+      
       res.status(201).json(newProject);
     } catch (error) {
       console.error("Project creation error:", error);
