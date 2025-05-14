@@ -743,6 +743,38 @@ export default function ProjectDetails() {
                                           )}
                                         </span>
                                       </div>
+                                      
+                                      {/* Display attached files */}
+                                      {fileUploads && fileUploads.filter(file => file.workflowStepId === step.id).length > 0 && (
+                                        <div className="mt-4 border-t pt-3">
+                                          <h4 className="text-sm font-medium mb-2 flex items-center">
+                                            <FileText className="h-4 w-4 mr-1 text-slate-400" />
+                                            Attached Files
+                                          </h4>
+                                          <div className="grid grid-cols-1 gap-2">
+                                            {fileUploads
+                                              .filter(file => file.workflowStepId === step.id)
+                                              .map(file => (
+                                                <div key={file.id} className="bg-slate-50 p-2 rounded text-sm flex items-center justify-between">
+                                                  <div className="flex items-center overflow-hidden">
+                                                    <span className="font-medium truncate mr-2">{file.fileName}</span>
+                                                    <Badge variant="outline" className="ml-1">
+                                                      {file.fileType || 'File'}
+                                                    </Badge>
+                                                  </div>
+                                                  <a 
+                                                    href={file.filePath} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="text-primary hover:text-primary/80"
+                                                  >
+                                                    <ExternalLink className="h-4 w-4" />
+                                                  </a>
+                                                </div>
+                                              ))}
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                   
