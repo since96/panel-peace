@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus, Mail, MessageSquare, Calendar, Users, AlertCircle, Phone, Link, Edit, X } from "lucide-react";
+import { Search, UserPlus, Mail, Calendar, Users, AlertCircle, Phone, Link, Edit, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -434,13 +434,16 @@ export default function Collaborators() {
                                 </div>
                                 
                                 <div className="flex mt-3 gap-2">
-                                  <Button size="sm" variant="outline" className="h-8">
-                                    <Mail className="h-3.5 w-3.5 mr-1" />
-                                    Email
-                                  </Button>
-                                  <Button size="sm" variant="outline" className="h-8">
-                                    <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                                    Message
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="h-8"
+                                    asChild
+                                  >
+                                    <a href={`mailto:${user.email}`}>
+                                      <Mail className="h-3.5 w-3.5 mr-1" />
+                                      Email
+                                    </a>
                                   </Button>
                                 </div>
                               </div>
