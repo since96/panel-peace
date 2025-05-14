@@ -756,7 +756,8 @@ export default function ProjectDetails() {
                                                 variant="outline"
                                                 className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
                                                 onClick={() => {
-                                                  openTrackerDialog(step);
+                                                  setSelectedStepForTracker(step);
+                                                  setShowTrackerDialog(true);
                                                 }}
                                               >
                                                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -858,10 +859,38 @@ export default function ProjectDetails() {
               </CardContent>
             </Card>
             
-
           </div>
         </div>
       </div>
+      
+      {/* Progress Tracker Dialog */}
+      <Dialog open={showTrackerDialog} onOpenChange={setShowTrackerDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Update Progress</DialogTitle>
+            <DialogDescription>
+              {selectedStepForTracker && `Track completion for ${selectedStepForTracker.title}`}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedStepForTracker && (
+            <div>
+              <CompletionTracker 
+                stepId={selectedStepForTracker.id}
+                stepType={selectedStepForTracker.stepType}
+                currentProgress={selectedStepForTracker.progress}
+                totalCount={selectedStepForTracker.stepType.includes('pencil') || 
+                            selectedStepForTracker.stepType.includes('ink') || 
+                            selectedStepForTracker.stepType.includes('color') ? 22 : 1}
+                onProgressUpdate={handleProgressUpdate}
+              />
+              <div className="flex justify-end space-x-2 mt-4">
+                <Button onClick={() => setShowTrackerDialog(false)} variant="outline">Close</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Deadline Adjustment Dialog */}
       <Dialog open={showDeadlineDialog} onOpenChange={setShowDeadlineDialog}>
