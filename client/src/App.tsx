@@ -5,7 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileSidebar } from "@/hooks/use-mobile-sidebar";
 import { AppLayout } from "@/components/layouts/app-layout";
-import { ProtectedRoute } from "@/components/auth/protected-route";
+import { SimpleProtected } from "@/components/auth/simple-protected";
+import { SimpleNav } from "@/components/auth/simple-nav";
+import { DirectAuthProvider } from "@/hooks/useDirectAuth";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
@@ -17,7 +19,7 @@ import Collaborators from "@/pages/collaborators-new";
 import AssetLibrary from "@/pages/asset-library";
 import Publication from "@/pages/publication";
 import FeedbackDetails from "@/pages/feedback-details";
-import { LoginBasic } from "./pages/login-basic";
+import { SimpleLogin } from "./pages/simple-login";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
@@ -25,9 +27,9 @@ function Router() {
 
   return (
     <Switch>
-      {/* Login page - not protected, not using app layout */}
-      <Route path="/login">
-        <LoginBasic />
+      {/* Simple Login page - not protected, not using app layout */}
+      <Route path="/simple-login">
+        <SimpleLogin />
       </Route>
       
       {/* All other routes use the app layout and are protected */}
@@ -39,54 +41,54 @@ function Router() {
         >
           <Switch>
             <Route path="/">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <Dashboard />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/projects">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <Projects />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/projects/new">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <ProjectCreate />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/projects/:id">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <ProjectDetails />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/script-editor">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <ScriptEditor />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/panel-editor">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <PanelEditor />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/feedback/:id">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <FeedbackDetails />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/collaborators">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <Collaborators />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/asset-library">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <AssetLibrary />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route path="/publication">
-              <ProtectedRoute>
+              <SimpleProtected>
                 <Publication />
-              </ProtectedRoute>
+              </SimpleProtected>
             </Route>
             <Route>
               <NotFound />
@@ -102,10 +104,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <DirectAuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </DirectAuthProvider>
       </HelmetProvider>
     </QueryClientProvider>
   );

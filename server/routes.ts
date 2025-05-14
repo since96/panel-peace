@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./simpleAuth.new";
+import { setupDirectAuth, isAuthenticated } from "./direct-auth";
 import { 
   insertProjectSchema, 
   insertFeedbackItemSchema, 
@@ -18,7 +18,7 @@ import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
-  await setupAuth(app);
+  setupDirectAuth(app);
   
   // API routes
   app.get("/api/health", (_req, res) => {
