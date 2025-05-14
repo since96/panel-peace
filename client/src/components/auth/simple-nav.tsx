@@ -15,9 +15,9 @@ export function SimpleNav() {
     <div className="bg-white border-b border-gray-200 py-2 px-4">
       <div className="container mx-auto flex justify-between items-center">
         <div>
-          <Link href="/">
-            <a className="text-xl font-bold text-primary hover:text-primary/80">Comic Editor Pro</a>
-          </Link>
+          <a href="/" className="text-xl font-bold text-primary hover:text-primary/80">
+            Comic Editor Pro
+          </a>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -38,9 +38,9 @@ export function SimpleNav() {
               </Button>
             </>
           ) : (
-            <Link href="/simple-login">
+            <a href="/simple-login">
               <Button size="sm">Login</Button>
-            </Link>
+            </a>
           )}
         </div>
       </div>

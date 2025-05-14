@@ -8,14 +8,17 @@ interface SimpleProtectedProps {
 }
 
 export function SimpleProtected({ children }: SimpleProtectedProps) {
-  const { isAuthenticated, isLoading } = useDirectAuth();
+  const { isAuthenticated, isLoading, user } = useDirectAuth();
 
   // If not authenticated, redirect to login page
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      window.location.href = '/simple-login';
+      console.log('Not authenticated in SimpleProtected, redirecting to login');
+      window.location.replace('/simple-login');
+    } else if (!isLoading && isAuthenticated) {
+      console.log('Authenticated in SimpleProtected, user:', user);
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, user]);
 
   if (isLoading) {
     return (

@@ -38,10 +38,29 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
         const response = await axios.get('/api/direct-user');
         if (response.data.success) {
           setUser(response.data.user);
+          console.log('Authentication successful, user:', response.data.user);
+        } else {
+          // Try the auth endpoint
+          try {
+            const authResponse = await axios.get('/api/auth/user');
+            setUser(authResponse.data);
+            console.log('Authentication successful via /api/auth/user, user:', authResponse.data);
+          } catch (authErr) {
+            console.log('Not authenticated via /api/auth/user either');
+            setUser(null);
+          }
         }
       } catch (err) {
-        console.log('Not authenticated');
-        setUser(null);
+        console.log('Not authenticated via /api/direct-user');
+        // Try the auth endpoint
+        try {
+          const authResponse = await axios.get('/api/auth/user');
+          setUser(authResponse.data);
+          console.log('Authentication successful via /api/auth/user, user:', authResponse.data);
+        } catch (authErr) {
+          console.log('Not authenticated via /api/auth/user either');
+          setUser(null);
+        }
       } finally {
         setIsLoading(false);
       }
