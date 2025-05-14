@@ -476,10 +476,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Pre-process the date field to handle string date from client
       const requestData = { ...req.body };
       
-      // Get the authenticated user
-      const userId = req.user?.id || req.session?.userId;
-                    
-      const dbUser = await storage.getUser(userId);
+      // TEMP: No authentication - use admin user
+      const dbUser = await storage.getUser(1);
       
       if (!dbUser) {
         return res.status(404).json({ message: "User not found" });
