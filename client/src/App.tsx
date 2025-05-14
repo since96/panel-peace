@@ -12,7 +12,7 @@ import ProjectCreate from "@/pages/project-create";
 import ProjectDetails from "@/pages/project-details";
 import ScriptEditor from "@/pages/script-editor";
 import PanelEditor from "@/pages/panel-editor";
-import Collaborators from "@/pages/collaborators";
+import Collaborators from "@/pages/collaborators-new";
 import AssetLibrary from "@/pages/asset-library";
 import Publication from "@/pages/publication";
 import FeedbackDetails from "@/pages/feedback-details";
