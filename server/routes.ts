@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import crypto from "crypto";
+import * as crypto from "crypto";
 import { setupDirectAuth, isAuthenticated } from "./direct-auth";
 import { 
   insertProjectSchema, 
