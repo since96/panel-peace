@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Dialog, 
   DialogContent, 
@@ -71,7 +72,8 @@ export default function ProjectDetails() {
   const [_, navigate] = useLocation();
   const [projectProgress, setProjectProgress] = useState<number>(0);
   const [editing, setEditing] = useState(false);
-  const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
+  // Adding assignees array to the editingStep
+  const [editingStep, setEditingStep] = useState<(WorkflowStep & { assignees?: string[] }) | null>(null);
   const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
   const [showUpdateStatusDialog, setShowUpdateStatusDialog] = useState(false);
   const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
@@ -406,6 +408,7 @@ export default function ProjectDetails() {
       dueDate?: Date | null;
       description?: string | null;
       assignedTo?: number | null;
+      assignees?: string[];
     }) => {
       const { stepId, ...updateData } = data;
       console.log("Sending update:", updateData);
@@ -1294,76 +1297,170 @@ export default function ProjectDetails() {
                 />
               </div>
               
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="assign-user" className="text-right">
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="assign-user" className="text-right pt-2">
                   Assign To
                 </Label>
-                <div className="col-span-3">
+                <div className="col-span-3 space-y-4">
                   {users && users.length > 0 ? (
-                    <Select 
-                      defaultValue={editingStep.assignedTo?.toString() || "unassigned"}
-                      onValueChange={(value) => {
-                        setEditingStep({
-                          ...editingStep,
-                          assignedTo: value && value !== "unassigned" ? parseInt(value) : null
-                        });
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a team member" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {users
-                          .filter(user => {
-                            // Filter users based on workflow step type
-                            const stepType = editingStep?.stepType?.toLowerCase();
-                            
-                            // Editors can be assigned to any step
-                            if (user.isEditor) return true;
-                            
-                            // For roles array support
-                            const userRoles = user.roles || [user.role];
-                            
-                            // Match step type with appropriate roles
-                            if (stepType === 'final_assembled_reader_proof' || stepType === 'final_production') {
-                              // Only editors can be assigned to these steps
-                              return user.isEditor;
-                            } else if (stepType === 'editorial_pages' || stepType === 'final_editorial_pages') {
-                              // Only production/design or editors can work on these steps
-                              return userRoles.some(role => role === 'production' || role === 'design') || user.isEditor;
-                            } else if (stepType === 'plot' || stepType === 'script') {
-                              return userRoles.some(role => role === 'writer');
-                            } else if (stepType === 'pencils' || stepType === 'inks' || stepType === 'roughs') {
-                              return userRoles.some(role => role === 'artist' || role === 'cover_artist' || role === 'character_designer');
-                            } else if (stepType === 'colors') {
-                              return userRoles.some(role => role === 'colorist');
-                            } else if (stepType === 'letters') {
-                              return userRoles.some(role => role === 'letterer');
-                            } else if (stepType === 'covers') {
-                              return userRoles.some(role => role === 'cover_artist' || role === 'artist');
-                            }
-                            
-                            // By default, show all users for other step types
-                            return true;
-                          })
-                          .map(user => (
-                            <SelectItem key={user.id} value={user.id.toString()}>
-                              {user.fullName || user.username || `User ${user.id}`}
-                              {user.roles && user.roles.length > 0 ? (
-                                <span className="ml-1 text-xs text-slate-400">
-                                  ({user.roles.map(r => r.charAt(0).toUpperCase() + r.slice(1).replace(/_/g, ' ')).join(', ')})
-                                </span>
-                              ) : user.role ? (
-                                <span className="ml-1 text-xs text-slate-400">
-                                  ({user.role.charAt(0).toUpperCase() + user.role.slice(1).replace(/_/g, ' ')})
-                                </span>
-                              ) : null}
-                            </SelectItem>
-                          ))
-                        }
-                      </SelectContent>
-                    </Select>
+                    <>
+                      <p className="text-sm text-slate-500 mb-2">
+                        Select one or more team members to work on this step
+                      </p>
+                      
+                      {/* Legacy single assignee dropdown (keeping for compatibility) */}
+                      <Select 
+                        defaultValue={editingStep.assignedTo?.toString() || "unassigned"}
+                        onValueChange={(value) => {
+                          setEditingStep({
+                            ...editingStep,
+                            assignedTo: value && value !== "unassigned" ? parseInt(value) : null
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select primary assignee" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unassigned">Unassigned</SelectItem>
+                          {users
+                            .filter(user => {
+                              // Filter users based on workflow step type
+                              const stepType = editingStep?.stepType?.toLowerCase();
+                              
+                              // Editors can be assigned to any step
+                              if (user.isEditor) return true;
+                              
+                              // For roles array support
+                              const userRoles = user.roles || [user.role];
+                              
+                              // Match step type with appropriate roles
+                              if (stepType === 'final_assembled_reader_proof' || stepType === 'final_production') {
+                                // Only editors can be assigned to these steps
+                                return user.isEditor;
+                              } else if (stepType === 'editorial_pages' || stepType === 'final_editorial_pages') {
+                                // Only production/design or editors can work on these steps
+                                return userRoles.some(role => role === 'production' || role === 'design') || user.isEditor;
+                              } else if (stepType === 'plot' || stepType === 'script') {
+                                return userRoles.some(role => role === 'writer');
+                              } else if (stepType === 'pencils' || stepType === 'inks' || stepType === 'roughs') {
+                                return userRoles.some(role => role === 'artist' || role === 'cover_artist' || role === 'character_designer');
+                              } else if (stepType === 'colors') {
+                                return userRoles.some(role => role === 'colorist');
+                              } else if (stepType === 'letters') {
+                                return userRoles.some(role => role === 'letterer');
+                              } else if (stepType === 'covers') {
+                                return userRoles.some(role => role === 'cover_artist' || role === 'artist');
+                              }
+                              
+                              // By default, show all users for other step types
+                              return true;
+                            })
+                            .map(user => (
+                              <SelectItem key={user.id} value={user.id.toString()}>
+                                {user.fullName || user.username || `User ${user.id}`}
+                                {user.roles && user.roles.length > 0 ? (
+                                  <span className="ml-1 text-xs text-slate-400">
+                                    ({user.roles.map(r => r.charAt(0).toUpperCase() + r.slice(1).replace(/_/g, ' ')).join(', ')})
+                                  </span>
+                                ) : user.role ? (
+                                  <span className="ml-1 text-xs text-slate-400">
+                                    ({user.role.charAt(0).toUpperCase() + user.role.slice(1).replace(/_/g, ' ')})
+                                  </span>
+                                ) : null}
+                              </SelectItem>
+                            ))
+                          }
+                        </SelectContent>
+                      </Select>
+                      
+                      {/* Multiple assignees with checkboxes */}
+                      <div className="border rounded-md p-4 mt-4">
+                        <h4 className="text-sm font-medium mb-2">Additional Collaborators</h4>
+                        <div className="space-y-3 max-h-[250px] overflow-y-auto">
+                          {users
+                            .filter(user => {
+                              // Filter users based on workflow step type
+                              const stepType = editingStep?.stepType?.toLowerCase();
+                              
+                              // Editors can be assigned to any step
+                              if (user.isEditor) return true;
+                              
+                              // For roles array support
+                              const userRoles = user.roles || [user.role];
+                              
+                              // Match step type with appropriate roles
+                              if (stepType === 'final_assembled_reader_proof' || stepType === 'final_production') {
+                                // Only editors can be assigned to these steps
+                                return user.isEditor;
+                              } else if (stepType === 'editorial_pages' || stepType === 'final_editorial_pages') {
+                                // Only production/design or editors can work on these steps
+                                return userRoles.some(role => role === 'production' || role === 'design') || user.isEditor;
+                              } else if (stepType === 'plot' || stepType === 'script') {
+                                return userRoles.some(role => role === 'writer');
+                              } else if (stepType === 'pencils' || stepType === 'inks' || stepType === 'roughs') {
+                                return userRoles.some(role => role === 'artist' || role === 'cover_artist' || role === 'character_designer');
+                              } else if (stepType === 'colors') {
+                                return userRoles.some(role => role === 'colorist');
+                              } else if (stepType === 'letters') {
+                                return userRoles.some(role => role === 'letterer');
+                              } else if (stepType === 'covers') {
+                                return userRoles.some(role => role === 'cover_artist' || role === 'artist');
+                              }
+                              
+                              // By default, show all users for other step types
+                              return true;
+                            })
+                            .map(user => {
+                              const isSelected = editingStep.assignees?.includes(user.id.toString()) || false;
+                              
+                              return (
+                                <div key={user.id} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`user-${user.id}`} 
+                                    checked={isSelected}
+                                    onCheckedChange={(checked) => {
+                                      const currentAssignees = editingStep.assignees || [];
+                                      let newAssignees: string[];
+                                      
+                                      if (checked) {
+                                        // Add user to assignees
+                                        newAssignees = [...currentAssignees, user.id.toString()];
+                                      } else {
+                                        // Remove user from assignees
+                                        newAssignees = currentAssignees.filter(id => id !== user.id.toString());
+                                      }
+                                      
+                                      setEditingStep({
+                                        ...editingStep,
+                                        assignees: newAssignees
+                                      });
+                                    }}
+                                  />
+                                  <Label 
+                                    htmlFor={`user-${user.id}`}
+                                    className="text-sm cursor-pointer flex-1"
+                                  >
+                                    <span className="font-medium">
+                                      {user.fullName || user.username || `User ${user.id}`}
+                                    </span>
+                                    {user.roles && user.roles.length > 0 ? (
+                                      <span className="ml-1 text-xs text-slate-400">
+                                        ({user.roles.map(r => r.charAt(0).toUpperCase() + r.slice(1).replace(/_/g, ' ')).join(', ')})
+                                      </span>
+                                    ) : user.role ? (
+                                      <span className="ml-1 text-xs text-slate-400">
+                                        ({user.role.charAt(0).toUpperCase() + user.role.slice(1).replace(/_/g, ' ')})
+                                      </span>
+                                    ) : null}
+                                  </Label>
+                                </div>
+                              );
+                            })
+                          }
+                        </div>
+                      </div>
+                    </>
                   ) : (
                     <p className="text-sm text-slate-500">No users available</p>
                   )}
@@ -1387,7 +1484,8 @@ export default function ProjectDetails() {
                 if (editingStep) {
                   updateWorkflowStepMutation.mutate({
                     stepId: editingStep.id,
-                    assignedTo: editingStep.assignedTo
+                    assignedTo: editingStep.assignedTo,
+                    assignees: editingStep.assignees || []
                   });
                   setShowAssignDialog(false);
                 }
