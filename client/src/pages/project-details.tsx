@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link, CheckCircle, UserPlus, Check } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link as LinkIcon, CheckCircle, UserPlus, Check } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { CompletionTracker } from '@/components/ui/custom/completion-tracker';
@@ -78,9 +78,12 @@ export default function ProjectDetails() {
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showTrackerDialog, setShowTrackerDialog] = useState(false);
+  const [showFileLinkDialog, setShowFileLinkDialog] = useState(false);
   const [selectedStepForTalent, setSelectedStepForTalent] = useState<WorkflowStep | null>(null);
   const [selectedStepForTracker, setSelectedStepForTracker] = useState<WorkflowStep | null>(null);
   const [commentText, setCommentText] = useState('');
+  const [newFileLink, setNewFileLink] = useState('');
+  const [selectedWorkflowStepForLink, setSelectedWorkflowStepForLink] = useState<number | null>(null);
   
   // The comments we'll fetch from the API
   const [comments, setComments] = useState<Comment[]>([]);
@@ -601,6 +604,113 @@ export default function ProjectDetails() {
                           )}
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Project File Links section */}
+                <div className="mt-6">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-lg font-medium">File References</CardTitle>
+                          <CardDescription>
+                            Add links to external files for reference
+                          </CardDescription>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="gap-1"
+                          onClick={() => {
+                            // Show dialog to add new file link for project-wide reference
+                            setShowFileLinkDialog(true);
+                          }}
+                        >
+                          <LinkIcon className="h-4 w-4" />
+                          Add Link
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {Object.values(fileLinksMap).flat().length > 0 ? (
+                        <div className="space-y-2">
+                          {Object.entries(fileLinksMap).map(([stepId, links]) => 
+                            links.map(link => (
+                              <div key={link.id} className="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-md">
+                                <div className="flex items-center gap-2">
+                                  <LinkIcon className="h-4 w-4 text-blue-500" />
+                                  <div>
+                                    <a 
+                                      href={link.url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500 hover:underline text-sm font-medium"
+                                    >
+                                      {link.url}
+                                    </a>
+                                    <div className="text-xs text-slate-500">
+                                      {/* Find the workflow step name for this link */}
+                                      {workflowSteps?.find(step => step.id === parseInt(stepId))?.title || 'Project File'}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex gap-1">
+                                  <a
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1 text-slate-500 hover:text-blue-600 rounded-md hover:bg-slate-100"
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                  </a>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="p-1 h-auto text-slate-500 hover:text-red-600 rounded-md hover:bg-slate-100"
+                                    onClick={() => {
+                                      // Delete file link
+                                      fetch(`/api/file-links/${link.id}`, {
+                                        method: 'DELETE'
+                                      }).then(response => {
+                                        if (response.ok) {
+                                          // Remove from UI
+                                          const updatedMap = {...fileLinksMap};
+                                          updatedMap[parseInt(stepId)] = updatedMap[parseInt(stepId)].filter(l => l.id !== link.id);
+                                          setFileLinksMap(updatedMap);
+                                          toast({
+                                            title: "Link removed",
+                                            description: "File link has been removed successfully"
+                                          });
+                                        }
+                                      }).catch(error => {
+                                        toast({
+                                          title: "Failed to remove link",
+                                          description: error.message,
+                                          variant: "destructive"
+                                        });
+                                      });
+                                    }}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-slate-500">
+                          <div className="flex justify-center mb-3">
+                            <LinkIcon className="h-10 w-10 text-slate-300" />
+                          </div>
+                          <p className="mb-2">No file links added yet</p>
+                          <p className="text-sm">
+                            Add links to external files such as Dropbox, Google Drive, or other cloud storage
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -1328,6 +1438,125 @@ export default function ProjectDetails() {
               ))}
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Link Dialog */}
+      <Dialog open={showFileLinkDialog} onOpenChange={setShowFileLinkDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add File Reference</DialogTitle>
+            <DialogDescription>
+              Add a link to an external file for reference
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="file-link" className="text-right">
+                File URL
+              </Label>
+              <Input
+                id="file-link"
+                placeholder="https://dropbox.com/your-file or similar"
+                value={newFileLink}
+                onChange={(e) => setNewFileLink(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="workflow-step" className="text-right">
+                Related Step
+              </Label>
+              <Select
+                value={selectedWorkflowStepForLink?.toString() || ""}
+                onValueChange={(value) => setSelectedWorkflowStepForLink(parseInt(value))}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a workflow step (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {workflowSteps?.map((step) => (
+                    <SelectItem key={step.id} value={step.id.toString()}>
+                      {step.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowFileLinkDialog(false);
+                setNewFileLink('');
+                setSelectedWorkflowStepForLink(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (!newFileLink.trim()) return;
+                
+                // Choose the endpoint based on whether we have a selected step
+                const endpoint = selectedWorkflowStepForLink
+                  ? `/api/workflow-steps/${selectedWorkflowStepForLink}/file-links`
+                  : `/api/projects/${id}/file-links`;
+                
+                // Add the new file link
+                fetch(endpoint, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    url: newFileLink,
+                    description: null,
+                    addedBy: 1 // Default admin user
+                  }),
+                }).then(async (response) => {
+                  if (!response.ok) {
+                    throw new Error('Failed to add file link');
+                  }
+                  
+                  const newLink = await response.json();
+                  
+                  // Update the file links map
+                  const stepId = selectedWorkflowStepForLink || 0; // Use 0 for project-wide links
+                  setFileLinksMap(prev => {
+                    const updated = { ...prev };
+                    if (!updated[stepId]) {
+                      updated[stepId] = [];
+                    }
+                    updated[stepId] = [...updated[stepId], newLink];
+                    return updated;
+                  });
+                  
+                  setShowFileLinkDialog(false);
+                  setNewFileLink('');
+                  setSelectedWorkflowStepForLink(null);
+                  
+                  toast({
+                    title: "Link added",
+                    description: "File link has been added successfully"
+                  });
+                }).catch(error => {
+                  toast({
+                    title: "Failed to add link",
+                    description: error.message,
+                    variant: "destructive"
+                  });
+                });
+              }}
+              disabled={!newFileLink.trim()}
+            >
+              Add Link
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
