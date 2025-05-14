@@ -77,8 +77,16 @@ export function setupAuth(app: express.Express) {
       // Set user in session
       req.session.userId = user.id;
       
-      console.log(`User ${username} logged in successfully`);
-      return res.json({ success: true, user });
+      // Save the session explicitly to ensure it's written before responding
+      req.session.save(err => {
+        if (err) {
+          console.error("Error saving session:", err);
+          return res.status(500).json({ message: "Session error" });
+        }
+        
+        console.log(`User ${username} logged in successfully with ID ${user.id}`);
+        return res.json({ success: true, user });
+      });
     } catch (error) {
       console.error("Login error:", error);
       return res.status(500).json({ message: "Internal server error" });
@@ -99,18 +107,24 @@ export function setupAuth(app: express.Express) {
   
   // Get current user
   app.get("/api/simple-user", async (req, res) => {
-    if (!req.session.userId) {
+    if (!req.session || !req.session.userId) {
+      console.log("No session or userId found in session");
       return res.status(401).json({ message: "Not authenticated" });
     }
     
     try {
+      console.log(`Getting user for session ID: ${req.session.userId}`);
       const user = await storage.getUser(req.session.userId);
       
       if (!user) {
-        req.session.destroy(() => {});
+        console.log(`No user found for ID: ${req.session.userId}, destroying session`);
+        req.session.destroy((err) => {
+          if (err) console.error("Error destroying session:", err);
+        });
         return res.status(401).json({ message: "User not found" });
       }
       
+      console.log(`User found: ${user.username || user.fullName}`);
       return res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);

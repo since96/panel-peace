@@ -15,11 +15,12 @@ export function useAuth() {
     refetch 
   } = useQuery<User>({
     queryKey: ["/api/simple-user"],
-    retry: 1,
-    retryDelay: 1000,
+    retry: 0, // Don't retry to avoid loops
     staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+    refetchOnWindowFocus: false, // Disable auto refetching to prevent loops
+    refetchOnReconnect: false,
+    // Gracefully handle unauthorized errors
+    gcTime: 0,
   });
 
   // Login mutation

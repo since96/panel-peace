@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,23 +7,30 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoaderCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { login, isLoading, isAuthenticated, user } = useAuth();
+  
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setLocation("/");
+    }
+  }, [isAuthenticated, user, setLocation]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
     
     try {
-      const response = await axios.post("/api/simple-login", { username, password });
+      const response = await login(username, password);
       
       if (response.data.success) {
         toast({
@@ -32,14 +38,11 @@ export function LoginPage() {
           description: `Welcome back, ${response.data.user.fullName || username}!`,
         });
         
-        // Redirect to dashboard
-        setLocation("/");
+        // No need to redirect - useEffect will handle it when isAuthenticated becomes true
       }
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || "Failed to login. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
   
@@ -89,9 +92,9 @@ export function LoginPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? (
+              {isLoading ? (
                 <>
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                   Logging in...
