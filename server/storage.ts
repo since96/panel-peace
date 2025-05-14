@@ -9,7 +9,8 @@ import {
   comments, Comment, InsertComment,
   workflowSteps, WorkflowStep, InsertWorkflowStep,
   fileUploads, FileUpload, InsertFileUpload,
-  fileLinks, FileLink, InsertFileLink
+  fileLinks, FileLink, InsertFileLink,
+  projectEditors, ProjectEditor, InsertProjectEditor
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -24,9 +25,17 @@ export interface IStorage {
   getProject(id: number): Promise<Project | undefined>;
   getProjects(): Promise<Project[]>;
   getProjectsByUser(userId: number): Promise<Project[]>;
+  getProjectsByEditor(editorId: number): Promise<Project[]>; // Projects where user is an editor
   createProject(project: InsertProject): Promise<Project>;
   updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
+  
+  // Project editor operations
+  getProjectEditors(projectId: number): Promise<ProjectEditor[]>;
+  getEditableProjects(userId: number): Promise<Project[]>; // All projects user can edit
+  assignEditorToProject(assignment: InsertProjectEditor): Promise<ProjectEditor>;
+  removeEditorFromProject(userId: number, projectId: number): Promise<boolean>;
+  canEditProject(userId: number, projectId: number): Promise<boolean>;
   
   // Collaborator operations
   getCollaboratorsByProject(projectId: number): Promise<Collaborator[]>;
@@ -95,6 +104,7 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private projects: Map<number, Project>;
   private collaborators: Map<number, Collaborator>;
+  private projectEditors: Map<number, ProjectEditor>;
   private feedbackItems: Map<number, FeedbackItem>;
   private assets: Map<number, Asset>;
   private deadlines: Map<number, Deadline>;

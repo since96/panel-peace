@@ -96,8 +96,23 @@ export const collaborators = pgTable("collaborators", {
   endDate: timestamp("end_date"), // When their work is expected to be complete
 });
 
+// Project Editors table (linking editors to projects)
+export const projectEditors = pgTable("project_editors", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(), // Editor user ID
+  projectId: integer("project_id").notNull(),
+  assignedBy: integer("assigned_by"), // ID of the editor who made the assignment
+  assignmentRole: text("assignment_role").default("editor"), // Role within this specific project
+  assignedAt: timestamp("assigned_at").defaultNow(),
+});
+
 export const insertCollaboratorSchema = createInsertSchema(collaborators).omit({
   id: true,
+});
+
+export const insertProjectEditorSchema = createInsertSchema(projectEditors).omit({
+  id: true,
+  assignedAt: true,
 });
 
 // Feedback items table
@@ -300,3 +315,6 @@ export const insertFileLinkSchema = createInsertSchema(fileLinks).omit({
 
 export type FileLink = typeof fileLinks.$inferSelect;
 export type InsertFileLink = z.infer<typeof insertFileLinkSchema>;
+
+export type ProjectEditor = typeof projectEditors.$inferSelect;
+export type InsertProjectEditor = z.infer<typeof insertProjectEditorSchema>;
