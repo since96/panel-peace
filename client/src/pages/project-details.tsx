@@ -835,7 +835,8 @@ export default function ProjectDetails() {
                                       <div className="flex items-center text-sm">
                                         <Users className="h-3.5 w-3.5 mr-1 text-slate-400" />
                                         <span>
-                                          {users.find(u => u.id === step.assignedTo)?.username || 'Unknown'}
+                                          {users.find(u => u.id === step.assignedTo)?.fullName || 
+                                           users.find(u => u.id === step.assignedTo)?.username || 'Unknown'}
                                         </span>
                                       </div>
                                     )}
@@ -1314,7 +1315,8 @@ export default function ProjectDetails() {
                         <SelectItem value="unassigned">Unassigned</SelectItem>
                         {users.map(user => (
                           <SelectItem key={user.id} value={user.id.toString()}>
-                            {user.username || `User ${user.id}`}
+                            {user.fullName || user.username || `User ${user.id}`}
+                            {user.role && <span className="ml-1 text-xs text-slate-400">({user.role})</span>}
                           </SelectItem>
                         ))}
                       </SelectContent>
