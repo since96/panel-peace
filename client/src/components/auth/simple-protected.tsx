@@ -10,8 +10,18 @@ interface SimpleProtectedProps {
 export function SimpleProtected({ children }: SimpleProtectedProps) {
   const { isAuthenticated, isLoading, user } = useDirectAuth();
 
-  // If not authenticated, redirect to login page
+  // First check localStorage directly to avoid flashing login screen
   useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    const isAuthFromStorage = localStorage.getItem('isAuthenticated') === 'true';
+    
+    // If already logged in according to localStorage, we don't need to redirect
+    if (isAuthFromStorage && savedUser) {
+      console.log('User authenticated from localStorage in SimpleProtected');
+      return;
+    }
+
+    // If not authenticated from API check, redirect to login page
     if (!isLoading && !isAuthenticated) {
       console.log('Not authenticated in SimpleProtected, redirecting to login');
       window.location.replace('/simple-login');

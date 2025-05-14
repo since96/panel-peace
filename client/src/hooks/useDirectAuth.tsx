@@ -30,20 +30,47 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Check if user is logged in
+  // Check if user is logged in - first try localStorage, then API
   useEffect(() => {
     const checkAuth = async () => {
+      setIsLoading(true);
+      
+      // First check localStorage
+      const savedUser = localStorage.getItem('user');
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+      
+      if (savedUser && isAuthenticated === 'true') {
+        try {
+          const parsedUser = JSON.parse(savedUser);
+          console.log('User found in localStorage:', parsedUser);
+          setUser(parsedUser);
+          setIsLoading(false);
+          return; // Exit early, we're already authenticated
+        } catch (err) {
+          console.error('Error parsing user from localStorage:', err);
+          // Clear invalid data
+          localStorage.removeItem('user');
+          localStorage.removeItem('isAuthenticated');
+        }
+      }
+      
+      // If localStorage failed, try API endpoints
       try {
-        setIsLoading(true);
         const response = await axios.get('/api/direct-user');
         if (response.data.success) {
           setUser(response.data.user);
-          console.log('Authentication successful, user:', response.data.user);
+          // Store in localStorage
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          console.log('Authentication successful via API, user:', response.data.user);
         } else {
           // Try the auth endpoint
           try {
             const authResponse = await axios.get('/api/auth/user');
             setUser(authResponse.data);
+            // Store in localStorage
+            localStorage.setItem('user', JSON.stringify(authResponse.data));
+            localStorage.setItem('isAuthenticated', 'true');
             console.log('Authentication successful via /api/auth/user, user:', authResponse.data);
           } catch (authErr) {
             console.log('Not authenticated via /api/auth/user either');
@@ -56,10 +83,16 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const authResponse = await axios.get('/api/auth/user');
           setUser(authResponse.data);
+          // Store in localStorage
+          localStorage.setItem('user', JSON.stringify(authResponse.data));
+          localStorage.setItem('isAuthenticated', 'true');
           console.log('Authentication successful via /api/auth/user, user:', authResponse.data);
         } catch (authErr) {
           console.log('Not authenticated via /api/auth/user either');
           setUser(null);
+          // Clear localStorage
+          localStorage.removeItem('user');
+          localStorage.removeItem('isAuthenticated');
         }
       } finally {
         setIsLoading(false);
@@ -72,11 +105,21 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
   // Login function
   const login = async (username: string, password: string) => {
     try {
+      console.log('Attempting login with username:', username, 'password length:', password.length);
       setIsLoading(true);
       const response = await axios.post('/api/direct-login', { username, password });
+      console.log('Login response:', response.data);
+      
       setUser(response.data.user);
+      
+      // Store authentication in localStorage for persistence
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem('isAuthenticated', 'true');
+      console.log('User stored in localStorage');
+      
       return response.data;
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err);
       throw err;
     } finally {
@@ -90,7 +133,13 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       await axios.post('/api/direct-logout');
       setUser(null);
+      
+      // Clear localStorage on logout
+      localStorage.removeItem('user');
+      localStorage.removeItem('isAuthenticated');
+      console.log('User removed from localStorage');
     } catch (err: any) {
+      console.error('Logout error:', err);
       setError(err);
     } finally {
       setIsLoading(false);
