@@ -5,17 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatDateRelative } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-
-interface Comment {
-  id: number;
-  content: string;
-  userId: number;
-  createdAt: Date | string;
-  user?: {
-    name: string;
-    avatarUrl?: string;
-  };
-}
+import { Comment } from "@shared/schema";
 
 interface CommentThreadProps {
   comments: Comment[];

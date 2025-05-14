@@ -684,20 +684,20 @@ export default function ProjectDetails() {
                                               .filter(file => file.workflowStepId === step.id)
                                               .map(file => (
                                                 <div key={file.id} className="bg-slate-50 p-2 rounded text-sm flex items-center justify-between">
-                                                  <div className="flex items-center overflow-hidden">
-                                                    <span className="font-medium truncate mr-2">{file.fileName}</span>
-                                                    <Badge variant="outline" className="ml-1">
+                                                  <div className="flex items-center overflow-hidden flex-1">
+                                                    <a 
+                                                      href={file.filePath} 
+                                                      target="_blank" 
+                                                      rel="noopener noreferrer"
+                                                      className="font-medium truncate mr-2 text-primary hover:text-primary/80 hover:underline flex items-center flex-1"
+                                                    >
+                                                      <FileText className="h-4 w-4 mr-2 flex-shrink-0" />
+                                                      <span className="truncate">{file.fileName}</span>
+                                                    </a>
+                                                    <Badge variant="outline" className="ml-1 flex-shrink-0">
                                                       {file.fileType || 'File'}
                                                     </Badge>
                                                   </div>
-                                                  <a 
-                                                    href={file.filePath} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
-                                                    className="text-primary hover:text-primary/80"
-                                                  >
-                                                    <FileText className="h-4 w-4" />
-                                                  </a>
                                                 </div>
                                               ))}
                                           </div>
