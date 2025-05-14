@@ -250,14 +250,14 @@ export default function Collaborators() {
             </div>
             
             <Select
-              value={selectedRoleFilter || ""}
-              onValueChange={(value) => setSelectedRoleFilter(value === "" ? null : value)}
+              value={selectedRoleFilter || "all_roles"}
+              onValueChange={(value) => setSelectedRoleFilter(value === "all_roles" ? null : value)}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Roles</SelectItem>
+                <SelectItem value="all_roles">All Roles</SelectItem>
                 {talentRoles.map(role => (
                   <SelectItem key={role.id} value={role.id}>{role.label}</SelectItem>
                 ))}
