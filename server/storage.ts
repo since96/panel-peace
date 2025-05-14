@@ -161,8 +161,8 @@ export class MemStorage implements IStorage {
     this.createUser({
       username: "admin",
       password: "admin123",
-      fullName: "Comic Editor",
-      email: "editor@comicsmanagement.com",
+      fullName: "Admin",
+      email: "admin@comicsmanagement.com",
       isEditor: true,
       editorRole: "editor_in_chief",
       role: "Editor",
