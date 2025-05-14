@@ -1,4 +1,3 @@
-import { StatsOverview } from '@/components/dashboard/stats-overview';
 import { CurrentProjects } from '@/components/dashboard/current-projects';
 import { ActionItems } from '@/components/dashboard/action-items';
 import { CreativeTools } from '@/components/dashboard/creative-tools';
@@ -34,9 +33,6 @@ export default function Dashboard() {
             </Button>
           </div>
         </div>
-        
-        {/* Stats Overview */}
-        <StatsOverview />
         
         {/* Current Projects */}
         <CurrentProjects />

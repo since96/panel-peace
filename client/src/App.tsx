@@ -6,8 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileSidebar } from "@/hooks/use-mobile-sidebar";
 import { AppLayout } from "@/components/layouts/app-layout";
 import NotFound from "@/pages/not-found";
-// Using our completely new dashboard implementation with no labels
-import Dashboard from "@/pages/new-dashboard";
+import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
 import ProjectCreate from "@/pages/project-create";
 import ProjectDetails from "@/pages/project-details";
