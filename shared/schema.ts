@@ -262,3 +262,23 @@ export const insertFileUploadSchema = createInsertSchema(fileUploads).omit({
 
 export type FileUpload = typeof fileUploads.$inferSelect;
 export type InsertFileUpload = z.infer<typeof insertFileUploadSchema>;
+
+// File links for simplifying external file sharing
+export const fileLinks = pgTable("file_links", {
+  id: serial("id").primaryKey(),
+  workflowStepId: integer("workflow_step_id").notNull(),
+  url: text("url").notNull(),
+  description: text("description"),
+  addedBy: integer("added_by").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertFileLinkSchema = createInsertSchema(fileLinks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type FileLink = typeof fileLinks.$inferSelect;
+export type InsertFileLink = z.infer<typeof insertFileLinkSchema>;

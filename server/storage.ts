@@ -8,7 +8,8 @@ import {
   panelLayouts, PanelLayout, InsertPanelLayout,
   comments, Comment, InsertComment,
   workflowSteps, WorkflowStep, InsertWorkflowStep,
-  fileUploads, FileUpload, InsertFileUpload
+  fileUploads, FileUpload, InsertFileUpload,
+  fileLinks, FileLink, InsertFileLink
 } from "@shared/schema";
 
 // Interface for storage operations
@@ -82,6 +83,11 @@ export interface IStorage {
   createFileUpload(upload: InsertFileUpload): Promise<FileUpload>;
   updateFileUpload(id: number, upload: Partial<InsertFileUpload>): Promise<FileUpload | undefined>;
   deleteFileUpload(id: number): Promise<boolean>;
+  
+  // File link operations (simpler external file sharing)
+  getFileLinksByWorkflowStep(workflowStepId: number): Promise<FileLink[]>;
+  createFileLink(link: InsertFileLink): Promise<FileLink>;
+  deleteFileLink(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -107,6 +113,9 @@ export class MemStorage implements IStorage {
 
   private fileUploads: Map<number, FileUpload>;
   private fileUploadIdCounter: number;
+  
+  private fileLinks: Map<number, FileLink>;
+  private fileLinkIdCounter: number;
 
   constructor() {
     this.users = new Map();
