@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Project, User } from "@shared/schema";
+import { Project, User, WorkflowStep } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,17 +8,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus, Mail, MessageSquare, Clock } from "lucide-react";
+import { Search, UserPlus, Mail, MessageSquare, Clock, Users, AlertCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
-// Sample collaborator data (in a real app, this would come from the API)
-const sampleCollaborators = [
-  { id: 1, name: "Alex Rodriguez", role: "Senior Editor", avatarUrl: "", projectCount: 8 },
-  { id: 2, name: "Sarah Lee", role: "Writer", avatarUrl: "", projectCount: 5 },
-  { id: 3, name: "James King", role: "Artist", avatarUrl: "", projectCount: 4 },
-  { id: 4, name: "Mina Tan", role: "Character Designer", avatarUrl: "", projectCount: 3 },
-  { id: 5, name: "David Chen", role: "Colorist", avatarUrl: "", projectCount: 6 },
-  { id: 6, name: "Julia Smith", role: "Letterer", avatarUrl: "", projectCount: 7 }
+// Define talent roles for the dropdown
+const talentRoles = [
+  { id: "artist", label: "Artist" },
+  { id: "writer", label: "Writer" },
+  { id: "colorist", label: "Colorist" },
+  { id: "letterer", label: "Letterer" },
+  { id: "editor", label: "Editor" },
+  { id: "character_designer", label: "Character Designer" },
+  { id: "cover_artist", label: "Cover Artist" }
 ];
 
 export default function Collaborators() {
@@ -26,16 +27,49 @@ export default function Collaborators() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [selectedRole, setSelectedRole] = useState("artist");
   
+  // Fetch users from the API
+  const { data: users, isLoading: isUsersLoading } = useQuery<User[]>({
+    queryKey: ['/api/users'],
+  });
+  
+  // Fetch projects
   const { data: projects } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
   });
   
-  // Filter collaborators based on search query
-  const filteredCollaborators = sampleCollaborators.filter(
-    collaborator => 
-      collaborator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      collaborator.role.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Fetch all workflow steps to calculate assignments
+  const { data: allWorkflowSteps, isLoading: isStepsLoading } = useQuery<WorkflowStep[]>({
+    queryKey: ['/api/workflow-steps'],
+  });
+  
+  // Calculate project assignments for each user
+  const userAssignments = useMemo(() => {
+    if (!allWorkflowSteps || !users) return new Map();
+    
+    const assignments = new Map();
+    
+    allWorkflowSteps.forEach(step => {
+      if (step.assignedTo) {
+        if (!assignments.has(step.assignedTo)) {
+          assignments.set(step.assignedTo, []);
+        }
+        assignments.get(step.assignedTo).push(step);
+      }
+    });
+    
+    return assignments;
+  }, [allWorkflowSteps, users]);
+  
+  // Filter users based on search query
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    
+    return users.filter(user => 
+      (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.role || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [users, searchQuery]);
   
   const handleInvite = () => {
     if (!inviteEmail) return;
@@ -83,50 +117,73 @@ export default function Collaborators() {
               
               <TabsContent value="team" className="mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredCollaborators.map((collaborator) => (
-                    <Card key={collaborator.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start">
-                          <Avatar className="h-12 w-12 mr-4">
-                            <AvatarImage src={collaborator.avatarUrl} alt={collaborator.name} />
-                            <AvatarFallback className="bg-primary/10 text-primary">
-                              {collaborator.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h3 className="font-medium text-slate-900">{collaborator.name}</h3>
-                              <Badge variant="outline">{collaborator.role}</Badge>
-                            </div>
-                            <p className="text-sm text-slate-500 mt-1">
-                              Working on {collaborator.projectCount} project{collaborator.projectCount !== 1 ? 's' : ''}
-                            </p>
-                            <div className="flex mt-3 gap-2">
-                              <Button size="sm" variant="outline" className="h-8">
-                                <Mail className="h-3.5 w-3.5 mr-1" />
-                                Email
-                              </Button>
-                              <Button size="sm" variant="outline" className="h-8">
-                                <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                                Message
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  
-                  {filteredCollaborators.length === 0 && (
-                    <div className="col-span-2 py-12 flex flex-col items-center justify-center text-center bg-white rounded-xl shadow-sm">
-                      <div className="text-4xl text-slate-300 mb-3">
-                        <i className="ri-team-line"></i>
+                  {isUsersLoading ? (
+                    <div className="col-span-2 py-12 flex flex-col items-center justify-center text-center">
+                      <div className="animate-spin text-primary mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
                       </div>
-                      <h3 className="text-lg font-medium text-slate-600 mb-1">No collaborators found</h3>
-                      <p className="text-sm text-slate-500 mb-4">
-                        Try adjusting your search or invite new team members
-                      </p>
+                      <h3 className="text-lg font-medium text-slate-600 mb-1">Loading team members...</h3>
                     </div>
+                  ) : (
+                    <>
+                      {filteredUsers.map((user) => (
+                        <Card key={user.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start">
+                              <Avatar className="h-12 w-12 mr-4">
+                                <AvatarImage src={user.avatarUrl || ''} alt={user.fullName || user.username} />
+                                <AvatarFallback className="bg-primary/10 text-primary">
+                                  {user.fullName 
+                                    ? user.fullName.split(' ').map(n => n[0]).join('') 
+                                    : user.username?.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="font-medium text-slate-900">{user.fullName || user.username}</h3>
+                                  <Badge variant="outline">{user.role || 'Team Member'}</Badge>
+                                </div>
+                                <p className="text-sm text-slate-500 mt-1">
+                                  {userAssignments.has(user.id) ? (
+                                    `Working on ${userAssignments.get(user.id).length} project${userAssignments.get(user.id).length !== 1 ? 's' : ''}`
+                                  ) : (
+                                    'No current assignments'
+                                  )}
+                                </p>
+                                <div className="flex mt-3 gap-2">
+                                  <Button size="sm" variant="outline" className="h-8">
+                                    <Mail className="h-3.5 w-3.5 mr-1" />
+                                    Email
+                                  </Button>
+                                  <Button size="sm" variant="outline" className="h-8">
+                                    <MessageSquare className="h-3.5 w-3.5 mr-1" />
+                                    Message
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                      
+                      {filteredUsers.length === 0 && (
+                        <div className="col-span-2 py-12 flex flex-col items-center justify-center text-center bg-white rounded-xl shadow-sm">
+                          <div className="text-4xl text-slate-300 mb-3">
+                            <Users className="mx-auto h-12 w-12" />
+                          </div>
+                          <h3 className="text-lg font-medium text-slate-600 mb-1">No team members found</h3>
+                          <p className="text-sm text-slate-500 mb-4">
+                            Try adjusting your search or invite new team members
+                          </p>
+                          <Button variant="outline" className="mt-2">
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Add New Team Member
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </TabsContent>
@@ -138,106 +195,132 @@ export default function Collaborators() {
                     <CardDescription>Track deliverables and deadlines for your team</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="rounded-lg border overflow-hidden">
-                        <div className="bg-muted px-4 py-3 font-medium flex items-center">
-                          <span className="flex-1">Stellar Adventures Issue #1 - Character Designs</span>
-                          <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">In Progress</Badge>
+                    {isStepsLoading || isUsersLoading ? (
+                      <div className="py-12 flex flex-col items-center justify-center text-center">
+                        <div className="animate-spin text-primary mb-3">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                          </svg>
                         </div>
-                        <div className="p-4">
-                          <div className="flex items-center mb-3">
-                            <Avatar className="h-8 w-8 mr-2">
-                              <AvatarFallback>MT</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">Mina Tan</p>
-                              <p className="text-xs text-muted-foreground">Character Designer</p>
-                            </div>
-                            <div className="ml-auto text-sm text-muted-foreground flex items-center">
-                              <Clock className="h-3.5 w-3.5 mr-1" />
-                              Due in 5 days
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center">
-                              <span className="text-slate-500 mr-2">Progress:</span>
-                              <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-primary rounded-full" style={{ width: '70%' }}></div>
-                              </div>
-                              <span className="ml-2 text-slate-700">70%</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">View Details</Button>
-                              <Button size="sm">Send Reminder</Button>
-                            </div>
-                          </div>
-                        </div>
+                        <h3 className="text-lg font-medium text-slate-600 mb-1">Loading assignments...</h3>
                       </div>
-
-                      <div className="rounded-lg border overflow-hidden">
-                        <div className="bg-muted px-4 py-3 font-medium flex items-center">
-                          <span className="flex-1">Cosmic Tales Volume 3 - Script Draft</span>
-                          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Needs Review</Badge>
-                        </div>
-                        <div className="p-4">
-                          <div className="flex items-center mb-3">
-                            <Avatar className="h-8 w-8 mr-2">
-                              <AvatarFallback>SL</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">Sarah Lee</p>
-                              <p className="text-xs text-muted-foreground">Writer</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {allWorkflowSteps && allWorkflowSteps.length > 0 ? (
+                          allWorkflowSteps
+                            .filter(step => step.assignedTo && step.status !== 'completed')
+                            .sort((a, b) => {
+                              // Sort by due date (closest due date first)
+                              if (a.dueDate && b.dueDate) {
+                                return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+                              }
+                              if (a.dueDate) return -1;
+                              if (b.dueDate) return 1;
+                              return 0;
+                            })
+                            .map(step => {
+                              const assignedUser = users?.find(u => u.id === step.assignedTo);
+                              const project = projects?.find(p => p.id === step.projectId);
+                              
+                              // Calculate status badge properties
+                              let badgeClass = "bg-gray-100 text-gray-800 hover:bg-gray-100";
+                              if (step.status === 'in_progress') {
+                                badgeClass = "bg-amber-100 text-amber-800 hover:bg-amber-100";
+                              } else if (step.status === 'needs_review') {
+                                badgeClass = "bg-blue-100 text-blue-800 hover:bg-blue-100"; 
+                              } else if (step.status === 'not_started') {
+                                badgeClass = "bg-slate-100 text-slate-800 hover:bg-slate-100";
+                              } else if (step.status === 'blocked') {
+                                badgeClass = "bg-red-100 text-red-800 hover:bg-red-100";
+                              }
+                              
+                              // Format the status label
+                              const statusLabel = step.status
+                                .replace(/_/g, ' ')
+                                .split(' ')
+                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(' ');
+                              
+                              // Calculate due date text
+                              let dueText = 'No deadline set';
+                              if (step.dueDate) {
+                                const now = new Date();
+                                const dueDate = new Date(step.dueDate);
+                                const diffTime = dueDate.getTime() - now.getTime();
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                
+                                if (diffDays < 0) {
+                                  dueText = `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? 's' : ''}`;
+                                } else if (diffDays === 0) {
+                                  dueText = 'Due today';
+                                } else {
+                                  dueText = `Due in ${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+                                }
+                              }
+                              
+                              return (
+                                <div key={step.id} className="rounded-lg border overflow-hidden">
+                                  <div className="bg-muted px-4 py-3 font-medium flex items-center">
+                                    <span className="flex-1">
+                                      {project?.title} {project?.issue ? `Issue #${project.issue}` : ''} - {step.title}
+                                    </span>
+                                    <Badge className={badgeClass}>{statusLabel}</Badge>
+                                  </div>
+                                  <div className="p-4">
+                                    <div className="flex items-center mb-3">
+                                      <Avatar className="h-8 w-8 mr-2">
+                                        <AvatarImage src={assignedUser?.avatarUrl || ''} />
+                                        <AvatarFallback>
+                                          {assignedUser?.fullName 
+                                            ? assignedUser.fullName.split(' ').map(n => n[0]).join('') 
+                                            : assignedUser?.username?.substring(0, 2).toUpperCase() || '??'}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <p className="text-sm font-medium">{assignedUser?.fullName || assignedUser?.username || 'Unknown'}</p>
+                                        <p className="text-xs text-muted-foreground">{assignedUser?.role || 'Team Member'}</p>
+                                      </div>
+                                      <div className="ml-auto text-sm text-muted-foreground flex items-center">
+                                        <Clock className="h-3.5 w-3.5 mr-1" />
+                                        {dueText}
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm">
+                                      <div className="flex items-center">
+                                        <span className="text-slate-500 mr-2">Progress:</span>
+                                        <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                          <div 
+                                            className="h-full bg-primary rounded-full" 
+                                            style={{ width: `${step.progress}%` }}
+                                          ></div>
+                                        </div>
+                                        <span className="ml-2 text-slate-700">{step.progress}%</span>
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <Button size="sm" variant="outline">View Details</Button>
+                                        <Button size="sm">Send Reminder</Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                        ) : (
+                          <div className="py-12 flex flex-col items-center justify-center text-center">
+                            <div className="text-4xl text-slate-300 mb-3">
+                              <AlertCircle className="mx-auto h-12 w-12" />
                             </div>
-                            <div className="ml-auto text-sm text-muted-foreground flex items-center">
-                              <Clock className="h-3.5 w-3.5 mr-1" />
-                              Submitted yesterday
-                            </div>
+                            <h3 className="text-lg font-medium text-slate-600 mb-1">No active assignments</h3>
+                            <p className="text-sm text-slate-500 mb-4">
+                              There are no active workflow steps assigned to team members
+                            </p>
+                            <Button variant="outline" className="mt-2">
+                              Assign Team Members
+                            </Button>
                           </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center">
-                              <span className="text-slate-500 mr-2">Status:</span>
-                              <span className="text-slate-700">Ready for review</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">Download Draft</Button>
-                              <Button size="sm">Review Now</Button>
-                            </div>
-                          </div>
-                        </div>
+                        )}
                       </div>
-
-                      <div className="rounded-lg border overflow-hidden">
-                        <div className="bg-muted px-4 py-3 font-medium flex items-center">
-                          <span className="flex-1">Shadow Quest Issue #5 - Page Inks</span>
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Completed</Badge>
-                        </div>
-                        <div className="p-4">
-                          <div className="flex items-center mb-3">
-                            <Avatar className="h-8 w-8 mr-2">
-                              <AvatarFallback>JK</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="text-sm font-medium">James King</p>
-                              <p className="text-xs text-muted-foreground">Artist</p>
-                            </div>
-                            <div className="ml-auto text-sm text-muted-foreground flex items-center">
-                              <Clock className="h-3.5 w-3.5 mr-1" />
-                              Completed 2 days ago
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center">
-                              <span className="text-slate-500 mr-2">Pages:</span>
-                              <span className="text-slate-700">22 pages delivered</span>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline">Archive</Button>
-                              <Button size="sm">Send to Colorist</Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>

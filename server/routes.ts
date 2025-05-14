@@ -20,6 +20,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok" });
   });
 
+  // User routes
+  app.get("/api/users", async (_req, res) => {
+    try {
+      // For now, simply return all users
+      const users = await Promise.all(
+        Array.from({ length: 10 }, (_, i) => i + 1).map(async (id) => {
+          return await storage.getUser(id);
+        })
+      );
+      
+      // Filter out undefined users (IDs that don't exist)
+      const validUsers = users.filter(Boolean);
+      res.json(validUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
   // Project routes
   app.get("/api/projects", async (_req, res) => {
     try {
@@ -380,6 +399,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Workflow steps routes
+  app.get("/api/workflow-steps", async (_req, res) => {
+    try {
+      // Get all workflow steps across all projects
+      const projects = await storage.getProjects();
+      const allSteps = await Promise.all(
+        projects.map(async (project) => {
+          return await storage.getWorkflowStepsByProject(project.id);
+        })
+      );
+      
+      // Flatten the array of arrays
+      const steps = allSteps.flat();
+      res.json(steps);
+    } catch (error) {
+      console.error("Error fetching all workflow steps:", error);
+      res.status(500).json({ message: "Failed to fetch all workflow steps" });
+    }
+  });
+  
   app.get("/api/projects/:projectId/workflow-steps", async (req, res) => {
     try {
       const projectId = parseInt(req.params.projectId);
