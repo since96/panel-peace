@@ -10,7 +10,8 @@ import {
   insertCommentSchema,
   insertWorkflowStepSchema,
   insertFileUploadSchema,
-  insertFileLinkSchema
+  insertFileLinkSchema,
+  insertProjectEditorSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -517,6 +518,219 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting project:", error);
       res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+  
+  // Project Editors routes
+  app.get("/api/projects/:id/editors", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      if (isNaN(projectId)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+      
+      // Check if project exists
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      const editors = await storage.getProjectEditors(projectId);
+      
+      // Get full user details for each editor
+      const editorUsers = await Promise.all(
+        editors.map(async (editor) => {
+          const user = await storage.getUser(editor.userId);
+          return {
+            ...editor,
+            user
+          };
+        })
+      );
+      
+      res.json(editorUsers);
+    } catch (error) {
+      console.error("Error fetching project editors:", error);
+      res.status(500).json({ message: "Failed to fetch project editors" });
+    }
+  });
+  
+  app.post("/api/projects/:id/editors", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      if (isNaN(projectId)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+      
+      // Get current user (in a real auth system, this would come from session)
+      const currentUserId = req.body.assignedBy || req.query.userId ? parseInt(req.query.userId as string) : 1;
+      
+      // Check if the current user is allowed to assign editors
+      const currentUser = await storage.getUser(currentUserId);
+      if (!currentUser || !currentUser.isEditor) {
+        return res.status(403).json({ message: "Only editors can assign editors to projects" });
+      }
+      
+      // Check if project exists
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Check if current user has permission to modify this project
+      // Project creator or higher-ranking editor can assign editors
+      const canAssignEditors = 
+        project.createdBy === currentUserId || 
+        (currentUser.editorRole === 'senior_editor' || currentUser.editorRole === 'editor_in_chief');
+        
+      if (!canAssignEditors) {
+        return res.status(403).json({ 
+          message: "You don't have permission to assign editors to this project" 
+        });
+      }
+      
+      // Get the user to be assigned
+      const userId = parseInt(req.body.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const userToAssign = await storage.getUser(userId);
+      if (!userToAssign) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if the user is already an editor for this project
+      const existingEditors = await storage.getProjectEditors(projectId);
+      const alreadyAssigned = existingEditors.some(editor => editor.userId === userId);
+      
+      if (alreadyAssigned) {
+        return res.status(400).json({ message: "User is already an editor for this project" });
+      }
+      
+      // Prepare editor assignment data
+      const editorData = {
+        userId,
+        projectId,
+        assignedBy: currentUserId,
+        editorRole: req.body.editorRole || userToAssign.editorRole || 'editor',
+        assignedAt: new Date()
+      };
+      
+      // Create the assignment
+      const parsedData = insertProjectEditorSchema.safeParse(editorData);
+      if (!parsedData.success) {
+        return res.status(400).json({ 
+          message: "Invalid editor assignment data", 
+          errors: parsedData.error.format() 
+        });
+      }
+      
+      const newAssignment = await storage.assignEditorToProject(parsedData.data);
+      res.status(201).json(newAssignment);
+    } catch (error) {
+      console.error("Error assigning editor to project:", error);
+      res.status(500).json({ message: "Failed to assign editor to project" });
+    }
+  });
+  
+  app.delete("/api/projects/:projectId/editors/:userId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(projectId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid project ID or user ID" });
+      }
+      
+      // Get current user (in a real auth system, this would come from session)
+      const currentUserId = req.query.userId ? parseInt(req.query.userId as string) : 1;
+      
+      // Check if current user has permission to remove editors
+      const currentUser = await storage.getUser(currentUserId);
+      if (!currentUser || !currentUser.isEditor) {
+        return res.status(403).json({ message: "Only editors can remove editors from projects" });
+      }
+      
+      // Get the project
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Check if the editor assignment exists
+      const editors = await storage.getProjectEditors(projectId);
+      const assignmentExists = editors.some(editor => editor.userId === userId);
+      
+      if (!assignmentExists) {
+        return res.status(404).json({ message: "Editor assignment not found" });
+      }
+      
+      // Check if current user has permission to modify this project
+      // Project creator, higher-ranking editor, or self-removal can remove editors
+      const canRemoveEditors = 
+        project.createdBy === currentUserId || 
+        (currentUser.editorRole === 'senior_editor' || currentUser.editorRole === 'editor_in_chief') ||
+        (currentUserId === userId); // User can remove themselves
+        
+      if (!canRemoveEditors) {
+        return res.status(403).json({ 
+          message: "You don't have permission to remove editors from this project" 
+        });
+      }
+      
+      // Remove the editor assignment
+      await storage.removeEditorFromProject(userId, projectId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error removing editor from project:", error);
+      res.status(500).json({ message: "Failed to remove editor from project" });
+    }
+  });
+  
+  // Get projects where user is assigned as an editor
+  app.get("/api/users/:id/edited-projects", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Get the user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get all projects where the user is an editor
+      const projects = await storage.getProjectsByEditor(userId);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching user's edited projects:", error);
+      res.status(500).json({ message: "Failed to fetch user's edited projects" });
+    }
+  });
+  
+  // Get all projects a user can edit (created by them or assigned as editor)
+  app.get("/api/users/:id/editable-projects", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Get the user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get all projects the user can edit
+      const projects = await storage.getEditableProjects(userId);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching user's editable projects:", error);
+      res.status(500).json({ message: "Failed to fetch user's editable projects" });
     }
   });
   
