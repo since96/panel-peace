@@ -81,12 +81,32 @@ export default function Collaborators() {
     username: "",
     password: "",
     fullName: "",
-    role: selectedRole,
+    role: selectedRole, // for backwards compatibility
+    roles: [] as string[], // for multi-role support
     avatarUrl: ""
   });
   
   const [isAddingTeamMember, setIsAddingTeamMember] = useState(false);
   const [addTeamMemberError, setAddTeamMemberError] = useState("");
+  
+  // Role selection handling
+  const toggleRole = (roleId: string) => {
+    setNewTeamMember(prevState => {
+      const currentRoles = [...prevState.roles];
+      if (currentRoles.includes(roleId)) {
+        return {
+          ...prevState,
+          roles: currentRoles.filter(r => r !== roleId)
+        };
+      } else {
+        return {
+          ...prevState,
+          roles: [...currentRoles, roleId],
+          role: currentRoles.length === 0 ? roleId : prevState.role // set primary role if not already set
+        };
+      }
+    });
+  };
   
   // Handle adding a new team member
   const handleAddTeamMember = async () => {
@@ -99,6 +119,12 @@ export default function Collaborators() {
     setAddTeamMemberError("");
     
     try {
+      // Ensure we have at least one role selected
+      if (newTeamMember.roles.length === 0) {
+        setAddTeamMemberError("Please select at least one role for this team member");
+        return;
+      }
+      
       const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
@@ -106,7 +132,7 @@ export default function Collaborators() {
         },
         body: JSON.stringify({
           ...newTeamMember,
-          role: selectedRole // Use the selected role from the dropdown
+          role: newTeamMember.roles[0] // Use the first selected role as the primary role
         })
       });
       
@@ -121,6 +147,7 @@ export default function Collaborators() {
         password: "",
         fullName: "",
         role: selectedRole,
+        roles: [],
         avatarUrl: ""
       });
       

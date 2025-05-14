@@ -8,7 +8,8 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   fullName: text("full_name"),
-  role: text("role"),
+  role: text("role"), // Primary role (backwards compatibility)
+  roles: text("roles").array(), // Multiple roles support
   avatarUrl: text("avatar_url"),
 });
 
@@ -17,6 +18,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   fullName: true,
   role: true,
+  roles: true,
   avatarUrl: true,
 });
 
