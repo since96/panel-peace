@@ -58,11 +58,8 @@ export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [_, navigate] = useLocation();
-  const [projectProgress, setProjectProgress] = useState<number>(0);
-  const [editing, setEditing] = useState(false);
   const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
   const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
-  const [showEditStepDialog, setShowEditStepDialog] = useState(false);
   const [showUpdateStatusDialog, setShowUpdateStatusDialog] = useState(false);
   const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
