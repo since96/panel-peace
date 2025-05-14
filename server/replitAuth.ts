@@ -257,41 +257,13 @@ export async function setupAuth(app: Express) {
             req.login(user, (err) => {
               if (err) {
                 console.error("Error logging in user:", err);
-                return res.status(500).send(`
-                  <html>
-                    <head>
-                      <title>Authentication Error</title>
-                      <script>
-                        setTimeout(function() {
-                          window.location.href = "/";
-                        }, 2000);
-                      </script>
-                    </head>
-                    <body>
-                      <h1>Authentication Error</h1>
-                      <p>There was an error during login. Redirecting you to the home page...</p>
-                    </body>
-                  </html>
-                `);
+                console.error("Authentication error:", err);
+                return res.redirect('/auth-redirect.html?error=true');
               }
               
-              // Send HTML with a JavaScript redirect
-              console.log("Authentication successful, sending redirect to home page");
-              res.status(200).send(`
-                <html>
-                  <head>
-                    <title>Authentication Successful</title>
-                    <script>
-                      // Redirect immediately
-                      window.location.href = "/";
-                    </script>
-                  </head>
-                  <body>
-                    <h1>Authentication Successful</h1>
-                    <p>Redirecting to the application...</p>
-                  </body>
-                </html>
-              `);
+              // Redirect to our custom redirect page
+              console.log("Authentication successful, redirecting to home page");
+              return res.redirect('/auth-redirect.html');
             });
           } else {
             console.error("No access token found in response");
@@ -307,22 +279,7 @@ export async function setupAuth(app: Express) {
         }
       } catch (error) {
         console.error("Error in callback:", error);
-        return res.status(500).send(`
-          <html>
-            <head>
-              <title>Authentication Error</title>
-              <script>
-                setTimeout(function() {
-                  window.location.href = "/";
-                }, 3000);
-              </script>
-            </head>
-            <body>
-              <h1>Authentication Error</h1>
-              <p>There was an error during authentication. Redirecting to the home page in 3 seconds...</p>
-            </body>
-          </html>
-        `);
+        return res.redirect('/auth-redirect.html?error=true');
       }
     });
 
