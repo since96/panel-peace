@@ -2,7 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
 import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep, User, Comment } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,8 +69,7 @@ export default function ProjectDetails() {
   
   // The comments we'll fetch from the API
   const [comments, setComments] = useState<Comment[]>([]);
-  // Store file uploads for each workflow step
-  const [stepFileUploads, setStepFileUploads] = useState<{ [stepId: number]: any[] }>({}); // Using any temporarily until we get types
+
 
   const { data: project, isLoading: isProjectLoading } = useQuery<Project>({
     queryKey: [`/api/projects/${id}`],
@@ -96,46 +95,14 @@ export default function ProjectDetails() {
     enabled: !!id,
   });
   
-  // Load file uploads for each workflow step when steps change
-  useEffect(() => {
-    const loadFileUploadsForSteps = async () => {
-      if (workflowSteps && workflowSteps.length > 0) {
-        const uploads: { [stepId: number]: any[] } = {};
-        
-        // Load files for each step
-        for (const step of workflowSteps) {
-          const stepFiles = await fetchFileUploads(step.id);
-          if (stepFiles && stepFiles.length > 0) {
-            uploads[step.id] = stepFiles;
-          }
-        }
-        
-        setStepFileUploads(uploads);
-      }
-    };
-    
-    loadFileUploadsForSteps();
-  }, [workflowSteps, fetchFileUploads]);
+
   
   const { data: fileUploads, isLoading: isFileUploadsLoading } = useQuery<FileUpload[]>({
     queryKey: [`/api/projects/${id}/file-uploads`],
     enabled: !!id,
   });
   
-  // Fetch file uploads for a specific workflow step
-  const fetchFileUploads = useCallback(async (stepId: number) => {
-    try {
-      const response = await fetch(`/api/workflow-steps/${stepId}/file-uploads`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch file uploads');
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error('Error fetching file uploads:', error);
-      return [];
-    }
-  }, []);
+  
 
   // Handle adding a comment
   const handleAddComment = () => {
