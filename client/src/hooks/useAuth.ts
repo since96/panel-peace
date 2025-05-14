@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   
   // Fetch current user from the simple auth endpoint
   const { 
@@ -41,7 +41,7 @@ export function useAuth() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/simple-user"] });
       queryClient.clear();
-      navigate("/login");
+      setLocation("/login");
     }
   });
 
@@ -55,7 +55,7 @@ export function useAuth() {
 
   // Simple function to redirect to login page
   const goToLogin = () => {
-    navigate("/login");
+    setLocation("/login");
   };
 
   return {

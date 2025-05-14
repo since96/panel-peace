@@ -17,23 +17,32 @@ import Collaborators from "@/pages/collaborators-new";
 import AssetLibrary from "@/pages/asset-library";
 import Publication from "@/pages/publication";
 import FeedbackDetails from "@/pages/feedback-details";
+import { LoginPage } from "@/pages/login";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
   const { isMobileSidebarOpen, toggleMobileSidebar, closeMobileSidebar } = useMobileSidebar();
 
   return (
-    <AppLayout 
-      isOpen={isMobileSidebarOpen} 
-      toggleSidebar={toggleMobileSidebar} 
-      closeSidebar={closeMobileSidebar}
-    >
-      <Switch>
-        <Route path="/">
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        </Route>
+    <Switch>
+      {/* Login page - not protected, not using app layout */}
+      <Route path="/login">
+        <LoginPage />
+      </Route>
+      
+      {/* All other routes use the app layout and are protected */}
+      <Route>
+        <AppLayout 
+          isOpen={isMobileSidebarOpen} 
+          toggleSidebar={toggleMobileSidebar} 
+          closeSidebar={closeMobileSidebar}
+        >
+          <Switch>
+            <Route path="/">
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            </Route>
         <Route path="/projects">
           <ProtectedRoute>
             <Projects />
@@ -79,11 +88,13 @@ function Router() {
             <Publication />
           </ProtectedRoute>
         </Route>
-        <Route>
-          <NotFound />
-        </Route>
-      </Switch>
-    </AppLayout>
+            <Route>
+              <NotFound />
+            </Route>
+          </Switch>
+        </AppLayout>
+      </Route>
+    </Switch>
   );
 }
 

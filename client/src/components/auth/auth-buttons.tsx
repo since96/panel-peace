@@ -4,7 +4,7 @@ import { Loader2, LogIn, LogOut, RefreshCw, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 
 export function AuthButtons() {
-  const { user, isLoading, isAuthenticated, login, logout, refetch } = useAuth();
+  const { user, isLoading, isAuthenticated, logout, refetch, goToLogin } = useAuth();
 
   if (isLoading) {
     return (
@@ -55,7 +55,7 @@ export function AuthButtons() {
       <Button 
         variant="default" 
         size="sm" 
-        onClick={login}
+        onClick={() => goToLogin()}
         className="flex items-center"
       >
         <LogIn className="mr-2 h-4 w-4" />
