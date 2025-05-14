@@ -3,6 +3,13 @@ import session from "express-session";
 import { storage } from "./storage";
 import crypto from "crypto";
 
+// Declare session data type to make TypeScript happy
+declare module 'express-session' {
+  interface SessionData {
+    userId: number | string;
+  }
+}
+
 // Middleware to check if a user is authenticated
 export const isAuthenticated: RequestHandler = (req, res, next) => {
   if (req.session && req.session.userId) {
@@ -15,7 +22,8 @@ export const isAuthenticated: RequestHandler = (req, res, next) => {
 
 // Setup session store
 export function getSession() {
-  return session({
+  // Create a session middleware using express-session
+  const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || "keyboard cat",
     resave: false,
     saveUninitialized: false,
@@ -25,6 +33,8 @@ export function getSession() {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   });
+  
+  return sessionMiddleware;
 }
 
 // Simple password hashing

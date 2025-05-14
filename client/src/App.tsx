@@ -43,51 +43,51 @@ function Router() {
                 <Dashboard />
               </ProtectedRoute>
             </Route>
-        <Route path="/projects">
-          <ProtectedRoute>
-            <Projects />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/projects/new">
-          <ProtectedRoute>
-            <ProjectCreate />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/projects/:id">
-          <ProtectedRoute>
-            <ProjectDetails />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/script-editor">
-          <ProtectedRoute>
-            <ScriptEditor />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/panel-editor">
-          <ProtectedRoute>
-            <PanelEditor />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/feedback/:id">
-          <ProtectedRoute>
-            <FeedbackDetails />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/collaborators">
-          <ProtectedRoute>
-            <Collaborators />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/asset-library">
-          <ProtectedRoute>
-            <AssetLibrary />
-          </ProtectedRoute>
-        </Route>
-        <Route path="/publication">
-          <ProtectedRoute>
-            <Publication />
-          </ProtectedRoute>
-        </Route>
+            <Route path="/projects">
+              <ProtectedRoute>
+                <Projects />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/projects/new">
+              <ProtectedRoute>
+                <ProjectCreate />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/projects/:id">
+              <ProtectedRoute>
+                <ProjectDetails />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/script-editor">
+              <ProtectedRoute>
+                <ScriptEditor />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/panel-editor">
+              <ProtectedRoute>
+                <PanelEditor />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/feedback/:id">
+              <ProtectedRoute>
+                <FeedbackDetails />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/collaborators">
+              <ProtectedRoute>
+                <Collaborators />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/asset-library">
+              <ProtectedRoute>
+                <AssetLibrary />
+              </ProtectedRoute>
+            </Route>
+            <Route path="/publication">
+              <ProtectedRoute>
+                <Publication />
+              </ProtectedRoute>
+            </Route>
             <Route>
               <NotFound />
             </Route>

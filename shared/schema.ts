@@ -114,7 +114,7 @@ export const projectEditors = pgTable("project_editors", {
   projectId: integer("project_id").notNull(),
   assignedBy: integer("assigned_by"), // ID of the editor who made the assignment
   assignmentRole: text("assignment_role").default("editor"), // Role within this specific project
-  assignedAt: timestamp("assigned_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(), // Renamed from assignedAt to match convention
 });
 
 export const insertCollaboratorSchema = createInsertSchema(collaborators).omit({
@@ -123,7 +123,7 @@ export const insertCollaboratorSchema = createInsertSchema(collaborators).omit({
 
 export const insertProjectEditorSchema = createInsertSchema(projectEditors).omit({
   id: true,
-  assignedAt: true,
+  createdAt: true,
 });
 
 // Feedback items table
