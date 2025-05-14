@@ -61,7 +61,7 @@ import {
   getTalentProgressStatusColor,
   type TalentProgressStatus, cn
 } from '@/lib/utils';
-import { FileUpload, FileData } from '@/components/ui/custom/file-upload';
+
 import { Helmet } from 'react-helmet-async';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -75,7 +75,6 @@ export default function ProjectDetails() {
   const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
   const [showUpdateStatusDialog, setShowUpdateStatusDialog] = useState(false);
   const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showTrackerDialog, setShowTrackerDialog] = useState(false);
@@ -163,10 +162,7 @@ export default function ProjectDetails() {
   
 
   
-  const { data: fileUploads, isLoading: isFileUploadsLoading } = useQuery<any[]>({
-    queryKey: [`/api/projects/${id}/file-uploads`],
-    enabled: !!id,
-  });
+
   
   // Query file links for a selected step when dialog opens
   const { 
@@ -1149,42 +1145,7 @@ export default function ProjectDetails() {
         </DialogContent>
       </Dialog>
 
-      {/* Upload Dialog */}
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Upload Files</DialogTitle>
-            <DialogDescription>
-              Add files related to "{selectedStep?.title || 'this step'}"
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <FileUpload 
-              multiple={true}
-              onFilesSelected={(files) => {
-                // Here you'd handle file upload to your server
-                console.log("Selected files:", files);
-                
-                // Mock API request - in a real app, you'd upload these files
-                setTimeout(() => {
-                  toast({
-                    title: "Files uploaded",
-                    description: `${files.length} file(s) uploaded successfully`
-                  });
-                  setShowUploadDialog(false);
-                }, 1500);
-              }}
-            />
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Assign User Dialog */}
       <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
