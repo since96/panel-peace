@@ -370,6 +370,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Pre-process the date field to handle string date from client
       const requestData = { ...req.body };
       
+      // Get the user ID of the creator (from request or default to admin)
+      // In a real auth system, this would come from the session
+      const userId = req.body.userId || 1; // Default to admin user if not specified
+      
+      // Store the creator's user ID
+      requestData.createdBy = userId;
+      
       // Handle all date fields by converting string dates to Date objects for Zod validation
       const dateFields = ['dueDate', 'plotDeadline', 'coverDeadline'];
       
@@ -393,7 +400,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid project data", errors: parsedData.error.format() });
       }
 
-      const newProject = await storage.createProject(parsedData.data);
+      const newProject = await storage.createProject({
+        ...parsedData.data,
+        createdBy: userId // Ensure createdBy is included
+      });
       res.status(201).json(newProject);
     } catch (error) {
       console.error("Project creation error:", error);
@@ -471,17 +481,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid project ID" });
       }
 
+      // Get current user (in a real auth system, this would come from session)
+      const currentUserId = req.query.userId ? parseInt(req.query.userId as string) : 1;
+      
+      // Get the user to check their role
+      const user = await storage.getUser(currentUserId);
+      if (!user) {
+        return res.status(403).json({ message: "User not found" });
+      }
+      
       const project = await storage.getProject(id);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Check if user has permission to delete this project
+      if (!user.isEditor) {
+        return res.status(403).json({ message: "Only editors can delete projects" });
+      }
+      
+      // Permission rules:
+      // 1. Editor-in-Chief can delete any project
+      // 2. Senior Editor can delete projects they created or created by regular editors
+      // 3. Regular Editor can only delete projects they created
+      
+      const hasDeletePermission = await checkDeletePermission(user, project);
+      if (!hasDeletePermission) {
+        return res.status(403).json({ 
+          message: "You don't have permission to delete this project" 
+        });
       }
 
       await storage.deleteProject(id);
       res.status(204).send();
     } catch (error) {
+      console.error("Error deleting project:", error);
       res.status(500).json({ message: "Failed to delete project" });
     }
   });
+  
+  // Helper function to check if a user has permission to delete a project
+  async function checkDeletePermission(user: any, project: any): Promise<boolean> {
+    // Editor-in-Chief can delete any project
+    if (user.editorRole === 'editor_in_chief') {
+      return true;
+    }
+    
+    // Senior Editor can delete their own projects or projects created by regular editors
+    if (user.editorRole === 'senior_editor') {
+      // If Senior Editor created the project, they can delete it
+      if (project.createdBy === user.id) {
+        return true;
+      }
+      
+      // If the project was created by a regular editor, Senior Editor can delete it
+      if (project.createdBy) {
+        const creatorUser = await storage.getUser(project.createdBy);
+        if (creatorUser && creatorUser.isEditor && creatorUser.editorRole === 'editor') {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
+    // Regular Editor can only delete projects they created
+    if (user.editorRole === 'editor') {
+      return project.createdBy === user.id;
+    }
+    
+    return false;
+  }
 
   // Feedback routes
   app.get("/api/feedback", async (_req, res) => {

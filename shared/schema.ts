@@ -48,6 +48,10 @@ export const projects = pgTable("projects", {
   plotDeadline: timestamp("plot_deadline"), // Manual plot deadline
   coverDeadline: timestamp("cover_deadline"), // Manual cover deadline
   
+  // Metadata fields
+  createdBy: integer("created_by"), // User ID of creator
+  createdAt: timestamp("created_at").defaultNow(),
+  
   // Comic book metrics
   coverCount: integer("cover_count").default(1), // Number of covers
   interiorPageCount: integer("interior_page_count").notNull().default(22), // Number of interior comic pages
