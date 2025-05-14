@@ -5,9 +5,13 @@ import { z } from "zod";
 // Users table (already defined, extended with additional fields)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-  fullName: text("full_name"),
+  username: text("username").notNull().unique(), // For admin/editors only
+  password: text("password"), // For admin/editors only
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull(), // Mandatory for all users
+  phone: text("phone"),
+  socialMedia: text("social_media"), // JSON string of social media links
+  isEditor: boolean("is_editor").default(false), // Flag to separate editors from talent
   role: text("role"), // Primary role (backwards compatibility)
   roles: text("roles").array(), // Multiple roles support
   avatarUrl: text("avatar_url"),
@@ -17,6 +21,10 @@ export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   fullName: true,
+  email: true,
+  phone: true,
+  socialMedia: true,
+  isEditor: true,
   role: true,
   roles: true,
   avatarUrl: true,
