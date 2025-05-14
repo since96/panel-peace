@@ -21,6 +21,7 @@ import Publication from "@/pages/publication";
 import FeedbackDetails from "@/pages/feedback-details";
 import { SimpleLogin } from "./pages/simple-login";
 import Signup from "./pages/signup";
+import ProfilePage from "./pages/profile";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
@@ -95,6 +96,11 @@ function Router() {
             <Route path="/publication">
               <SimpleProtected>
                 <Publication />
+              </SimpleProtected>
+            </Route>
+            <Route path="/profile">
+              <SimpleProtected>
+                <ProfilePage />
               </SimpleProtected>
             </Route>
             <Route>

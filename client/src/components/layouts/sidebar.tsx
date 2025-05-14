@@ -119,9 +119,9 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             <p className="text-sm font-medium truncate">{user?.fullName || user?.username || "User"}</p>
             <p className="text-xs text-slate-500 truncate">{user?.role || "Editor"}</p>
           </div>
-          <button className="text-slate-400 hover:text-slate-600">
+          <Link href="/profile" className="text-slate-400 hover:text-slate-600">
             <Settings className="h-4 w-4" />
-          </button>
+          </Link>
         </div>
       </div>
     </div>
