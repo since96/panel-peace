@@ -1,6 +1,4 @@
 import { CurrentProjects } from '@/components/dashboard/current-projects';
-import { ActionItems } from '@/components/dashboard/action-items';
-import { CreativeTools } from '@/components/dashboard/creative-tools';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
 
@@ -34,14 +32,8 @@ export default function Dashboard() {
           </div>
         </div>
         
-        {/* Current Projects */}
+        {/* Current Projects - The only section we're keeping */}
         <CurrentProjects />
-        
-        {/* Action Items (Pending Feedback + Upcoming Deadlines) */}
-        <ActionItems />
-        
-        {/* Talent Management Quick Access */}
-        <CreativeTools />
       </div>
     </>
   );
