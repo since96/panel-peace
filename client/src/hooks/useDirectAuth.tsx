@@ -1,6 +1,11 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import axios from 'axios';
 
+// For development - clear any stale data
+if (typeof window !== 'undefined') {
+  console.log('Checking for fresh authentication data');
+}
+
 // Define user type
 interface User {
   id: number | string;
@@ -43,6 +48,23 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const parsedUser = JSON.parse(savedUser);
           console.log('User found in localStorage:', parsedUser);
+          
+          // Get fresh data from server
+          axios.get(`/api/users/${parsedUser.id}`)
+            .then(response => {
+              if (response.data) {
+                // Update localStorage with fresh data
+                const freshUser = response.data;
+                localStorage.setItem('user', JSON.stringify(freshUser));
+                setUser(freshUser);
+                console.log('Updated user data from server:', freshUser);
+              }
+            })
+            .catch(error => {
+              console.warn('Could not fetch fresh user data, using localStorage', error);
+            });
+          
+          // Set the user from localStorage for now (will be updated if API call succeeds)
           setUser(parsedUser);
           setIsLoading(false);
           return; // Exit early, we're already authenticated
@@ -105,17 +127,33 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
   // Login function
   const login = async (username: string, password: string) => {
     try {
-      console.log('Attempting login with username:', username, 'password length:', password.length);
+      console.log('Attempting login with:', username, password);
       setIsLoading(true);
       const response = await axios.post('/api/direct-login', { username, password });
       console.log('Login response:', response.data);
       
-      setUser(response.data.user);
-      
-      // Store authentication in localStorage for persistence
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      localStorage.setItem('isAuthenticated', 'true');
-      console.log('User stored in localStorage');
+      if (response.data.success && response.data.user) {
+        // Double-check with server to get the most up-to-date user data
+        try {
+          const userResponse = await axios.get(`/api/users/${response.data.user.id}`);
+          if (userResponse.data) {
+            // Use the fresh user data
+            setUser(userResponse.data);
+            localStorage.setItem('user', JSON.stringify(userResponse.data));
+            localStorage.setItem('isAuthenticated', 'true');
+            console.log('Fresh user data stored:', userResponse.data);
+          } else {
+            setUser(response.data.user);
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            localStorage.setItem('isAuthenticated', 'true');
+          }
+        } catch (freshError) {
+          console.warn('Could not get fresh user data, using login response', freshError);
+          setUser(response.data.user);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+          localStorage.setItem('isAuthenticated', 'true');
+        }
+      }
       
       return response.data;
     } catch (err: any) {
