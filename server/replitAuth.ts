@@ -6,6 +6,15 @@ import connectPg from "connect-pg-simple";
 import axios from "axios";
 import { storage } from "./storage";
 
+// Declare session for typed Replit OAuth
+declare module 'express-session' {
+  interface Session {
+    passport?: {
+      user?: any;
+    };
+  }
+}
+
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }
@@ -45,7 +54,9 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
-  return session({
+  
+  // Create a session middleware using express-session
+  const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET ?? "comic-book-creator-secret-key",
     store: sessionStore,
     resave: false,
@@ -56,6 +67,8 @@ export function getSession() {
       maxAge: sessionTtl,
     },
   });
+  
+  return sessionMiddleware;
 }
 
 // Fetch user profile from Replit

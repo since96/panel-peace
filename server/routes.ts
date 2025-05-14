@@ -439,7 +439,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const editorProjects = await storage.getProjectsByEditor(dbUser.id);
           // Combine and remove duplicates
           const allProjects = [...projects, ...editorProjects];
-          projects = [...new Map(allProjects.map(project => [project.id, project])).values()];
+          const projectMap = new Map();
+          
+          // Deduplicate projects
+          allProjects.forEach(project => {
+            projectMap.set(project.id, project);
+          });
+          
+          projects = Array.from(projectMap.values());
         }
       }
       
@@ -764,8 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         projectId,
         assignedBy: currentUserId,
-        editorRole: req.body.editorRole || userToAssign.editorRole || 'editor',
-        assignedAt: new Date()
+        assignmentRole: req.body.editorRole || userToAssign.editorRole || 'editor'
       };
       
       // Create the assignment
