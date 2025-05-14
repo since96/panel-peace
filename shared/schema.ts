@@ -49,7 +49,7 @@ export const projects = pgTable("projects", {
   coverDeadline: timestamp("cover_deadline"), // Manual cover deadline
   
   // Metadata fields
-  createdBy: integer("created_by"), // User ID of creator
+  createdBy: integer("created_by").notNull(), // User ID of creator
   createdAt: timestamp("created_at").defaultNow(),
   
   // Comic book metrics
@@ -76,7 +76,6 @@ export const projects = pgTable("projects", {
   formatType: text("format_type").default("print"), // print, digital, web, etc.
   
   dueDate: timestamp("due_date"),
-  createdBy: integer("created_by").notNull(),
 });
 
 export const insertProjectSchema = createInsertSchema(projects).omit({
