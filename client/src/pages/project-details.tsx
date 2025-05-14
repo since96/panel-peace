@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link, CheckCircle, UserPlus } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link, CheckCircle, UserPlus, Check } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { CompletionTracker } from '@/components/ui/custom/completion-tracker';
@@ -819,12 +819,43 @@ export default function ProjectDetails() {
                                         </TooltipProvider>
                                       </div>
                                       
-                                      <div className="w-full flex items-center justify-end my-2">
+                                      <div className="w-full flex items-center justify-between my-2">
                                         <div className="flex items-center gap-2">
-                                          <span className="text-xs text-slate-500">{step.progress}%</span>
+                                          <span className={`font-medium text-sm ${progressStatusColors.text}`}>
+                                            {
+                                              step.stepType === 'plot_development' || step.stepType === 'script'
+                                                ? step.progress >= 100 ? 'Completed' : 'In Progress'
+                                                : `${step.progress}% Complete`
+                                            }
+                                          </span>
+                                          {step.progress < 100 && (
+                                            <TooltipProvider>
+                                              <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                  <Button 
+                                                    size="sm" 
+                                                    variant="outline"
+                                                    className={`h-6 px-2 py-1 ${progressStatusColors.bgLight} ${progressStatusColors.text} border-none ml-2`}
+                                                    onClick={() => {
+                                                      setSelectedStepForTracker(step);
+                                                      setShowTrackerDialog(true);
+                                                    }}
+                                                  >
+                                                    <Check className="h-3 w-3 mr-1" />
+                                                    Update
+                                                  </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  <p>Update progress</p>
+                                                </TooltipContent>
+                                              </Tooltip>
+                                            </TooltipProvider>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center w-full max-w-[150px]">
                                           <Progress 
                                             value={step.progress} 
-                                            className={`h-2 w-32`} 
+                                            className="h-3 w-full rounded-full" 
                                             indicatorClassName={progressStatusColors.bg}
                                           />
                                         </div>
