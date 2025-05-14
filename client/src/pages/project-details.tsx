@@ -58,6 +58,8 @@ export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [_, navigate] = useLocation();
+  const [projectProgress, setProjectProgress] = useState<number>(0);
+  const [editing, setEditing] = useState(false);
   const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
   const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
   const [showUpdateStatusDialog, setShowUpdateStatusDialog] = useState(false);
@@ -249,7 +251,7 @@ export default function ProjectDetails() {
         description: "Workflow step has been updated successfully"
       });
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
-      setShowEditStepDialog(false);
+      setShowDeadlineDialog(false);
       setEditingStep(null);
     },
     onError: (error) => {
