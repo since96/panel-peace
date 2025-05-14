@@ -19,6 +19,7 @@ export function SimpleLogin() {
     try {
       console.log("Attempting login with:", username, password);
       
+      console.log(`Attempting login with username: ${username}, password length: ${password.length}`);
       const response = await fetch("/api/direct-login", {
         method: "POST",
         headers: {

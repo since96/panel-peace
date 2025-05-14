@@ -27,7 +27,10 @@ function Router() {
 
   return (
     <Switch>
-      {/* Simple Login page - not protected, not using app layout */}
+      {/* Login pages - not protected, not using app layout */}
+      <Route path="/login">
+        <SimpleLogin />
+      </Route>
       <Route path="/simple-login">
         <SimpleLogin />
       </Route>

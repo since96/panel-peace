@@ -1,5 +1,6 @@
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
+import { SimpleNav } from "../auth/simple-nav";
 import { ReactNode } from "react";
 
 interface AppLayoutProps {
@@ -15,7 +16,7 @@ export function AppLayout({ children, isOpen, toggleSidebar, closeSidebar }: App
       <Sidebar isOpen={isOpen} onClose={isOpen ? closeSidebar : undefined} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar toggleSidebar={toggleSidebar} />
+        <SimpleNav />
         
         <main className="flex-1 overflow-y-auto bg-slate-100 p-6">
           {children}
