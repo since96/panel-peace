@@ -220,10 +220,10 @@ async function createDefaultAdmin() {
       await storage.createUser({
         username: adminUsername,
         password: adminPassword,
-        fullName: "Admin User",
-        email: "admin@example.com",
+        fullName: "Admin",
+        email: "admin@comicsmanagement.com",
         isEditor: true,
-        role: "editor",
+        role: "Editor",
         editorRole: "editor_in_chief"
       });
       

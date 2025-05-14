@@ -68,56 +68,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all users from storage
       const users = [];
       
-      // Create default users if they don't exist
+      // Create only admin user if it doesn't exist
       const defaultUsers = [
         {
           username: "admin",
           password: "admin123",
-          fullName: "Alex Rodriguez",
-          email: "admin@comiceditorpro.com",
-          role: "editor",
+          fullName: "Admin",
+          email: "admin@comicsmanagement.com",
+          role: "Editor",
           roles: ["editor"],
           isEditor: true,
-          avatarUrl: ""
-        },
-        {
-          username: "artist1",
-          password: "password",
-          fullName: "James Wilson",
-          email: "james@example.com",
-          role: "artist",
-          roles: ["artist", "cover_artist"],
-          isEditor: false,
-          avatarUrl: ""
-        },
-        {
-          username: "writer1",
-          password: "password",
-          fullName: "Sarah Miller",
-          email: "sarah@example.com",
-          role: "writer",
-          roles: ["writer"],
-          isEditor: false,
-          avatarUrl: ""
-        },
-        {
-          username: "colorist1",
-          password: "password",
-          fullName: "David Chen", 
-          email: "david@example.com",
-          role: "colorist",
-          roles: ["colorist"],
-          isEditor: false,
-          avatarUrl: ""
-        },
-        {
-          username: "letterer1",
-          password: "password",
-          fullName: "Julia Rodriguez",
-          email: "julia@example.com",
-          role: "letterer",
-          roles: ["letterer"],
-          isEditor: false,
           avatarUrl: ""
         }
       ];
