@@ -13,10 +13,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     const token = req.cookies?.auth_token;
     
     if (!token) {
-      console.log('Authentication check bypassed - using admin user');
-      // TEMP: Set admin user as the authenticated user for development
-      (req as any).user = { id: 1 };
-      return next();
+      console.log('No auth token, returning unauthorized');
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
     
     try {
@@ -186,32 +184,12 @@ export function setupDirectAuth(app: express.Express) {
       // Get the token from the cookie
       const token = req.cookies.auth_token;
       
-      // If there's no token, use the current fix that bypasses authentication
+      // If there's no token, return not authenticated
       if (!token) {
-        console.log("No auth token, falling back to admin user");
-        const userId = 1; // Admin user ID
-        
-        console.log(`Getting user data for admin ID: ${userId}`);
-        const user = await storage.getUser(userId);
-        
-        if (!user) {
-          console.log(`No user found for ID: ${userId}`);
-          res.clearCookie('auth_token');
-          return res.status(401).json({
-            success: false,
-            message: "User not found"
-          });
-        }
-        
-        // Create a safe user object without password
-        const safeUser = { ...user } as any;
-        if (safeUser.password) delete safeUser.password;
-        
-        console.log(`User found: ${user.fullName || user.username}`);
-        
-        return res.json({
-          success: true,
-          user: safeUser
+        console.log("No auth token found, not authenticated");
+        return res.status(401).json({
+          success: false,
+          message: "Not authenticated"
         });
       }
       
