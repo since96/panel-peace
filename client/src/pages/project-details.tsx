@@ -851,7 +851,7 @@ export default function ProjectDetails() {
                                   {fileLinksMap[step.id] && fileLinksMap[step.id].length > 0 && (
                                     <div className="mt-2">
                                       <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-                                        <Link className="h-3.5 w-3.5" />
+                                        <LinkIcon className="h-3.5 w-3.5" />
                                         <span>Attached Files ({fileLinksMap[step.id].length})</span>
                                       </div>
                                       <div className="flex flex-wrap gap-2">
