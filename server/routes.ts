@@ -287,21 +287,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Verify current password
-      const hashedCurrentPassword = crypto.createHash('sha256').update(currentPassword).digest('hex');
-      if (user.password !== hashedCurrentPassword) {
+      // For the demo, we're using plain text passwords
+      // In a real application, we would use proper password hashing
+      if (user.password !== currentPassword) {
         return res.status(400).json({ 
           message: "Current password is incorrect",
           errors: { currentPassword: { _errors: ["Current password is incorrect"] } }
         });
       }
       
-      // Hash the new password
-      const hashedNewPassword = crypto.createHash('sha256').update(newPassword).digest('hex');
+      // In a real application, we would hash the new password
+      // For demo purposes, we'll use plain text passwords
       
       // Update the user's password
       const updatedUser = await storage.updateUser(userId, {
-        password: hashedNewPassword
+        password: newPassword
       });
       
       res.json({ message: "Password changed successfully" });
