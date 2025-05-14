@@ -14,8 +14,9 @@ export function StatCard({
       <div className="flex items-center justify-between">
         <p className="text-slate-500 font-medium">{title}</p>
       </div>
-      <div className="mt-4 flex items-baseline">
+      <div className="mt-4">
         <p className="text-4xl font-bold text-slate-900">{count}</p>
+        {/* No labels or additional text here - just the count */}
       </div>
     </div>
   );
