@@ -708,7 +708,7 @@ export default function ProjectDetails() {
                                   
                                   <div className="flex-none">
                                     <div className="flex flex-col items-end gap-2">
-                                      <div className="flex gap-2 flex-wrap">
+                                      <div className="grid grid-cols-2 gap-2 w-full">
                                         <Button 
                                           size="sm" 
                                           variant="outline"
@@ -716,6 +716,7 @@ export default function ProjectDetails() {
                                             setEditingStep(step);
                                             setShowUpdateStatusDialog(true);
                                           }}
+                                          className="flex items-center justify-center w-full"
                                         >
                                           <CheckCircle2 className="h-4 w-4 mr-2" />
                                           Update Status
@@ -728,6 +729,7 @@ export default function ProjectDetails() {
                                             setEditingStep(step);
                                             setShowEditStepDialog(true);
                                           }}
+                                          className="flex items-center justify-center w-full"
                                         >
                                           <Pencil className="h-4 w-4 mr-2" />
                                           Edit Details
@@ -740,6 +742,7 @@ export default function ProjectDetails() {
                                             setEditingStep(step);
                                             setShowDeadlineDialog(true);
                                           }}
+                                          className="flex items-center justify-center w-full"
                                         >
                                           <CalendarIcon className="h-4 w-4 mr-2" />
                                           Adjust Deadline
@@ -751,6 +754,7 @@ export default function ProjectDetails() {
                                             setSelectedStep(step);
                                             setShowUploadDialog(true);
                                           }}
+                                          className="flex items-center justify-center w-full"
                                         >
                                           <Plus className="h-4 w-4 mr-2" />
                                           Upload Files
