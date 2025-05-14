@@ -639,6 +639,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete file link" });
     }
   });
+  
+  // Project file links
+  app.get("/api/projects/:projectId/file-links", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      if (isNaN(projectId)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+
+      // Get all file links associated with this project's workflow steps
+      const workflowSteps = await storage.getWorkflowStepsByProject(projectId);
+      const allLinks = [];
+      
+      for (const step of workflowSteps) {
+        const links = await storage.getFileLinksByWorkflowStep(step.id);
+        allLinks.push(...links);
+      }
+      
+      res.json(allLinks);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch file links" });
+    }
+  });
+
+  app.post("/api/projects/:projectId/file-links", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      if (isNaN(projectId)) {
+        return res.status(400).json({ message: "Invalid project ID" });
+      }
+
+      // Validate project exists
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Since file links are tied to workflow steps, we need to create a link
+      // for a specific step. If not specified, we'll use the first step.
+      const workflowSteps = await storage.getWorkflowStepsByProject(projectId);
+      
+      if (!workflowSteps || workflowSteps.length === 0) {
+        return res.status(400).json({ 
+          message: "Cannot add file link - project has no workflow steps" 
+        });
+      }
+      
+      // Use the first step as default if none is specified
+      const workflowStepId = req.body.workflowStepId || workflowSteps[0].id;
+      
+      // Add the step ID to the request data
+      const requestData = { 
+        ...req.body,
+        workflowStepId
+      };
+
+      const parsedData = insertFileLinkSchema.safeParse(requestData);
+      if (!parsedData.success) {
+        return res.status(400).json({ message: "Invalid file link data", errors: parsedData.error.format() });
+      }
+
+      const newLink = await storage.createFileLink(parsedData.data);
+      res.status(201).json(newLink);
+    } catch (error) {
+      console.error("Error creating file link:", error);
+      res.status(500).json({ message: "Failed to create file link" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
