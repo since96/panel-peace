@@ -531,7 +531,7 @@ export default function ProjectDetails() {
                                   
                                   <div className="flex-none">
                                     <div className="flex flex-col items-end gap-2">
-                                      <div className="grid grid-cols-3 gap-2 w-full">
+                                      <div className="grid grid-cols-2 gap-2 w-full mb-2">
                                         <TooltipProvider>
                                           <Tooltip>
                                             <TooltipTrigger asChild>
@@ -545,7 +545,7 @@ export default function ProjectDetails() {
                                                 }}
                                               >
                                                 <Users className="h-4 w-4 mr-2" />
-                                                Assign
+                                                Assign Talent
                                               </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
@@ -554,18 +554,53 @@ export default function ProjectDetails() {
                                           </Tooltip>
                                         </TooltipProvider>
                                         
-                                        <Button 
-                                          size="sm"
-                                          variant="outline"
-                                          className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
-                                          onClick={() => {
-                                            setEditingStep(step);
-                                            setShowDeadlineDialog(true);
-                                          }}
-                                        >
-                                          <CalendarIcon className="h-4 w-4 mr-2" />
-                                          Adjust Deadline
-                                        </Button>
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button 
+                                                size="sm"
+                                                variant="outline"
+                                                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
+                                                onClick={() => {
+                                                  setEditingStep(step);
+                                                  setShowDeadlineDialog(true);
+                                                }}
+                                              >
+                                                <CalendarIcon className="h-4 w-4 mr-2" />
+                                                Adjust Deadline
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>Adjust deadline for this step</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      </div>
+                                      
+                                      <div className="grid grid-cols-2 gap-2 w-full">
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button 
+                                                size="sm"
+                                                variant="outline"
+                                                className="bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-800"
+                                                onClick={() => {
+                                                  setSelectedStep(step);
+                                                  setCommentText('');
+                                                  fetchComments(step.id);
+                                                  setShowCommentDialog(true);
+                                                }}
+                                              >
+                                                <MessageSquare className="h-4 w-4 mr-2" />
+                                                Comments
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>View and add comments</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
                                         
                                         <TooltipProvider>
                                           <Tooltip>
@@ -580,7 +615,7 @@ export default function ProjectDetails() {
                                                 }}
                                               >
                                                 <Upload className="h-4 w-4 mr-2" />
-                                                Upload
+                                                Upload Files
                                               </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
@@ -853,6 +888,93 @@ export default function ProjectDetails() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign User Dialog */}
+      <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Assign Team Member</DialogTitle>
+            <DialogDescription>
+              Select a team member to work on this step
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingStep && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="step-title-assign" className="text-right">
+                  Step
+                </Label>
+                <Input
+                  id="step-title-assign"
+                  value={editingStep.title}
+                  className="col-span-3"
+                  disabled
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="assign-user" className="text-right">
+                  Assign To
+                </Label>
+                <div className="col-span-3">
+                  {users && users.length > 0 ? (
+                    <Select 
+                      defaultValue={editingStep.assignedTo?.toString() || ""}
+                      onValueChange={(value) => {
+                        setEditingStep({
+                          ...editingStep,
+                          assignedTo: value ? parseInt(value) : null
+                        });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a team member" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Unassigned</SelectItem>
+                        {users.map(user => (
+                          <SelectItem key={user.id} value={user.id.toString()}>
+                            {user.username || `User ${user.id}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="text-sm text-slate-500">No users available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowAssignDialog(false);
+                setEditingStep(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (editingStep) {
+                  updateWorkflowStepMutation.mutate({
+                    stepId: editingStep.id,
+                    assignedTo: editingStep.assignedTo
+                  });
+                  setShowAssignDialog(false);
+                }
+              }}
+              disabled={updateWorkflowStepMutation.isPending}
+            >
+              {updateWorkflowStepMutation.isPending ? "Assigning..." : "Assign User"}
             </Button>
           </DialogFooter>
         </DialogContent>
