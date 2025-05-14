@@ -1,65 +1,58 @@
 import { useState } from "react";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoaderCircle } from "lucide-react";
 
-export function LoginBasic() {
+export function SimpleLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  const handleLogin = async (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
-    
-    // For debugging
-    console.log("Login attempt with:", { username, password });
-    
+    setError("");
+
     try {
-      // Direct HTTP request - no hooks involved
-      const response = await fetch("/api/simple-login", {
+      console.log("Attempting login with:", username, password);
+      
+      const response = await fetch("/api/direct-login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json" 
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ username, password }),
-        credentials: "include" // Important for cookies/session
+        credentials: "include"
       });
-      
+
       const data = await response.json();
       console.log("Login response:", data);
-      
+
       if (data.success) {
-        console.log("Login successful, redirecting to home");
-        // Force page reload and redirect to root
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 500); // Small delay to ensure session is saved
+        // Force a complete page reload to reset all React state
+        window.location.href = "/";
       } else {
-        console.log("Login failed:", data.message);
         setError(data.message || "Login failed");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Login error:", err);
-      setError("Failed to login. Please try again.");
+      setError("Failed to connect to the server. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl text-center">Comic Editor Login</CardTitle>
         </CardHeader>
-        
-        <form onSubmit={handleLogin}>
+
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
               <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
@@ -71,9 +64,9 @@ export function LoginBasic() {
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
-                type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 required
               />
             </div>
@@ -85,8 +78,15 @@ export function LoginBasic() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
                 required
               />
+            </div>
+            
+            <div className="text-sm text-gray-500">
+              Default admin login:<br />
+              Username: admin<br />
+              Password: admin123
             </div>
           </CardContent>
           

@@ -1,12 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { getSession } from "./simpleAuth.new";
+import { setupDirectAuth } from "./direct-auth";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(getSession()); // Initialize session middleware
 
 app.use((req, res, next) => {
   const start = Date.now();

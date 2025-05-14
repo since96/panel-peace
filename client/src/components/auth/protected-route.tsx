@@ -17,12 +17,12 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (!isLoading && !isAuthenticated) {
       // Add a small delay to allow for any pending auth operations
       const timeoutId = setTimeout(() => {
-        login();
+        window.location.href = "/login";
       }, 100);
       
       return () => clearTimeout(timeoutId);
     }
-  }, [isAuthenticated, isLoading, login]);
+  }, [isAuthenticated, isLoading]);
 
   if (isLoading) {
     return (
@@ -58,7 +58,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
             You need to be logged in to access this page.
           </p>
           <Button 
-            onClick={() => login()}
+            onClick={() => window.location.href = "/login"}
             variant="default"
           >
             Login Now
