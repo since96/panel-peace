@@ -161,6 +161,9 @@ export class MemStorage implements IStorage {
       username: "admin",
       password: "admin123",
       fullName: "Alex Rodriguez",
+      email: "alex@comicsmanagement.com",
+      isEditor: true,
+      editorRole: "editor_in_chief",
       role: "Senior Editor",
       avatarUrl: ""
     });
@@ -304,15 +307,15 @@ export class MemStorage implements IStorage {
     this.assignEditorToProject({
       userId: 2, // editor user
       projectId: 1,
-      role: "editor",
-      editorRole: "editor"
+      assignedBy: 1,
+      assignmentRole: "editor"
     });
     
     this.assignEditorToProject({
       userId: 3, // senior editor
       projectId: 2,
-      role: "editor",
-      editorRole: "senior_editor"
+      assignedBy: 1,
+      assignmentRole: "senior_editor"
     });
   }
 
