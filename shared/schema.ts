@@ -249,6 +249,7 @@ export const fileUploads = pgTable("file_uploads", {
   version: integer("version").notNull().default(1),
   notes: text("notes"),
   status: text("status").notNull().default("pending_review"),
+  fileTag: text("file_tag").notNull().default("misc"),
   uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

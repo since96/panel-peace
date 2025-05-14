@@ -1357,6 +1357,7 @@ export default function ProjectDetails() {
                         uploadedBy: DEFAULT_USER_ID,
                         version: 1,
                         status: 'pending_review',
+                        fileTag: fileData.tag,
                       };
                       
                       // Submit to API

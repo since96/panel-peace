@@ -37,6 +37,7 @@ export function FileUpload({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [selectedTag, setSelectedTag] = useState<'artwork' | 'script' | 'misc'>('misc');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -108,7 +109,8 @@ export function FileUpload({
           url: URL.createObjectURL(file),
           size: file.size,
           type: file.type,
-          name: file.name
+          name: file.name,
+          tag: selectedTag
         };
       });
       
@@ -200,6 +202,28 @@ export function FileUpload({
               </Button>
             </Card>
           ))}
+          
+          <div className="mt-4 p-4 border rounded-lg bg-slate-50">
+            <h4 className="text-sm font-medium mb-2">File Type:</h4>
+            <RadioGroup 
+              value={selectedTag} 
+              onValueChange={(value) => setSelectedTag(value as 'artwork' | 'script' | 'misc')}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="artwork" id="artwork" />
+                <Label htmlFor="artwork">Artwork</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="script" id="script" />
+                <Label htmlFor="script">Script</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="misc" id="misc" />
+                <Label htmlFor="misc">Misc</Label>
+              </div>
+            </RadioGroup>
+          </div>
           
           <div className="flex justify-end pt-2">
             <Button 
