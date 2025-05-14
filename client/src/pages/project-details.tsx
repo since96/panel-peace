@@ -834,13 +834,34 @@ export default function ProjectDetails() {
                                       </div>
                                     )}
                                     
-                                    {step.assignedTo && users && (
+                                    {/* Show assigned users */}
+                                    {(step.assignedTo || (step.assignees && step.assignees.length > 0)) && users && (
                                       <div className="flex items-center text-sm">
                                         <Users className="h-3.5 w-3.5 mr-1 text-slate-400" />
-                                        <span>
-                                          {users.find(u => u.id === step.assignedTo)?.fullName || 
-                                           users.find(u => u.id === step.assignedTo)?.username || 'Unknown'}
-                                        </span>
+                                        {step.assignedTo && (
+                                          <span className="mr-1">
+                                            {users.find(u => u.id === step.assignedTo)?.fullName || 
+                                             users.find(u => u.id === step.assignedTo)?.username || 'Unknown'}
+                                            {step.assignees && step.assignees.length > 0 && ", "}
+                                          </span>
+                                        )}
+                                        
+                                        {step.assignees && step.assignees.length > 0 && (
+                                          <span className="text-sm">
+                                            {step.assignees.length === 1 && !step.assignedTo ? (
+                                              // Show single collaborator
+                                              users.find(u => u.id.toString() === step.assignees?.[0])?.fullName || 
+                                              users.find(u => u.id.toString() === step.assignees?.[0])?.username || 'Unknown'
+                                            ) : step.assignees.length > 0 ? (
+                                              // Show "and X more" if there are multiple assignees
+                                              `${step.assignees.length > 1 && step.assignedTo ? `+${step.assignees.length}` : 
+                                                !step.assignedTo ? 
+                                                  users.find(u => u.id.toString() === step.assignees?.[0])?.fullName || 
+                                                  users.find(u => u.id.toString() === step.assignees?.[0])?.username : ''} 
+                                               ${step.assignees.length > 1 ? 'collaborators' : 'collaborator'}`
+                                            ) : ''}
+                                          </span>
+                                        )}
                                       </div>
                                     )}
                                   </div>

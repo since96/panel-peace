@@ -1,12 +1,16 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { cn, formatStatusLabel, getStatusColor } from '@/lib/utils';
 import { Link } from 'wouter';
 import { Project } from '@shared/schema';
+import { AlertCircle, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
   collaborators?: Array<{ id: number; name: string; avatarUrl?: string }>;
 }
+
+
 
 export function ProjectCard({ project, collaborators = [] }: ProjectCardProps) {
   const { title, issue, description, status, progress, dueDate } = project;
@@ -60,15 +64,51 @@ export function ProjectCard({ project, collaborators = [] }: ProjectCardProps) {
         <p className="text-sm text-slate-500 mb-4">{description}</p>
         
         <div className="mt-auto">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-500">Progress</span>
-            <span className="text-xs font-medium text-slate-700">{progress}%</span>
-          </div>
-          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-            <div 
-              className={cn("h-full rounded-full", statusColors.bg)} 
-              style={{ width: `${progress}%` }}
-            ></div>
+          <div className="flex items-center mb-2">
+            {/* Schedule status badge */}
+            {(() => {
+              // Already completed
+              if (status === 'completed') {
+                return (
+                  <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-green-200 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    <span>Completed</span>
+                  </Badge>
+                );
+              }
+              
+              // Check if overdue
+              if (dueDate) {
+                const today = new Date();
+                const due = new Date(dueDate);
+                const diffTime = due.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 0) {
+                  return (
+                    <Badge className="bg-red-50 text-red-700 hover:bg-red-100 border-red-200 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Behind Schedule</span>
+                    </Badge>
+                  );
+                } else if (diffDays <= 3) {
+                  return (
+                    <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-200 flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      <span>At Risk</span>
+                    </Badge>
+                  );
+                }
+              }
+              
+              // Default: on track
+              return (
+                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span>On Schedule</span>
+                </Badge>
+              );
+            })()}
           </div>
         </div>
       </div>
