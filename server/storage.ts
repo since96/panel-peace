@@ -303,6 +303,17 @@ export class MemStorage implements IStorage {
       role: "senior_editor"
     });
     
+    // Create a regular user (not an editor)
+    this.createUser({
+      username: "artist",
+      password: "password",
+      fullName: "Talented Artist",
+      email: "artist@example.com",
+      isEditor: false,
+      role: "artist",
+      roles: ["penciler", "inker"]
+    });
+    
     // Assign editor to projects
     this.assignEditorToProject({
       userId: 2, // editor user
