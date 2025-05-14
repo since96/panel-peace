@@ -271,6 +271,7 @@ export default function ProjectDetails() {
   });
   
   const [scheduleFeasible, setScheduleFeasible] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // Mutation for updating workflow step progress
   const updateStepProgressMutation = useMutation({
@@ -291,6 +292,31 @@ export default function ProjectDetails() {
       toast({
         title: "Failed to update progress",
         description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Mutation for deleting the project
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId: number) => {
+      // Get the current user ID (in a real app, this would come from auth context)
+      // Using admin (1) as the default
+      const currentUserId = 1; 
+      await apiRequest("DELETE", `/api/projects/${projectId}?userId=${currentUserId}`);
+      return true;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Project deleted",
+        description: "Project has been deleted successfully"
+      });
+      navigate('/projects');
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete project",
+        description: error.message || "You don't have permission to delete this project",
         variant: "destructive"
       });
     }
@@ -379,26 +405,7 @@ export default function ProjectDetails() {
     }
   });
   
-  const deleteProjectMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("DELETE", `/api/projects/${id}`);
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Project deleted",
-        description: "The project has been deleted successfully"
-      });
-      navigate('/projects');
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to delete project",
-        description: error.message || "An error occurred while deleting the project",
-        variant: "destructive"
-      });
-    }
-  });
+  // Mutation already defined above
   
   const updateWorkflowStepMutation = useMutation({
     mutationFn: async (data: {
@@ -536,6 +543,23 @@ export default function ProjectDetails() {
                 </Badge>
               </div>
               <p className="text-slate-500 mt-1">{project.description}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setEditing(!editing)}
+              >
+                {editing ? 'Cancel Edit' : 'Edit Project'}
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete Project
+              </Button>
             </div>
           </div>
         </div>
@@ -1737,6 +1761,34 @@ export default function ProjectDetails() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Project Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the project
+              and all its associated data including feedback, files, and workflow steps.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <Button 
+              variant="destructive" 
+              onClick={() => {
+                if (project) {
+                  deleteProjectMutation.mutate(project.id);
+                }
+                setShowDeleteConfirm(false);
+              }}
+              disabled={deleteProjectMutation.isPending}
+            >
+              {deleteProjectMutation.isPending ? "Deleting..." : "Delete Project"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
