@@ -406,10 +406,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project routes
   app.get("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
-      // Get user ID from either dbUser or profile
-      const userId = req.user.dbUser?.id || 
-                     req.user.profile?.id || 
-                     req.user.profile?.sub;
+      // Get user ID from session
+      const userId = req.user?.id || req.session?.userId;
       
       const dbUser = await storage.getUser(userId);
       
@@ -470,9 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if the authenticated user has access to this project
-      const userId = req.user.dbUser?.id || 
-                    req.user.profile?.id || 
-                    req.user.profile?.sub;
+      const userId = req.user?.id || req.session?.userId;
                     
       const dbUser = await storage.getUser(userId);
       
@@ -509,9 +505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const requestData = { ...req.body };
       
       // Get the authenticated user
-      const userId = req.user.dbUser?.id || 
-                    req.user.profile?.id || 
-                    req.user.profile?.sub;
+      const userId = req.user?.id || req.session?.userId;
                     
       const dbUser = await storage.getUser(userId);
       
