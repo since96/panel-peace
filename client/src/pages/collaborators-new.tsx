@@ -160,24 +160,30 @@ export default function Collaborators() {
     setAddTeamMemberError("");
     
     try {
-      // Ensure we have at least one role selected
-      if (newTeamMember.roles.length === 0) {
-        setAddTeamMemberError("Please select at least one role for this team member");
+      // Only require role selection for talent, not for editors
+      if (!newTeamMember.isEditor && newTeamMember.roles.length === 0) {
+        setAddTeamMemberError("Please select at least one role for this talent");
         return;
       }
       
       const method = isEditingUser ? 'PATCH' : 'POST';
       const url = isEditingUser ? `/api/users/${editUserId}` : '/api/users';
       
+      // Prepare the payload - don't send role info for editors
+      const payload = {
+        ...newTeamMember,
+        // Only include role for non-editors or if roles are selected
+        ...((!newTeamMember.isEditor && newTeamMember.roles.length > 0) ? {
+          role: newTeamMember.roles[0], // Primary role
+        } : {})
+      };
+      
       const response = await fetch(url, {
         method: method,
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...newTeamMember,
-          role: newTeamMember.roles[0] // Use the first selected role as the primary role
-        })
+        body: JSON.stringify(payload)
       });
       
       if (!response.ok) {
