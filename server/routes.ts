@@ -31,36 +31,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           username: "admin",
           password: "admin123",
-          fullName: "Admin User",
+          fullName: "Alex Rodriguez",
+          email: "admin@comiceditorpro.com",
           role: "editor",
+          roles: ["editor"],
+          isEditor: true,
           avatarUrl: ""
         },
         {
           username: "artist1",
           password: "password",
           fullName: "James Wilson",
+          email: "james@example.com",
           role: "artist",
+          roles: ["artist", "cover_artist"],
+          isEditor: false,
           avatarUrl: ""
         },
         {
           username: "writer1",
           password: "password",
           fullName: "Sarah Miller",
+          email: "sarah@example.com",
           role: "writer",
+          roles: ["writer"],
+          isEditor: false,
           avatarUrl: ""
         },
         {
           username: "colorist1",
           password: "password",
           fullName: "David Chen", 
+          email: "david@example.com",
           role: "colorist",
+          roles: ["colorist"],
+          isEditor: false,
           avatarUrl: ""
         },
         {
           username: "letterer1",
           password: "password",
           fullName: "Julia Rodriguez",
+          email: "julia@example.com",
           role: "letterer",
+          roles: ["letterer"],
+          isEditor: false,
           avatarUrl: ""
         }
       ];
@@ -70,7 +85,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const userData of defaultUsers) {
         const existingUser = await storage.getUserByUsername(userData.username);
         if (!existingUser) {
-          await storage.createUser(userData);
+          // Use the updated user schema fields
+          await storage.createUser({
+            username: userData.username,
+            password: userData.password,
+            fullName: userData.fullName,
+            email: userData.email,
+            role: userData.role,
+            roles: userData.roles,
+            isEditor: userData.isEditor,
+            avatarUrl: userData.avatarUrl
+          });
           createdUsers = true;
         }
       }
@@ -166,37 +191,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create a new user (team member)
-  app.post("/api/users", async (req, res) => {
+  // Update an existing user
+  app.patch("/api/users/:id", async (req, res) => {
     try {
-      const { username, password, fullName, role, avatarUrl } = req.body;
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
       
-      // Simple validation
-      if (!username || !password) {
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { 
+        username, 
+        password, 
+        fullName, 
+        email, 
+        phone, 
+        socialMedia, 
+        isEditor, 
+        role, 
+        roles, 
+        avatarUrl 
+      } = req.body;
+      
+      // For updates, email and fullName are still required
+      if ((email !== undefined && !email) || (fullName !== undefined && !fullName)) {
         return res.status(400).json({ 
-          message: "Username and password are required",
+          message: "Full name and email address cannot be empty",
           errors: { 
-            username: !username ? { _errors: ["Username is required"] } : undefined,
-            password: !password ? { _errors: ["Password is required"] } : undefined
+            fullName: (fullName !== undefined && !fullName) ? { _errors: ["Full name is required"] } : undefined,
+            email: (email !== undefined && !email) ? { _errors: ["Email address is required"] } : undefined
           }
         });
       }
       
-      // Check if username already exists
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
+      // Check if username being changed and already exists
+      if (username && username !== user.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(400).json({ 
+            message: "Username already exists", 
+            errors: { username: { _errors: ["Username already exists"] } } 
+          });
+        }
+      }
+      
+      // Update the user
+      const updatedUser = await storage.updateUser(userId, {
+        username: username,
+        // Only update password if provided (keep existing otherwise)
+        password: password !== undefined ? password : undefined,
+        fullName: fullName,
+        email: email,
+        phone: phone,
+        socialMedia: socialMedia,
+        isEditor: isEditor,
+        role: role,
+        roles: roles,
+        avatarUrl: avatarUrl
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+  
+  // Create a new user (team member)
+  app.post("/api/users", async (req, res) => {
+    try {
+      const { 
+        username, 
+        password, 
+        fullName, 
+        email, 
+        phone, 
+        socialMedia, 
+        isEditor, 
+        role, 
+        roles, 
+        avatarUrl 
+      } = req.body;
+      
+      // Validation based on user type
+      if (isEditor) {
+        // Editors need username and password
+        if (!username || !password) {
+          return res.status(400).json({ 
+            message: "Username and password are required for editors",
+            errors: { 
+              username: !username ? { _errors: ["Username is required"] } : undefined,
+              password: !password ? { _errors: ["Password is required"] } : undefined
+            }
+          });
+        }
+      } 
+      
+      // All users need fullName and email
+      if (!fullName || !email) {
         return res.status(400).json({ 
-          message: "Username already exists", 
-          errors: { username: { _errors: ["Username already exists"] } } 
+          message: "Full name and email address are required",
+          errors: { 
+            fullName: !fullName ? { _errors: ["Full name is required"] } : undefined,
+            email: !email ? { _errors: ["Email address is required"] } : undefined
+          }
         });
       }
       
-      // Create the user
+      // Check if username already exists (if provided)
+      if (username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser) {
+          return res.status(400).json({ 
+            message: "Username already exists", 
+            errors: { username: { _errors: ["Username already exists"] } } 
+          });
+        }
+      }
+      
+      // Generate username for talent if not provided
+      const finalUsername = username || `talent_${Date.now()}`;
+      
+      // Create the user with updated fields
       const newUser = await storage.createUser({
-        username,
-        password, // In a real app, you'd hash this password
-        fullName: fullName || undefined,
-        role: role || undefined,
+        username: finalUsername,
+        password: password || "", // Empty password for non-editors
+        fullName,
+        email,
+        phone: phone || undefined,
+        socialMedia: socialMedia || undefined,
+        isEditor: isEditor || false,
+        role: role || (roles && roles.length > 0 ? roles[0] : undefined),
+        roles: roles || [],
         avatarUrl: avatarUrl || undefined
       });
       
