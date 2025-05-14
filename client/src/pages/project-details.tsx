@@ -730,6 +730,32 @@ export default function ProjectDetails() {
                                     </p>
                                   )}
                                   
+                                  {/* Display file links */}
+                                  {fileLinksMap[step.id] && fileLinksMap[step.id].length > 0 && (
+                                    <div className="mt-2">
+                                      <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                                        <Link className="h-3.5 w-3.5" />
+                                        <span>Attached Files ({fileLinksMap[step.id].length})</span>
+                                      </div>
+                                      <div className="flex flex-wrap gap-2">
+                                        {fileLinksMap[step.id].map((link) => (
+                                          <a 
+                                            key={link.id}
+                                            href={link.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md border border-blue-100 hover:bg-blue-100"
+                                          >
+                                            <ExternalLink className="h-3 w-3" />
+                                            <span className="truncate max-w-[120px]">
+                                              {link.url.split('/').pop() || 'File link'}
+                                            </span>
+                                          </a>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
                                   <div className="flex-none">
                                     <div className="flex flex-col items-end gap-2">
                                       <div className="grid grid-cols-2 gap-2 w-full mb-2">
