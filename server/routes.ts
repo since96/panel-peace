@@ -35,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Authentication status route
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+  app.get("/api/auth/user", async (req: any, res) => {
     try {
       console.log("Fetching authenticated user");
       
@@ -385,12 +385,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Project routes
-  app.get("/api/projects", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects", async (req: any, res) => {
     try {
-      // Get user ID from session
-      const userId = req.user?.id || req.session?.userId;
-      
-      const dbUser = await storage.getUser(userId);
+      // TEMP: No authentication - use admin user
+      const dbUser = await storage.getUser(1);
       
       if (!dbUser) {
         return res.status(404).json({ message: "User not found" });
@@ -436,7 +434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/projects/:id", isAuthenticated, async (req: any, res) => {
+  app.get("/api/projects/:id", async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -448,10 +446,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Project not found" });
       }
       
-      // Check if the authenticated user has access to this project
-      const userId = req.user?.id || req.session?.userId;
-                    
-      const dbUser = await storage.getUser(userId);
+      // TEMP: No authentication - use admin user
+      const dbUser = await storage.getUser(1);
       
       if (!dbUser) {
         return res.status(404).json({ message: "User not found" });
@@ -480,7 +476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", isAuthenticated, async (req: any, res) => {
+  app.post("/api/projects", async (req: any, res) => {
     try {
       // Pre-process the date field to handle string date from client
       const requestData = { ...req.body };
