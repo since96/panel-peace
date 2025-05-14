@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { useToast } from '@/hooks/use-toast';
@@ -97,7 +97,7 @@ export default function ProjectDetails() {
   
 
   
-  const { data: fileUploads, isLoading: isFileUploadsLoading } = useQuery<FileUpload[]>({
+  const { data: fileUploads, isLoading: isFileUploadsLoading } = useQuery<any[]>({
     queryKey: [`/api/projects/${id}/file-uploads`],
     enabled: !!id,
   });
@@ -251,6 +251,15 @@ export default function ProjectDetails() {
       });
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
       setShowEditStepDialog(false);
+      setEditingStep(null);
+    },
+    onError: (error) => {
+      console.error("Error updating workflow step:", error);
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update workflow step",
+        variant: "destructive"
+      });
       setEditingStep(null);
     },
     onError: (error) => {
@@ -768,7 +777,7 @@ export default function ProjectDetails() {
                                                     rel="noopener noreferrer"
                                                     className="text-primary hover:text-primary/80"
                                                   >
-                                                    <ExternalLink className="h-4 w-4" />
+                                                    <FileText className="h-4 w-4" />
                                                   </a>
                                                 </div>
                                               ))}
