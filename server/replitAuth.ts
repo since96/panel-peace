@@ -21,6 +21,14 @@ const REPLIT_OAUTH_CONFIG = {
   userProfileURL: "https://replit.com/api/v1/users/current",
   clientID: process.env.REPL_ID,
   callbackURL: `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/callback`,
+  // Use proper query parameters for auth
+  authorizationParams: {
+    domain: process.env.REPLIT_DOMAINS.split(",")[0],
+    client_id: process.env.REPL_ID,
+    redirect_uri: `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/callback`,
+    response_type: "code",
+    scope: "identity",
+  },
   scope: ["identity"],
   passReqToCallback: true,
 };
@@ -173,18 +181,80 @@ export async function setupAuth(app: Express) {
 
     // Authentication routes
     app.get("/api/login", (req, res, next) => {
-      console.log("Login attempt");
-      passport.authenticate("replit", {
-        scope: ["identity"],
-      })(req, res, next);
+      console.log("Login attempt with domain:", process.env.REPLIT_DOMAINS?.split(",")[0]);
+      
+      // Redirect directly to Replit auth with proper parameters
+      const authUrl = new URL(REPLIT_OAUTH_CONFIG.authorizationURL);
+      authUrl.searchParams.append("domain", process.env.REPLIT_DOMAINS?.split(",")[0] || "");
+      authUrl.searchParams.append("redirect", REPLIT_OAUTH_CONFIG.callbackURL);
+      
+      return res.redirect(authUrl.toString());
     });
 
-    app.get("/api/callback", (req, res, next) => {
+    app.get("/api/callback", async (req, res, next) => {
       console.log("Auth callback received", req.query);
-      passport.authenticate("replit", {
-        successRedirect: "/",
-        failureRedirect: "/api/login",
-      })(req, res, next);
+      
+      try {
+        // Check if the code is present
+        if (!req.query.code) {
+          console.error("No code found in callback");
+          return res.redirect("/api/login");
+        }
+        
+        const code = req.query.code as string;
+        
+        // Exchange the code for an access token
+        const tokenResponse = await axios.post(
+          REPLIT_OAUTH_CONFIG.tokenURL,
+          {
+            client_id: process.env.REPL_ID,
+            code,
+            redirect_uri: REPLIT_OAUTH_CONFIG.callbackURL,
+            grant_type: "authorization_code",
+          },
+          {
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        
+        console.log("Token response status:", tokenResponse.status);
+        
+        if (tokenResponse.data.access_token) {
+          // Get user profile with the access token
+          const userProfile = await fetchUserProfile(tokenResponse.data.access_token);
+          
+          // Create a user object
+          const user = {
+            profile: userProfile,
+            access_token: tokenResponse.data.access_token,
+            expires_at: Date.now() + (tokenResponse.data.expires_in || 3600) * 1000,
+          };
+          
+          // Process and store in database
+          const dbUser = await processUser(userProfile);
+          user.dbUser = dbUser;
+          
+          // Log the user in by setting up the session
+          req.login(user, (err) => {
+            if (err) {
+              console.error("Error logging in user:", err);
+              return res.redirect("/api/login");
+            }
+            
+            // Redirect to the app
+            return res.redirect("/");
+          });
+        } else {
+          console.error("No access token found in response");
+          return res.redirect("/api/login");
+        }
+      } catch (error) {
+        console.error("Error in callback:", error);
+        return res.redirect("/api/login");
+      }
     });
 
     app.get("/api/logout", (req, res) => {
