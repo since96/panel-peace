@@ -438,8 +438,17 @@ export default function Collaborators() {
                                     <>
                                       <span className="font-medium">Current assignments:</span>
                                       <ul className="mt-1 list-disc pl-4">
-                                        {Array.from(new Set(userAssignments.get(user.id).map((step: WorkflowStep) => step.projectId)))
-                                          .map((projectId: number) => {
+                                        {(() => {
+                                          // Extract unique project IDs
+                                          const projectIds: number[] = [];
+                                          userAssignments.get(user.id).forEach((step: WorkflowStep) => {
+                                            if (!projectIds.includes(step.projectId)) {
+                                              projectIds.push(step.projectId);
+                                            }
+                                          });
+                                          
+                                          // Return mapped elements
+                                          return projectIds.map((projectId: number) => {
                                             const project = projects?.find(p => p.id === projectId);
                                             const steps = userAssignments.get(user.id)
                                               .filter((step: WorkflowStep) => step.projectId === projectId);
@@ -452,8 +461,8 @@ export default function Collaborators() {
                                                 </span>
                                               </li>
                                             );
-                                          })
-                                        }
+                                          });
+                                        })()}
                                       </ul>
                                     </>
                                   ) : (
@@ -667,30 +676,43 @@ export default function Collaborators() {
                                         <>
                                           <p className="font-medium">Managing projects:</p>
                                           <ul className="mt-1 list-disc pl-4">
-                                            {Array.from(new Set(userAssignments.get(editor.id).map((step: WorkflowStep) => step.projectId)))
-                                              .map((projectId: number) => {
+                                            {(() => {
+                                              // Extract unique project IDs
+                                              const projectIds: number[] = [];
+                                              userAssignments.get(editor.id).forEach((step: WorkflowStep) => {
+                                                if (!projectIds.includes(step.projectId)) {
+                                                  projectIds.push(step.projectId);
+                                                }
+                                              });
+                                              
+                                              // Return mapped elements
+                                              return projectIds.map((projectId: number) => {
                                                 const project = projects?.find(p => p.id === projectId);
                                                 return (
                                                   <li key={projectId.toString()}>
                                                     {project?.title || 'Unknown project'}
                                                   </li>
                                                 );
-                                              })
-                                            }
+                                              });
+                                            })()}
                                           </ul>
                                         </>
                                       ) : editor.assignedProjects && editor.assignedProjects.length > 0 ? (
                                         <>
                                           <p className="font-medium">Assigned projects:</p>
                                           <ul className="mt-1 list-disc pl-4">
-                                            {editor.assignedProjects.map((projectId: number) => {
-                                              const project = projects?.find(p => p.id === projectId);
-                                              return (
-                                                <li key={projectId.toString()}>
-                                                  {project?.title || 'Unknown project'}
-                                                </li>
-                                              );
-                                            })}
+                                            {(() => {
+                                              if (!editor.assignedProjects) return null;
+                                              
+                                              return editor.assignedProjects.map((projectId) => {
+                                                const project = projects?.find(p => p.id === projectId);
+                                                return (
+                                                  <li key={String(projectId)}>
+                                                    {project?.title || 'Unknown project'}
+                                                  </li>
+                                                );
+                                              });
+                                            })()}
                                           </ul>
                                         </>
                                       ) : (
