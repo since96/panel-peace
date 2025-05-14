@@ -42,13 +42,6 @@ export function ProjectCard({ project, collaborators = [] }: ProjectCardProps) {
   
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col">
-      <div className="h-48 w-full bg-slate-100 border-b border-slate-200 flex items-center justify-center">
-        {/* Placeholder for project cover image */}
-        <div className="text-slate-400 text-4xl">
-          <i className="ri-book-open-line"></i>
-        </div>
-      </div>
-      
       <div className="p-4 flex-1">
         <div className="flex items-center justify-between mb-2">
           <span className={cn(
