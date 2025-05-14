@@ -1,4 +1,5 @@
-import { StatCard } from '@/components/ui/custom/stat-card';
+// Using our new component that guarantees no labels
+import { DashboardStat } from '@/components/ui/custom/dashboard-stat';
 import { useQuery } from '@tanstack/react-query';
 import { Project, FeedbackItem, Deadline } from '@shared/schema';
 
@@ -29,19 +30,20 @@ export function StatsOverview() {
     return dueDate >= now && dueDate <= weekFromNow;
   }) || [];
   
+  // Implement the stats cards with our new component
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-      <StatCard
+      <DashboardStat
         title="Active Projects"
         count={activeProjects.length}
       />
       
-      <StatCard
+      <DashboardStat
         title="Pending Feedback"
         count={pendingFeedbackCount}
       />
       
-      <StatCard
+      <DashboardStat
         title="Upcoming Deadlines"
         count={upcomingDeadlines.length}
       />
