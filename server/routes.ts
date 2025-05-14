@@ -553,8 +553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: dbUser.id,
         projectId: newProject.id,
         assignedBy: dbUser.id,
-        assignmentRole: dbUser.editorRole || "editor",
-        assignedAt: new Date()
+        assignmentRole: dbUser.editorRole || "editor"
       });
       
       res.status(201).json(newProject);
