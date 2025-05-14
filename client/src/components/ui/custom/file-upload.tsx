@@ -4,6 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { X, Upload, File, Image, FileText, Video } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 // Define a structure for file data
 export interface FileData {
@@ -12,6 +14,7 @@ export interface FileData {
   size: number;
   type: string;
   name: string;
+  tag: 'artwork' | 'script' | 'misc';
 }
 
 interface FileUploadProps {

@@ -94,6 +94,11 @@ export default function ProjectDetails() {
     enabled: !!id,
   });
   
+  const { data: fileUploads, isLoading: isFileUploadsLoading } = useQuery<FileUpload[]>({
+    queryKey: [`/api/projects/${id}/file-uploads`],
+    enabled: !!id,
+  });
+  
   // Handle adding a comment
   const handleAddComment = () => {
     if (!selectedStep || !commentText.trim()) return;
