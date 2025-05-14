@@ -747,6 +747,27 @@ export default function ProjectDetails() {
                                             </TooltipContent>
                                           </Tooltip>
                                         </TooltipProvider>
+
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button 
+                                                size="sm"
+                                                variant="outline"
+                                                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
+                                                onClick={() => {
+                                                  openTrackerDialog(step);
+                                                }}
+                                              >
+                                                <CheckCircle className="h-4 w-4 mr-2" />
+                                                Track Progress
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>Update completion percentage and add file links</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
                                       </div>
                                       
                                       <div className="grid grid-cols-2 gap-2 w-full">
