@@ -851,27 +851,7 @@ export default function ProjectDetails() {
                                           </Tooltip>
                                         </TooltipProvider>
                                         
-                                        <TooltipProvider>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <Button 
-                                                size="sm"
-                                                variant="outline"
-                                                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
-                                                onClick={() => {
-                                                  setSelectedStep(step);
-                                                  setShowUploadDialog(true);
-                                                }}
-                                              >
-                                                <Upload className="h-4 w-4 mr-2" />
-                                                Upload Files
-                                              </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              <p>Upload files for this step</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
+
                                       </div>
                                       
                                       <div className="w-full flex items-center justify-between my-2">
