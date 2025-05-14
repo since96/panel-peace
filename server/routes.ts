@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import crypto from "crypto";
 import { setupDirectAuth, isAuthenticated } from "./direct-auth";
 import { 
   insertProjectSchema, 
@@ -208,7 +209,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { 
         username, 
-        password, 
         fullName, 
         email, 
         phone, 
@@ -244,8 +244,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update the user
       const updatedUser = await storage.updateUser(userId, {
         username: username,
-        // Only update password if provided (keep existing otherwise)
-        password: password !== undefined ? password : undefined,
         fullName: fullName,
         email: email,
         phone: phone,
@@ -260,6 +258,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+  
+  // Change user password
+  app.post("/api/users/:id/change-password", async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = parseInt(req.params.id);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ 
+          message: "Current password and new password are required",
+          errors: {
+            currentPassword: !currentPassword ? { _errors: ["Current password is required"] } : undefined,
+            newPassword: !newPassword ? { _errors: ["New password is required"] } : undefined
+          }
+        });
+      }
+      
+      // Get the user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const hashedCurrentPassword = crypto.createHash('sha256').update(currentPassword).digest('hex');
+      if (user.password !== hashedCurrentPassword) {
+        return res.status(400).json({ 
+          message: "Current password is incorrect",
+          errors: { currentPassword: { _errors: ["Current password is incorrect"] } }
+        });
+      }
+      
+      // Hash the new password
+      const hashedNewPassword = crypto.createHash('sha256').update(newPassword).digest('hex');
+      
+      // Update the user's password
+      const updatedUser = await storage.updateUser(userId, {
+        password: hashedNewPassword
+      });
+      
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
     }
   });
   
