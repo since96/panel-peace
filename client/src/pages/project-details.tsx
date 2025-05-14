@@ -1299,11 +1299,11 @@ export default function ProjectDetails() {
                 <div className="col-span-3">
                   {users && users.length > 0 ? (
                     <Select 
-                      defaultValue={editingStep.assignedTo?.toString() || ""}
+                      defaultValue={editingStep.assignedTo?.toString() || "unassigned"}
                       onValueChange={(value) => {
                         setEditingStep({
                           ...editingStep,
-                          assignedTo: value ? parseInt(value) : null
+                          assignedTo: value && value !== "unassigned" ? parseInt(value) : null
                         });
                       }}
                     >
@@ -1311,7 +1311,7 @@ export default function ProjectDetails() {
                         <SelectValue placeholder="Select a team member" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Unassigned</SelectItem>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
                         {users.map(user => (
                           <SelectItem key={user.id} value={user.id.toString()}>
                             {user.username || `User ${user.id}`}
