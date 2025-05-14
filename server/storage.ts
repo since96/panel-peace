@@ -115,6 +115,7 @@ export class MemStorage implements IStorage {
   private userIdCounter: number;
   private projectIdCounter: number;
   private collaboratorIdCounter: number;
+  private projectEditorIdCounter: number;
   private feedbackIdCounter: number;
   private assetIdCounter: number;
   private deadlineIdCounter: number;
@@ -132,6 +133,7 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.projects = new Map();
     this.collaborators = new Map();
+    this.projectEditors = new Map();
     this.feedbackItems = new Map();
     this.assets = new Map();
     this.deadlines = new Map();
@@ -144,6 +146,7 @@ export class MemStorage implements IStorage {
     this.userIdCounter = 1;
     this.projectIdCounter = 1;
     this.collaboratorIdCounter = 1;
+    this.projectEditorIdCounter = 1;
     this.feedbackIdCounter = 1;
     this.assetIdCounter = 1;
     this.deadlineIdCounter = 1;
@@ -274,6 +277,43 @@ export class MemStorage implements IStorage {
       priority: "low",
       status: "pending"
     });
+    
+    // Create another editor user
+    this.createUser({
+      username: "editor",
+      password: "password",
+      fullName: "Test Editor",
+      email: "editor@example.com",
+      isEditor: true,
+      editorRole: "editor",
+      role: "editor"
+    });
+    
+    // Create a senior editor
+    this.createUser({
+      username: "senior_editor",
+      password: "password",
+      fullName: "Senior Editor",
+      email: "senior@example.com",
+      isEditor: true,
+      editorRole: "senior_editor",
+      role: "senior_editor"
+    });
+    
+    // Assign editor to projects
+    this.assignEditorToProject({
+      userId: 2, // editor user
+      projectId: 1,
+      role: "editor",
+      editorRole: "editor"
+    });
+    
+    this.assignEditorToProject({
+      userId: 3, // senior editor
+      projectId: 2,
+      role: "editor",
+      editorRole: "senior_editor"
+    });
   }
 
   // User operations
@@ -377,6 +417,65 @@ export class MemStorage implements IStorage {
     
     if (!collaborator) return false;
     return this.collaborators.delete(collaborator.id);
+  }
+  
+  // Project editor operations
+  async getProjectsByEditor(editorId: number): Promise<Project[]> {
+    const editorAssignments = Array.from(this.projectEditors.values())
+      .filter(pe => pe.userId === editorId);
+    
+    return Promise.all(editorAssignments.map(assignment => 
+      this.getProject(assignment.projectId)
+    )).then(projects => projects.filter((p): p is Project => p !== undefined));
+  }
+  
+  async getProjectEditors(projectId: number): Promise<ProjectEditor[]> {
+    return Array.from(this.projectEditors.values()).filter(
+      (editor) => editor.projectId === projectId
+    );
+  }
+  
+  async getEditableProjects(userId: number): Promise<Project[]> {
+    // Get projects created by the user
+    const ownedProjects = await this.getProjectsByUser(userId);
+    
+    // Get projects where the user is an editor
+    const editableProjects = await this.getProjectsByEditor(userId);
+    
+    // Combine and remove duplicates
+    const allProjects = [...ownedProjects, ...editableProjects];
+    return [...new Map(allProjects.map(project => [project.id, project])).values()];
+  }
+  
+  async assignEditorToProject(assignment: InsertProjectEditor): Promise<ProjectEditor> {
+    const id = this.projectEditorIdCounter++;
+    const newAssignment: ProjectEditor = { id, ...assignment };
+    this.projectEditors.set(id, newAssignment);
+    return newAssignment;
+  }
+  
+  async removeEditorFromProject(userId: number, projectId: number): Promise<boolean> {
+    const editor = Array.from(this.projectEditors.values()).find(
+      (pe) => pe.userId === userId && pe.projectId === projectId
+    );
+    
+    if (!editor) return false;
+    return this.projectEditors.delete(editor.id);
+  }
+  
+  async canEditProject(userId: number, projectId: number): Promise<boolean> {
+    const project = await this.getProject(projectId);
+    if (!project) return false;
+    
+    // Creator always has edit permission
+    if (project.createdBy === userId) return true;
+    
+    // Check if user is assigned as an editor
+    const editorAssignment = Array.from(this.projectEditors.values()).find(
+      (pe) => pe.userId === userId && pe.projectId === projectId
+    );
+    
+    return !!editorAssignment;
   }
   
   // Feedback operations
