@@ -8,10 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus, Mail, MessageSquare, Calendar, Users, AlertCircle, Phone, Link, Edit } from "lucide-react";
+import { Search, UserPlus, Mail, MessageSquare, Calendar, Users, AlertCircle, Phone, Link, Edit, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 // Define talent roles for the dropdown
 const talentRoles = [
@@ -21,6 +24,13 @@ const talentRoles = [
   { id: "letterer", label: "Letterer" },
   { id: "inker", label: "Inker" },
   { id: "cover_artist", label: "Cover Artist" }
+];
+
+// Define editor roles
+const editorRoles = [
+  { id: "editor", label: "Editor", description: "Manage specific assigned projects" },
+  { id: "senior_editor", label: "Senior Editor", description: "Manage multiple projects and editors" },
+  { id: "editor_in_chief", label: "Editor-in-Chief", description: "Full access to all projects and editorial teams" }
 ];
 
 export default function Collaborators() {
@@ -117,6 +127,8 @@ export default function Collaborators() {
     phone: "",
     socialMedia: "",
     isEditor: false, // Always false - editor role has been removed
+    editorRole: "", // Editor, Senior Editor, Editor-in-Chief
+    assignedProjects: [] as number[],
     role: "",
     roles: [] as string[],
     avatarUrl: "",
@@ -125,6 +137,7 @@ export default function Collaborators() {
   });
   
   const [isAddingTeamMember, setIsAddingTeamMember] = useState(false);
+  const [isAddingEditor, setIsAddingEditor] = useState(false);
   const [addTeamMemberError, setAddTeamMemberError] = useState("");
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [editUserId, setEditUserId] = useState<number | null>(null);
@@ -159,21 +172,54 @@ export default function Collaborators() {
     setAddTeamMemberError("");
     
     try {
-      // Only require role selection for talent, not for editors
-      if (!newTeamMember.isEditor && newTeamMember.roles.length === 0) {
-        setAddTeamMemberError("Please select at least one role for this talent");
-        return;
+      // Validation logic based on user type
+      if (newTeamMember.isEditor) {
+        // Editor validation
+        if (!newTeamMember.editorRole) {
+          setAddTeamMemberError("Please select an editor role");
+          setIsAddingTeamMember(false);
+          return;
+        }
+        
+        // For regular editors, validate project assignments
+        if (newTeamMember.editorRole === 'editor' && newTeamMember.assignedProjects.length === 0) {
+          setAddTeamMemberError("Please assign at least one project to this editor");
+          setIsAddingTeamMember(false);
+          return;
+        }
+        
+        // For all editors, require username/password
+        if (!newTeamMember.username) {
+          setAddTeamMemberError("Username is required for editors");
+          setIsAddingTeamMember(false);
+          return;
+        }
+        
+        if (!isEditingUser && !newTeamMember.password) {
+          setAddTeamMemberError("Password is required for editors");
+          setIsAddingTeamMember(false);
+          return;
+        }
+      } else {
+        // Talent validation
+        if (newTeamMember.roles.length === 0) {
+          setAddTeamMemberError("Please select at least one role for this talent");
+          setIsAddingTeamMember(false);
+          return;
+        }
       }
       
       const method = isEditingUser ? 'PATCH' : 'POST';
       const url = isEditingUser ? `/api/users/${editUserId}` : '/api/users';
       
-      // Prepare the payload - don't send role info for editors
+      // Prepare the payload based on user type
       const payload = {
         ...newTeamMember,
-        // Only include role for non-editors or if roles are selected
-        ...((!newTeamMember.isEditor && newTeamMember.roles.length > 0) ? {
-          role: newTeamMember.roles[0], // Primary role
+        // Always ensure isEditor is set correctly
+        isEditor: !!newTeamMember.isEditor,
+        // For talent, set the primary role
+        ...(!newTeamMember.isEditor ? {
+          role: newTeamMember.roles[0] || "", // Primary role
         } : {})
       };
       
@@ -196,13 +242,18 @@ export default function Collaborators() {
         email: "",
         phone: "",
         socialMedia: "",
-        isEditor: false, // Always false - editor role has been removed
+        isEditor: false,
+        editorRole: "",
+        assignedProjects: [],
         role: "",
         roles: [],
         avatarUrl: "",
         username: "talent_" + Date.now(),
         password: ""
       });
+      
+      // Reset form dialogs
+      setIsAddingEditor(false);
       
       // Reset edit state
       setIsEditingUser(false);
@@ -236,6 +287,8 @@ export default function Collaborators() {
       phone: user.phone || "",
       socialMedia: user.socialMedia || "",
       isEditor: user.isEditor || false,
+      editorRole: user.editorRole || "",
+      assignedProjects: user.assignedProjects || [],
       role: user.role || "",
       roles: user.roles || [],
       avatarUrl: user.avatarUrl || "",
@@ -244,6 +297,14 @@ export default function Collaborators() {
     });
     setIsEditingUser(true);
     setEditUserId(user.id);
+    // If it's an editor, show the editor form
+    if (user.isEditor) {
+      setIsAddingEditor(true);
+      setIsAddingTeamMember(false);
+    } else {
+      setIsAddingEditor(false);
+      setIsAddingTeamMember(true);
+    }
   };
   
   return (
@@ -500,7 +561,23 @@ export default function Collaborators() {
                         <CardTitle>Editorial Team</CardTitle>
                         <CardDescription>People who can access the admin interface</CardDescription>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setNewTeamMember({
+                            ...newTeamMember,
+                            fullName: "",
+                            email: "",
+                            isEditor: true,
+                            editorRole: "editor",
+                            assignedProjects: [],
+                            username: "editor_" + Date.now(),
+                            password: Math.random().toString(36).slice(-8)
+                          });
+                          setIsAddingEditor(true);
+                        }}
+                      >
                         <UserPlus className="h-4 w-4 mr-2" />
                         Add Editor
                       </Button>
@@ -522,7 +599,7 @@ export default function Collaborators() {
                           editorUsers.map(editor => (
                             <Card key={editor.id} className="bg-primary/5 border-primary/20">
                               <CardContent className="p-4">
-                                <div className="flex items-center">
+                                <div className="flex">
                                   <Avatar className="h-10 w-10 mr-3 border-2 border-primary">
                                     <AvatarImage src={editor.avatarUrl || ''} alt={editor.fullName || ''} />
                                     <AvatarFallback className="bg-primary text-white">
@@ -531,9 +608,21 @@ export default function Collaborators() {
                                         : 'ED'}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <div>
-                                    <p className="font-medium">{editor.fullName || editor.username}</p>
+                                  <div className="flex-1">
+                                    <div className="flex justify-between items-start">
+                                      <p className="font-medium">{editor.fullName || editor.username}</p>
+                                      <button 
+                                        onClick={() => handleEditUser(editor)}
+                                        className="text-slate-400 hover:text-primary transition-colors"
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </button>
+                                    </div>
                                     <p className="text-xs text-slate-500">{editor.email}</p>
+                                    <Badge className="mt-1" variant="outline">
+                                      {editor.editorRole === 'editor_in_chief' ? 'Editor-in-Chief' :
+                                       editor.editorRole === 'senior_editor' ? 'Senior Editor' : 'Editor'}
+                                    </Badge>
                                   </div>
                                 </div>
                               </CardContent>
@@ -705,14 +794,195 @@ export default function Collaborators() {
                   <p className="text-slate-500">Creates cover illustrations</p>
                 </div>
                 <div>
-                  <h3 className="font-medium">Character Designer</h3>
-                  <p className="text-slate-500">Develops character designs and style guides</p>
+                  <h3 className="font-medium">Inker</h3>
+                  <p className="text-slate-500">Provides finishes and inks over pencil art</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Editor Form Dialog */}
+      <Dialog open={isAddingEditor} onOpenChange={(open) => !open && setIsAddingEditor(false)}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>{isEditingUser ? "Edit Editor" : "Add New Editor"}</DialogTitle>
+            <DialogDescription>
+              {isEditingUser 
+                ? "Update editor information and permissions" 
+                : "Add a new editor to manage comic book projects"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="editor-name">Full Name *</Label>
+              <Input
+                id="editor-name"
+                placeholder="Editor's full name"
+                value={newTeamMember.fullName}
+                onChange={(e) => setNewTeamMember({...newTeamMember, fullName: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="editor-email">Email Address *</Label>
+              <Input
+                id="editor-email"
+                type="email"
+                placeholder="editor@example.com"
+                value={newTeamMember.email}
+                onChange={(e) => setNewTeamMember({...newTeamMember, email: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="editor-username">Username *</Label>
+              <Input
+                id="editor-username"
+                placeholder="Username for login"
+                value={newTeamMember.username}
+                onChange={(e) => setNewTeamMember({...newTeamMember, username: e.target.value})}
+              />
+            </div>
+            
+            {!isEditingUser && (
+              <div className="grid gap-2">
+                <Label htmlFor="editor-password">Password *</Label>
+                <Input
+                  id="editor-password"
+                  type="password"
+                  placeholder="Secure password"
+                  value={newTeamMember.password}
+                  onChange={(e) => setNewTeamMember({...newTeamMember, password: e.target.value})}
+                />
+              </div>
+            )}
+            
+            <div className="grid gap-2">
+              <Label>Editor Role *</Label>
+              <RadioGroup 
+                value={newTeamMember.editorRole} 
+                onValueChange={(value) => setNewTeamMember({...newTeamMember, editorRole: value})}
+              >
+                {editorRoles.map(role => (
+                  <div key={role.id} className="flex items-start space-x-2 p-2 rounded-md hover:bg-slate-50">
+                    <RadioGroupItem value={role.id} id={`editor-role-${role.id}`} className="mt-1" />
+                    <div className="grid gap-1">
+                      <Label htmlFor={`editor-role-${role.id}`} className="font-medium">
+                        {role.label}
+                      </Label>
+                      <p className="text-sm text-slate-500">{role.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+            
+            {newTeamMember.editorRole === 'editor' && (
+              <div className="grid gap-2">
+                <Label>Assigned Projects</Label>
+                <Select 
+                  value="select-projects"
+                  onValueChange={(value) => {
+                    if (value === "select-projects") return;
+                    const projectId = parseInt(value);
+                    if (!isNaN(projectId) && !newTeamMember.assignedProjects.includes(projectId)) {
+                      setNewTeamMember({
+                        ...newTeamMember, 
+                        assignedProjects: [...newTeamMember.assignedProjects, projectId]
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select projects to assign" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="select-projects">Select projects...</SelectItem>
+                    {projects?.map(project => (
+                      <SelectItem key={project.id} value={project.id.toString()}>
+                        {project.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {newTeamMember.assignedProjects.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {newTeamMember.assignedProjects.map(projectId => {
+                      const project = projects?.find(p => p.id === projectId);
+                      return project ? (
+                        <Badge key={projectId} className="pl-2 flex items-center gap-1">
+                          {project.title}
+                          <button 
+                            className="ml-1 text-xs hover:bg-primary/20 rounded-full p-0.5"
+                            onClick={() => setNewTeamMember({
+                              ...newTeamMember,
+                              assignedProjects: newTeamMember.assignedProjects.filter(id => id !== projectId)
+                            })}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                )}
+                
+                <p className="text-xs text-slate-500 mt-1">
+                  Regular editors can only see and manage their assigned projects
+                </p>
+              </div>
+            )}
+            
+            {addTeamMemberError && (
+              <div className="bg-red-50 border border-red-200 p-3 rounded-md flex items-start">
+                <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                <p className="text-red-700 text-sm">{addTeamMemberError}</p>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsAddingEditor(false);
+                // Reset form if not editing
+                if (!isEditingUser) {
+                  setNewTeamMember({
+                    ...newTeamMember,
+                    fullName: "",
+                    email: "",
+                    isEditor: false,
+                    editorRole: "",
+                    assignedProjects: [],
+                    username: "talent_" + Date.now(),
+                    password: ""
+                  });
+                }
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddTeamMember}
+              disabled={isAddingTeamMember || !newTeamMember.fullName || !newTeamMember.email}
+              className="min-w-[120px]"
+            >
+              {isAddingTeamMember && (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {isEditingUser ? 'Update Editor' : 'Add Editor'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

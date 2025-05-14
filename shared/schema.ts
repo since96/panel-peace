@@ -12,6 +12,8 @@ export const users = pgTable("users", {
   phone: text("phone"),
   socialMedia: text("social_media"), // JSON string of social media links
   isEditor: boolean("is_editor").default(false), // Flag to separate editors from talent
+  editorRole: text("editor_role"), // Editor role type: editor, senior_editor, editor_in_chief
+  assignedProjects: integer("assigned_projects").array(), // Projects assigned to editor (only relevant for editors)
   role: text("role"), // Primary role (backwards compatibility)
   roles: text("roles").array(), // Multiple roles support
   avatarUrl: text("avatar_url"),
@@ -25,6 +27,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   phone: true,
   socialMedia: true,
   isEditor: true,
+  editorRole: true,
+  assignedProjects: true,
   role: true,
   roles: true,
   avatarUrl: true,
