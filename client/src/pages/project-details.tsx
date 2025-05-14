@@ -256,14 +256,6 @@ export default function ProjectDetails() {
     onError: (error) => {
       console.error("Error updating workflow step:", error);
       toast({
-        title: "Update failed",
-        description: error.message || "Failed to update workflow step",
-        variant: "destructive"
-      });
-      setEditingStep(null);
-    },
-    onError: (error) => {
-      toast({
         title: "Failed to update step",
         description: error.message,
         variant: "destructive"
@@ -1327,7 +1319,10 @@ export default function ProjectDetails() {
           <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={() => setShowEditStepDialog(false)}
+              onClick={() => {
+                setShowEditStepDialog(false);
+                setEditingStep(null);
+              }}
             >
               Cancel
             </Button>
