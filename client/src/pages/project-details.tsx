@@ -95,24 +95,26 @@ export default function ProjectDetails() {
   
   const { data: workflowSteps, isLoading: isWorkflowLoading } = useQuery<WorkflowStep[]>({
     queryKey: [`/api/projects/${id}/workflow-steps`],
-    enabled: !!id,
-    onSuccess: (data) => {
-      if (data && data.length > 0 && project?.dueDate) {
-        // Check if the last step (production) is scheduled after the project due date
-        const lastStep = data[data.length - 1];
-        if (lastStep?.dueDate) {
-          const productionEndDate = new Date(lastStep.dueDate);
-          const projectDueDate = new Date(project.dueDate);
-          
-          if (productionEndDate > projectDueDate) {
-            setScheduleFeasible(false);
-          } else {
-            setScheduleFeasible(true);
-          }
+    enabled: !!id
+  });
+  
+  // Use an effect to check schedule feasibility whenever workflow steps or project changes
+  useEffect(() => {
+    if (workflowSteps && workflowSteps.length > 0 && project?.dueDate) {
+      // Check if the last step (production) is scheduled after the project due date
+      const lastStep = workflowSteps[workflowSteps.length - 1];
+      if (lastStep?.dueDate) {
+        const productionEndDate = new Date(lastStep.dueDate);
+        const projectDueDate = new Date(project.dueDate);
+        
+        if (productionEndDate > projectDueDate) {
+          setScheduleFeasible(false);
+        } else {
+          setScheduleFeasible(true);
         }
       }
     }
-  });
+  }, [workflowSteps, project]);
   
 
   
@@ -214,32 +216,39 @@ export default function ProjectDetails() {
       const res = await apiRequest("POST", `/api/projects/${id}/initialize-workflow`, {});
       const data = await res.json();
       
-      // Check the server logs for warnings about feasibility
-      const lastWorkflowStep = data[data.length - 1];
-      const productionEndDate = lastWorkflowStep?.dueDate ? new Date(lastWorkflowStep.dueDate) : null;
-      const projectDueDate = project?.dueDate ? new Date(project.dueDate) : null;
-      
-      if (productionEndDate && projectDueDate && productionEndDate > projectDueDate) {
-        setScheduleFeasible(false);
-      } else {
-        setScheduleFeasible(true);
-      }
-      
+      // Check feasibility after getting new data
       return data;
     },
     onSuccess: (data) => {
-      if (!scheduleFeasible) {
-        toast({
-          title: "Warning: Unrealistic Schedule",
-          description: "The calculated completion date is later than your project due date. Consider adjusting the schedule or due date.",
-          variant: "destructive"
-        });
+      // We need to get fresh data after initialization
+      if (data && data.length > 0 && project?.dueDate) {
+        const lastWorkflowStep = data[data.length - 1];
+        const productionEndDate = lastWorkflowStep?.dueDate ? new Date(lastWorkflowStep.dueDate) : null;
+        const projectDueDate = new Date(project.dueDate);
+        
+        const isFeasible = !productionEndDate || productionEndDate <= projectDueDate;
+        setScheduleFeasible(isFeasible);
+        
+        if (!isFeasible) {
+          toast({
+            title: "Warning: Unrealistic Schedule",
+            description: "The calculated completion date is later than your project due date. Consider adjusting the schedule or due date.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Workflow initialized",
+            description: "Comic production workflow has been set up successfully"
+          });
+        }
       } else {
         toast({
           title: "Workflow initialized",
           description: "Comic production workflow has been set up successfully"
         });
+        setScheduleFeasible(true);
       }
+      
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
     },
     onError: (error) => {
@@ -699,11 +708,16 @@ export default function ProjectDetails() {
                                         </TooltipProvider>
                                       </div>
                                       
-                                      <Progress 
-                                        value={step.progress} 
-                                        className={`h-2 w-32 mt-2`} 
-                                        indicatorClassName={progressStatusColors.bg}
-                                      />
+                                      <div className="w-full flex items-center justify-end my-2">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs text-slate-500">{step.progress}%</span>
+                                          <Progress 
+                                            value={step.progress} 
+                                            className={`h-2 w-32`} 
+                                            indicatorClassName={progressStatusColors.bg}
+                                          />
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
