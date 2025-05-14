@@ -708,7 +708,7 @@ export default function ProjectDetails() {
                                   
                                   <div className="flex-none">
                                     <div className="flex flex-col items-end gap-2">
-                                      <div className="grid grid-cols-2 gap-2 w-full">
+                                      <div className="grid grid-cols-3 gap-2 w-full">
                                         <Button 
                                           size="sm" 
                                           variant="outline"
@@ -722,18 +722,7 @@ export default function ProjectDetails() {
                                           Update Status
                                         </Button>
                                         
-                                        <Button 
-                                          size="sm" 
-                                          variant="outline"
-                                          onClick={() => {
-                                            setEditingStep(step);
-                                            setShowEditStepDialog(true);
-                                          }}
-                                          className="flex items-center justify-center w-full"
-                                        >
-                                          <Pencil className="h-4 w-4 mr-2" />
-                                          Edit Details
-                                        </Button>
+
                                         
                                         <Button 
                                           size="sm" 
@@ -1361,7 +1350,7 @@ export default function ProjectDetails() {
                       <Calendar
                         mode="single"
                         selected={editingStep.dueDate ? new Date(editingStep.dueDate) : undefined}
-                        onSelect={(date) => setEditingStep({...editingStep, dueDate: date})}
+                        onSelect={(date) => setEditingStep({...editingStep, dueDate: date || null})}
                         initialFocus
                       />
                     </PopoverContent>
