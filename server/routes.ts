@@ -25,110 +25,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok" });
   });
   
-  // Special handler for Replit auth closer page
-  // This catches the authentication callback that Replit makes after successful login
+  // This is a special route to handle Replit's auth_with_repl_site_closer callback
+  // We simply serve a static HTML file with a button that will take users back to the app
   app.get("/auth_with_repl_site_closer", (req, res) => {
     console.log("Auth closer route hit, query params:", req.query);
     
-    const domain = req.query.domain as string;
-    if (!domain) {
-      return res.status(400).send("Missing domain parameter");
-    }
-    
-    // Render HTML that will redirect the user back to our app
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Authentication Complete</title>
-        <style>
-          body {
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #13111a;
-            color: #fff;
-            text-align: center;
-          }
-          h1 {
-            margin-top: 0;
-            color: #4f46e5;
-          }
-          .button {
-            display: inline-block;
-            background-color: #4f46e5;
-            color: white;
-            font-weight: 600;
-            padding: 1rem 2rem;
-            border-radius: 0.375rem;
-            text-decoration: none;
-            margin-top: 20px;
-          }
-          .container {
-            padding: 2rem;
-            background-color: #1e1b29;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-          }
-        </style>
-        <script>
-          window.onload = function() {
-            // Try multiple approaches to redirect
-            const redirectToApp = function() {
-              const appUrl = "https://${domain}";
-              
-              try {
-                // If this window was opened by another window
-                if (window.opener) {
-                  console.log("Redirecting opener to", appUrl);
-                  window.opener.location.href = appUrl;
-                  
-                  // Try to close this window
-                  window.close();
-                  return;
-                }
-                
-                // If we're inside an iframe
-                if (window.parent && window.parent !== window) {
-                  console.log("Redirecting parent to", appUrl);
-                  window.parent.location.href = appUrl;
-                  return;
-                }
-                
-                // Direct navigation as fallback
-                console.log("Redirecting self to", appUrl);
-                window.location.href = appUrl;
-              } catch (err) {
-                console.error("Error during redirect:", err);
-                // Fallback to direct navigation
-                window.location.href = appUrl;
-              }
-            };
-            
-            // Execute the redirect
-            redirectToApp();
-            
-            // Also set a backup timeout
-            setTimeout(redirectToApp, 1000);
-          };
-        </script>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Authentication Successful</h1>
-          <p>You've been successfully authenticated with Replit.</p>
-          <p>Redirecting you back to the application...</p>
-          <a href="https://${domain}" class="button">Return to Application</a>
-        </div>
-      </body>
-      </html>
-    `);
+    // Redirect to our static HTML file with a prominent return button
+    res.redirect("/auth_with_repl_site_closer.html");
   });
   
   // Authentication status route
