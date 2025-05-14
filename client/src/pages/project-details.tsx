@@ -428,6 +428,7 @@ export default function ProjectDetails() {
     }
   });
 
+  // Updates overall project progress
   const handleProgressUpdate = () => {
     if (projectProgress !== project?.progress) {
       updateProjectMutation.mutateAsync({
@@ -436,6 +437,16 @@ export default function ProjectDetails() {
       });
     } else {
       setEditing(false);
+    }
+  };
+  
+  // Updates individual step progress from the tracker dialog
+  const handleStepProgressUpdate = (progress: number) => {
+    if (selectedStepForTracker) {
+      updateStepProgressMutation.mutate({
+        stepId: selectedStepForTracker.id,
+        progress
+      });
     }
   };
 
@@ -944,7 +955,7 @@ export default function ProjectDetails() {
                 totalCount={selectedStepForTracker.stepType.includes('pencil') || 
                             selectedStepForTracker.stepType.includes('ink') || 
                             selectedStepForTracker.stepType.includes('color') ? 22 : 1}
-                onProgressUpdate={handleProgressUpdate}
+                onProgressUpdate={handleStepProgressUpdate}
               />
               <div className="flex justify-end space-x-2 mt-4">
                 <Button onClick={() => setShowTrackerDialog(false)} variant="outline">Close</Button>
