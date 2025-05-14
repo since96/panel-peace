@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, UserPlus, Mail, MessageSquare, Clock, Users, AlertCircle } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 // Define talent roles for the dropdown
 const talentRoles = [
@@ -71,10 +73,84 @@ export default function Collaborators() {
     );
   }, [users, searchQuery]);
   
+  // Get toast function
+  const { toast } = useToast();
+  
+  // Form state for creating a new team member
+  const [newTeamMember, setNewTeamMember] = useState({
+    username: "",
+    password: "",
+    fullName: "",
+    role: selectedRole,
+    avatarUrl: ""
+  });
+  
+  const [isAddingTeamMember, setIsAddingTeamMember] = useState(false);
+  const [addTeamMemberError, setAddTeamMemberError] = useState("");
+  
+  // Handle adding a new team member
+  const handleAddTeamMember = async () => {
+    if (!newTeamMember.username || !newTeamMember.password) {
+      setAddTeamMemberError("Username and password are required");
+      return;
+    }
+    
+    setIsAddingTeamMember(true);
+    setAddTeamMemberError("");
+    
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...newTeamMember,
+          role: selectedRole // Use the selected role from the dropdown
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add team member");
+      }
+      
+      // Clear the form
+      setNewTeamMember({
+        username: "",
+        password: "",
+        fullName: "",
+        role: selectedRole,
+        avatarUrl: ""
+      });
+      
+      // Refetch the users list
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      
+      // Success message
+      toast({
+        title: "Team member added",
+        description: "The new team member has been added successfully",
+        variant: "default"
+      });
+    } catch (err) {
+      console.error("Error adding team member:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to add team member";
+      setAddTeamMemberError(errorMessage);
+    } finally {
+      setIsAddingTeamMember(false);
+    }
+  };
+  
+  // Legacy invite function (keeping for compatibility)
   const handleInvite = () => {
     if (!inviteEmail) return;
     // In a real app, you would send an invitation to this email
-    alert(`Invitation sent to ${inviteEmail} for role: ${selectedRole}`);
+    toast({
+      title: "Invitation sent",
+      description: `Invitation sent to ${inviteEmail} for role: ${selectedRole}`,
+      variant: "default"
+    });
     setInviteEmail("");
   };
   
@@ -524,7 +600,7 @@ export default function Collaborators() {
                   <div className="pt-4 mt-2 border-t border-slate-200">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Total Team Members</span>
-                      <span className="text-sm font-bold">{sampleCollaborators.length}</span>
+                      <span className="text-sm font-bold">{users?.length || 0}</span>
                     </div>
                   </div>
                 </div>

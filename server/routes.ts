@@ -38,6 +38,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch users" });
     }
   });
+  
+  // Get a specific user
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+  
+  // Create a new user (team member)
+  app.post("/api/users", async (req, res) => {
+    try {
+      const { username, password, fullName, role, avatarUrl } = req.body;
+      
+      // Simple validation
+      if (!username || !password) {
+        return res.status(400).json({ 
+          message: "Username and password are required",
+          errors: { 
+            username: !username ? { _errors: ["Username is required"] } : undefined,
+            password: !password ? { _errors: ["Password is required"] } : undefined
+          }
+        });
+      }
+      
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ 
+          message: "Username already exists", 
+          errors: { username: { _errors: ["Username already exists"] } } 
+        });
+      }
+      
+      // Create the user
+      const newUser = await storage.createUser({
+        username,
+        password, // In a real app, you'd hash this password
+        fullName: fullName || undefined,
+        role: role || undefined,
+        avatarUrl: avatarUrl || undefined
+      });
+      
+      res.status(201).json(newUser);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
 
   // Project routes
   app.get("/api/projects", async (_req, res) => {
