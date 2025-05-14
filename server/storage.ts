@@ -16,10 +16,11 @@ import {
 // Interface for storage operations
 export interface IStorage {
   // User operations
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: number | string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  upsertUser(userData: Partial<InsertUser> & { id: string | number }): Promise<User>;
   
   // Project operations
   getProject(id: number): Promise<Project | undefined>;
@@ -331,14 +332,79 @@ export class MemStorage implements IStorage {
   }
 
   // User operations
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUser(id: number | string): Promise<User | undefined> {
+    // Handle both numeric and string IDs (for Replit auth integration)
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (isNaN(numericId) && typeof id === 'string') {
+      // This is a Replit auth ID, search by username or email
+      return Array.from(this.users.values()).find(
+        user => user.username === id || user.email === id
+      );
+    }
+    return this.users.get(numericId);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
       (user) => user.username === username
     );
+  }
+  
+  async upsertUser(userData: Partial<InsertUser> & { id: string | number }): Promise<User> {
+    // Convert string ID to number if possible
+    let id: number;
+    if (typeof userData.id === 'string') {
+      // Check if we already have a user with this external ID or email
+      const existingUser = Array.from(this.users.values()).find(
+        u => u.username === userData.id || (userData.email && u.email === userData.email)
+      );
+      
+      if (existingUser) {
+        // Update existing user
+        const updatedUser = { ...existingUser };
+        if (userData.email) updatedUser.email = userData.email;
+        if (userData.fullName) updatedUser.fullName = userData.fullName;
+        if (userData.avatarUrl) updatedUser.avatarUrl = userData.avatarUrl;
+        
+        this.users.set(existingUser.id, updatedUser);
+        return updatedUser;
+      } else {
+        // Create new user
+        id = ++this.userIdCounter;
+      }
+    } else {
+      id = userData.id as number;
+    }
+    
+    // Create or update user
+    const newUserData: Partial<User> = {
+      ...userData,
+      id,
+      username: userData.username || `user${id}`,
+      password: userData.password || null,
+      fullName: userData.fullName || `User ${id}`,
+      email: userData.email || `user${id}@example.com`,
+      isEditor: userData.isEditor !== undefined ? userData.isEditor : false,
+    };
+    
+    const newUser: User = {
+      id,
+      username: newUserData.username!,
+      password: newUserData.password,
+      fullName: newUserData.fullName!,
+      email: newUserData.email!,
+      phone: newUserData.phone || null,
+      socialMedia: newUserData.socialMedia || null,
+      isEditor: newUserData.isEditor || null,
+      editorRole: newUserData.editorRole || null,
+      assignedProjects: newUserData.assignedProjects || null,
+      role: newUserData.role || null,
+      roles: newUserData.roles || null,
+      avatarUrl: newUserData.avatarUrl || null,
+    };
+    
+    this.users.set(id, newUser);
+    return newUser;
   }
 
   async createUser(user: InsertUser): Promise<User> {
