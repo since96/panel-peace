@@ -26,6 +26,61 @@ function hashPassword(password: string): string {
 export function setupDirectAuth(app: express.Express) {
   console.log("Setting up direct authentication with JWT...");
   
+  // Signup endpoint
+  app.post("/api/signup", async (req, res) => {
+    console.log("Received signup request:", req.body);
+    
+    const { username, password, fullName, email, isEditor, editorRole, role } = req.body;
+    
+    if (!username || !password || !fullName || !email) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required: username, password, fullName, and email"
+      });
+    }
+    
+    try {
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "Username already exists"
+        });
+      }
+      
+      // Create the new user
+      const newUser = await storage.createUser({
+        username,
+        password,
+        fullName,
+        email,
+        isEditor: isEditor || false,
+        editorRole: editorRole || "editor",
+        role: role || "Editor",
+        roles: ["editor"]
+      });
+      
+      // Create a safe user object without password
+      const safeUser = { ...newUser } as any;
+      if (safeUser.password) delete safeUser.password;
+      
+      console.log(`New user created: ${username}`);
+      
+      res.status(201).json({
+        success: true,
+        message: "User created successfully",
+        user: safeUser
+      });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({
+        success: false,
+        message: "An error occurred during signup"
+      });
+    }
+  });
+  
   // Direct login endpoint
   app.post("/api/direct-login", async (req, res) => {
     console.log("Received login request:", req.body);
