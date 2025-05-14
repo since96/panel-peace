@@ -186,7 +186,7 @@ export async function setupAuth(app: Express) {
       
       if (!domain) {
         console.error("No domain found in REPLIT_DOMAINS environment variable");
-        return res.status(500).json({ message: "Server configuration error: No domain found" });
+        return res.redirect("/login-page.html?error=missing_domain");
       }
       
       // Construct the auth URL with all required parameters
@@ -200,22 +200,28 @@ export async function setupAuth(app: Express) {
       console.log("Redirecting to auth URL:", authUrl.toString());
       return res.redirect(authUrl.toString());
     });
+    
+    // Redirect login page requests to our custom login page
+    app.get("/login", (req, res) => {
+      res.redirect("/login-page.html");
+    });
 
     app.get("/api/callback", async (req, res, next) => {
-      console.log("Auth callback received", req.query);
+      console.log("Auth callback received with query params:", req.query);
       
       try {
         // Check if the code is present
         if (!req.query.code) {
           console.error("No code found in callback");
-          return res.redirect("/api/login");
+          return res.redirect("/login-page.html?error=no_code");
         }
         
         const code = req.query.code as string;
         console.log("Auth code received:", code.substring(0, 10) + "...");
         
-        // Exchange the code for an access token
         try {
+          console.log("Exchanging code for token...");
+          // Exchange the code for an access token
           const tokenResponse = await axios.post(
             REPLIT_OAUTH_CONFIG.tokenURL,
             {
@@ -232,14 +238,20 @@ export async function setupAuth(app: Express) {
             }
           );
           
-          console.log("Token response status:", tokenResponse.status);
+          console.log("Token response received with status:", tokenResponse.status);
           
-          if (tokenResponse.data.access_token) {
+          if (tokenResponse.data && tokenResponse.data.access_token) {
             console.log("Access token received, fetching user profile");
             
             // Get user profile with the access token
             const userProfile = await fetchUserProfile(tokenResponse.data.access_token);
-            console.log("User profile received:", JSON.stringify(userProfile));
+            
+            if (!userProfile || !userProfile.id) {
+              console.error("Invalid user profile:", userProfile);
+              return res.redirect("/login-page.html?error=invalid_profile");
+            }
+            
+            console.log("User profile fetched successfully with ID:", userProfile.id);
             
             // Create a user object 
             const user: any = {
@@ -249,37 +261,37 @@ export async function setupAuth(app: Express) {
             };
             
             // Process and store in database
+            console.log("Storing user in database...");
             const dbUser = await processUser(userProfile);
             user.dbUser = dbUser;
-            console.log("User stored in database:", dbUser.id);
+            console.log("User stored in database with ID:", dbUser.id);
             
             // Log the user in
             req.login(user, (err) => {
               if (err) {
                 console.error("Error logging in user:", err);
-                console.error("Authentication error:", err);
-                return res.redirect('/auth-redirect.html?error=true');
+                return res.redirect('/auth-redirect.html?error=login_failed');
               }
               
-              // Redirect to our custom redirect page
-              console.log("Authentication successful, redirecting to home page");
+              // After successful login, always redirect to the static auth page
+              console.log("Authentication successful, redirecting to auth redirect page");
               return res.redirect('/auth-redirect.html');
             });
           } else {
             console.error("No access token found in response");
-            return res.redirect("/api/login");
+            return res.redirect("/login-page.html?error=no_access_token");
           }
         } catch (tokenError: any) {
           console.error("Error exchanging code for token:", tokenError.message);
           if (tokenError.response) {
             console.error("Response status:", tokenError.response.status);
-            console.error("Response data:", tokenError.response.data);
+            console.error("Response data:", JSON.stringify(tokenError.response.data));
           }
-          throw tokenError;
+          return res.redirect("/login-page.html?error=token_exchange_failed");
         }
-      } catch (error) {
-        console.error("Error in callback:", error);
-        return res.redirect('/auth-redirect.html?error=true');
+      } catch (error: any) {
+        console.error("Error in callback:", error.message);
+        return res.redirect('/login-page.html?error=general_error');
       }
     });
 
