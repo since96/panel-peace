@@ -45,7 +45,6 @@ interface ProjectEditorsProps {
 export default function ProjectEditors({ projectId, currentUserId, userRole }: ProjectEditorsProps) {
   const [showAddEditorDialog, setShowAddEditorDialog] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | "">("");
-  const [selectedRole, setSelectedRole] = useState<string>("editor");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -64,8 +63,12 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
 
   // Mutation to assign an editor to the project
   const assignEditorMutation = useMutation({
-    mutationFn: async (editorData: { userId: number; assignmentRole: string }) => {
-      return await apiRequest(`/api/projects/${projectId}/editors?userId=${currentUserId}`, 'POST', editorData);
+    mutationFn: async (userId: number) => {
+      // Use the editor's existing role by default, determined on the server side
+      return await apiRequest(`/api/projects/${projectId}/editors?userId=${currentUserId}`, 'POST', { 
+        userId: userId,
+        // No need to specify role, the server will use the user's existing role
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/editors`] });
@@ -75,7 +78,6 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
       });
       setShowAddEditorDialog(false);
       setSelectedUserId("");
-      setSelectedRole("editor");
     },
     onError: (error: any) => {
       toast({
@@ -123,10 +125,7 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
       return;
     }
 
-    assignEditorMutation.mutate({
-      userId: Number(selectedUserId),
-      assignmentRole: selectedRole,
-    });
+    assignEditorMutation.mutate(Number(selectedUserId));
   };
 
   // Handle removing editor
@@ -161,7 +160,7 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
               
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Editor</label>
+                  <label className="text-sm font-medium">Select Editor</label>
                   <Select
                     value={selectedUserId.toString()}
                     onValueChange={(value) => setSelectedUserId(Number(value))}
@@ -183,23 +182,9 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
                       )}
                     </SelectContent>
                   </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Role in Project</label>
-                  <Select
-                    value={selectedRole}
-                    onValueChange={setSelectedRole}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="editor">Editor</SelectItem>
-                      <SelectItem value="senior_editor">Senior Editor</SelectItem>
-                      <SelectItem value="editor_in_chief">Editor-in-Chief</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Editors will be assigned with their existing role
+                  </p>
                 </div>
               </div>
               
