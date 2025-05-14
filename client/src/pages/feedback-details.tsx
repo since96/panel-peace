@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
-import { FeedbackItem, Project } from '@shared/schema';
+import { FeedbackItem, Project, Comment } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -31,7 +31,7 @@ export default function FeedbackDetails() {
     enabled: !!feedback?.projectId,
   });
 
-  const { data: comments = [] } = useQuery({
+  const { data: comments = [] } = useQuery<Comment[]>({
     queryKey: [`/api/feedback/${id}/comments`],
     enabled: !!id,
   });
@@ -58,12 +58,12 @@ export default function FeedbackDetails() {
   });
 
   // Update local state when feedback data loads
-  useState(() => {
+  useEffect(() => {
     if (feedback) {
       setStatus(feedback.status);
       setPriority(feedback.priority);
     }
-  });
+  }, [feedback]);
 
   const handleStatusChange = (newStatus: string) => {
     setStatus(newStatus);
