@@ -19,7 +19,7 @@ export function CompletionTracker({
 }: CompletionTrackerProps) {
   const [selectedCount, setSelectedCount] = useState<number>(Math.round(currentProgress * totalCount / 100));
   
-  // Binary completion for plot and script steps
+  // Binary completion for plot and script steps only
   const isBinaryStep = stepType === 'plot_development' || stepType === 'script';
   
   // Generate options based on total count

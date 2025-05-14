@@ -866,7 +866,7 @@ export default function ProjectDetails() {
                                           >
                                             <ExternalLink className="h-3 w-3" />
                                             <span className="truncate max-w-[120px]">
-                                              {link.url.split('/').pop() || 'File link'}
+                                              Click for attached file
                                             </span>
                                           </a>
                                         ))}
@@ -1065,7 +1065,8 @@ export default function ProjectDetails() {
                 currentProgress={selectedStepForTracker.progress}
                 totalCount={selectedStepForTracker.stepType.includes('pencil') || 
                             selectedStepForTracker.stepType.includes('ink') || 
-                            selectedStepForTracker.stepType.includes('color') ? 22 : 1}
+                            selectedStepForTracker.stepType.includes('color') ||
+                            selectedStepForTracker.stepType.includes('letter') ? 22 : 1}
                 onProgressUpdate={handleStepProgressUpdate}
               />
               <div className="flex justify-end space-x-2 mt-4">
@@ -1325,7 +1326,13 @@ export default function ProjectDetails() {
                             const userRoles = user.roles || [user.role];
                             
                             // Match step type with appropriate roles
-                            if (stepType === 'plot' || stepType === 'script') {
+                            if (stepType === 'final_assembled_reader_proof' || stepType === 'final_production') {
+                              // Only editors can be assigned to these steps
+                              return user.isEditor;
+                            } else if (stepType === 'editorial_pages' || stepType === 'final_editorial_pages') {
+                              // Only production/design or editors can work on these steps
+                              return userRoles.some(role => role === 'production' || role === 'design') || user.isEditor;
+                            } else if (stepType === 'plot' || stepType === 'script') {
                               return userRoles.some(role => role === 'writer');
                             } else if (stepType === 'pencils' || stepType === 'inks' || stepType === 'roughs') {
                               return userRoles.some(role => role === 'artist' || role === 'cover_artist' || role === 'character_designer');
