@@ -1398,7 +1398,11 @@ export default function ProjectDetails() {
                       {/* Multiple assignees with checkboxes */}
                       <div className="border rounded-md p-4 mt-4">
                         <h4 className="text-sm font-medium mb-2">Additional Collaborators</h4>
-                        <div className="space-y-3 max-h-[250px] overflow-y-auto">
+                        <div className="text-xs text-slate-500 mb-3 bg-slate-50 p-2 rounded border">
+                          <p>Select additional collaborators who will help with this task. The primary assignee cannot be a collaborator simultaneously.</p>
+                          <p className="mt-1">All assignees will appear in project assignments and count toward their workload.</p>
+                        </div>
+                        <div className="space-y-3 max-h-[200px] overflow-y-auto">
                           {users
                             .filter(user => {
                               // Filter users based on workflow step type
@@ -1433,6 +1437,8 @@ export default function ProjectDetails() {
                               return true;
                             })
                             .map(user => {
+                              // Check if user is the primary assignee
+                              const isPrimaryAssignee = editingStep.assignedTo === user.id;
                               const isSelected = editingStep.assignees?.includes(user.id.toString()) || false;
                               
                               return (
@@ -1440,6 +1446,7 @@ export default function ProjectDetails() {
                                   <Checkbox 
                                     id={`user-${user.id}`} 
                                     checked={isSelected}
+                                    disabled={isPrimaryAssignee}
                                     onCheckedChange={(checked) => {
                                       const currentAssignees = editingStep.assignees || [];
                                       let newAssignees: string[];
@@ -1462,9 +1469,14 @@ export default function ProjectDetails() {
                                     htmlFor={`user-${user.id}`}
                                     className="text-sm cursor-pointer flex-1"
                                   >
-                                    <span className="font-medium">
+                                    <span className={`font-medium ${isPrimaryAssignee ? 'text-purple-700' : ''}`}>
                                       {user.fullName || user.username || `User ${user.id}`}
                                     </span>
+                                    {isPrimaryAssignee && (
+                                      <span className="ml-1 text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
+                                        Primary Assignee
+                                      </span>
+                                    )}
                                     {user.roles && user.roles.length > 0 ? (
                                       <span className="ml-1 text-xs text-slate-400">
                                         ({user.roles.map(r => r.charAt(0).toUpperCase() + r.slice(1).replace(/_/g, ' ')).join(', ')})
@@ -1515,7 +1527,7 @@ export default function ProjectDetails() {
               }}
               disabled={updateWorkflowStepMutation.isPending}
             >
-              {updateWorkflowStepMutation.isPending ? "Assigning..." : "Assign User"}
+              {updateWorkflowStepMutation.isPending ? "Saving..." : "Save Assignments"}
             </Button>
           </DialogFooter>
         </DialogContent>
