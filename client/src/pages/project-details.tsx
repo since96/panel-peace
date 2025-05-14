@@ -63,6 +63,7 @@ export default function ProjectDetails() {
   const [editingStep, setEditingStep] = useState<WorkflowStep | null>(null);
   const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
   const [showEditStepDialog, setShowEditStepDialog] = useState(false);
+  const [showUpdateStatusDialog, setShowUpdateStatusDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [commentText, setCommentText] = useState('');
@@ -787,11 +788,23 @@ export default function ProjectDetails() {
                                           variant="outline"
                                           onClick={() => {
                                             setEditingStep(step);
+                                            setShowUpdateStatusDialog(true);
+                                          }}
+                                        >
+                                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                                          Update Status
+                                        </Button>
+                                        
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => {
+                                            setEditingStep(step);
                                             setShowEditStepDialog(true);
                                           }}
                                         >
                                           <Pencil className="h-4 w-4 mr-2" />
-                                          Update Status
+                                          Edit Details
                                         </Button>
                                         
                                         <Button 
@@ -1343,6 +1356,91 @@ export default function ProjectDetails() {
               disabled={updateWorkflowStepMutation.isPending}
             >
               {updateWorkflowStepMutation.isPending ? "Updating..." : "Update Step"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Status Dialog */}
+      <Dialog open={showUpdateStatusDialog} onOpenChange={setShowUpdateStatusDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Step Status</DialogTitle>
+            <DialogDescription>
+              Quickly update the status of this workflow step.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingStep && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="quick-status" className="text-right">
+                  Status
+                </Label>
+                <Select 
+                  value={editingStep.status}
+                  onValueChange={(value) => setEditingStep({...editingStep, status: value})}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_started">Not Started</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="delayed">Delayed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="quick-progress" className="text-right">
+                  Progress
+                </Label>
+                <div className="col-span-3">
+                  <div className="flex items-center space-x-2">
+                    <Slider
+                      id="quick-progress"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={[editingStep.progress]}
+                      onValueChange={(value) => setEditingStep({...editingStep, progress: value[0]})}
+                      className="flex-1"
+                    />
+                    <span>{editingStep.progress}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowUpdateStatusDialog(false);
+                setEditingStep(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (editingStep) {
+                  const updateData = {
+                    stepId: editingStep.id,
+                    status: editingStep.status,
+                    progress: editingStep.progress
+                  };
+                  updateWorkflowStepMutation.mutate(updateData);
+                  setShowUpdateStatusDialog(false);
+                }
+              }}
+              disabled={updateWorkflowStepMutation.isPending}
+            >
+              {updateWorkflowStepMutation.isPending ? "Updating..." : "Update Status"}
             </Button>
           </DialogFooter>
         </DialogContent>
