@@ -64,6 +64,7 @@ export default function ProjectDetails() {
   const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
   const [showEditStepDialog, setShowEditStepDialog] = useState(false);
   const [showUpdateStatusDialog, setShowUpdateStatusDialog] = useState(false);
+  const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [commentText, setCommentText] = useState('');
@@ -808,6 +809,18 @@ export default function ProjectDetails() {
                                         </Button>
                                         
                                         <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => {
+                                            setEditingStep(step);
+                                            setShowDeadlineDialog(true);
+                                          }}
+                                        >
+                                          <CalendarIcon className="h-4 w-4 mr-2" />
+                                          Adjust Deadline
+                                        </Button>
+                                        
+                                        <Button 
                                           size="sm"
                                           onClick={() => {
                                             setSelectedStep(step);
@@ -1356,6 +1369,103 @@ export default function ProjectDetails() {
               disabled={updateWorkflowStepMutation.isPending}
             >
               {updateWorkflowStepMutation.isPending ? "Updating..." : "Update Step"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Deadline Adjustment Dialog */}
+      <Dialog open={showDeadlineDialog} onOpenChange={setShowDeadlineDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Adjust Deadline</DialogTitle>
+            <DialogDescription>
+              Update the deadline for this workflow step.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingStep && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="step-title-deadline" className="text-right">
+                  Step
+                </Label>
+                <Input
+                  id="step-title-deadline"
+                  value={editingStep.title}
+                  className="col-span-3"
+                  disabled
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="current-deadline" className="text-right">
+                  Current Deadline
+                </Label>
+                <div className="col-span-3">
+                  <p className="text-sm">
+                    {editingStep.dueDate 
+                      ? format(new Date(editingStep.dueDate), 'PPP') 
+                      : 'No deadline set'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="new-deadline" className="text-right">
+                  New Deadline
+                </Label>
+                <div className="col-span-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className="justify-start text-left font-normal w-full"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editingStep.dueDate 
+                          ? format(new Date(editingStep.dueDate), 'PPP') 
+                          : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={editingStep.dueDate ? new Date(editingStep.dueDate) : undefined}
+                        onSelect={(date) => setEditingStep({...editingStep, dueDate: date})}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeadlineDialog(false);
+                setEditingStep(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (editingStep) {
+                  const updateData = {
+                    stepId: editingStep.id,
+                    dueDate: editingStep.dueDate
+                  };
+                  updateWorkflowStepMutation.mutate(updateData);
+                  setShowDeadlineDialog(false);
+                }
+              }}
+              disabled={updateWorkflowStepMutation.isPending}
+            >
+              {updateWorkflowStepMutation.isPending ? "Updating..." : "Update Deadline"}
             </Button>
           </DialogFooter>
         </DialogContent>
