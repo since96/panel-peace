@@ -18,15 +18,15 @@ export function AuthButtons() {
   if (isAuthenticated) {
     return (
       <div className="flex items-center gap-3">
-        {user?.profileImageUrl && (
+        {user?.avatarUrl && (
           <img 
-            src={user.profileImageUrl} 
+            src={user.avatarUrl} 
             alt="Profile"
             className="h-8 w-8 rounded-full object-cover border border-primary/20"
           />
         )}
         <span className="text-sm font-medium hidden md:inline-block">
-          {user?.firstName || user?.id}
+          {user?.fullName || user?.username || user?.id}
         </span>
         <Button 
           variant="ghost" 
