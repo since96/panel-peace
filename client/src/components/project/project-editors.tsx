@@ -65,7 +65,7 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
   const assignEditorMutation = useMutation({
     mutationFn: async (userId: number) => {
       // Use the editor's existing role by default, determined on the server side
-      return await apiRequest(`/api/projects/${projectId}/editors?userId=${currentUserId}`, 'POST', { 
+      return await apiRequest('POST', `/api/projects/${projectId}/editors?userId=${currentUserId}`, { 
         userId: userId,
         // No need to specify role, the server will use the user's existing role
       });
@@ -91,7 +91,7 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
   // Mutation to remove an editor from the project
   const removeEditorMutation = useMutation({
     mutationFn: async (userId: number) => {
-      return await apiRequest(`/api/projects/${projectId}/editors/${userId}?userId=${currentUserId}`, 'DELETE');
+      return await apiRequest('DELETE', `/api/projects/${projectId}/editors/${userId}?userId=${currentUserId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/editors`] });
