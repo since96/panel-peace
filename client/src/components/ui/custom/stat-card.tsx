@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 interface StatCardProps {
   title: string;
   count: number;
-  unit?: string;
 }
 
 export function StatCard({
@@ -18,7 +17,6 @@ export function StatCard({
       </div>
       <div className="mt-4 flex items-baseline">
         <p className="text-4xl font-bold text-slate-900">{count}</p>
-        {unit && <p className="ml-2 text-sm text-slate-500">{unit}</p>}
       </div>
     </div>
   );
