@@ -372,84 +372,9 @@ export default function ProjectDetails() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                  <div className="mb-2 md:mb-0">
-                    <h3 className="text-sm font-medium text-slate-700">Project Progress</h3>
-                    <div className="text-sm text-slate-500">
-                      Overall completion status
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4 items-center">
-                    {editing ? (
-                      <>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={projectProgress}
-                          onChange={(e) => setProjectProgress(parseInt(e.target.value) || 0)}
-                          className="w-20"
-                        />
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={handleProgressUpdate} disabled={updateProjectMutation.isPending}>
-                            {updateProjectMutation.isPending ? "Saving..." : "Save"}
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => {
-                            setProjectProgress(project.progress);
-                            setEditing(false);
-                          }}>
-                            Cancel
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-medium">{project.progress}% complete</span>
-                        <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
+
                 
-                <Progress value={project.progress} className="h-2 mb-8" />
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card>
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500">Script</p>
-                        <p className="font-medium">{assets?.filter(a => a.type === 'script').length || 0} files</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
-                        <Pencil className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500">Artwork</p>
-                        <p className="font-medium">{assets?.filter(a => a.type.startsWith('image')).length || 0} files</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
-                        <MessageCircle className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500">Feedback</p>
-                        <p className="font-medium">{feedbackItems?.length || 0} items</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                <div className="grid grid-cols-1 gap-4">
                   <Card>
                     <CardContent className="p-4 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center text-warning">
