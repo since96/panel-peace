@@ -7,12 +7,10 @@ import { AlertCircle, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
-  collaborators?: Array<{ id: number; name: string; avatarUrl?: string }>;
 }
 
 
-
-export function ProjectCard({ project, collaborators = [] }: ProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
   const { title, issue, description, status, progress, dueDate } = project;
   const statusColors = getStatusColor(status);
   
@@ -108,24 +106,18 @@ export function ProjectCard({ project, collaborators = [] }: ProjectCardProps) {
       
       <div className="border-t border-slate-200 p-4">
         <div className="flex items-center justify-between">
-          <div className="flex -space-x-2">
-            {collaborators.slice(0, 3).map((collaborator, index) => (
-              <Avatar key={index} className="w-6 h-6 border border-white">
-                <AvatarFallback className="text-xs">
-                  {collaborator.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-            
-            {collaborators.length > 3 && (
-              <div className="w-6 h-6 rounded-full bg-slate-100 border border-white flex items-center justify-center text-xs font-medium text-slate-500">
-                +{collaborators.length - 3}
-              </div>
-            )}
-            
-            {collaborators.length === 0 && (
-              <span className="text-xs text-slate-400">No collaborators</span>
-            )}
+          <div>
+            {/* Project status indicator instead of collaborator avatars */}
+            <span className={cn(
+              "px-2 py-1 rounded-md text-xs",
+              status === 'in_progress' ? "bg-blue-50 text-blue-600" : 
+              status === 'needs_review' ? "bg-amber-50 text-amber-600" :
+              status === 'completed' ? "bg-green-50 text-green-600" :
+              status === 'delayed' ? "bg-red-50 text-red-600" : 
+              "bg-slate-50 text-slate-600"
+            )}>
+              {formatStatusLabel(status)}
+            </span>
           </div>
           <div className={cn("text-xs", isDueSoon ? "text-danger" : "text-slate-500")}>
             {dueString}

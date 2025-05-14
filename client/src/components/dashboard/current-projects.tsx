@@ -1,29 +1,12 @@
 import { ProjectCard } from '@/components/ui/custom/project-card';
 import { useQuery } from '@tanstack/react-query';
-import { Project, User } from '@shared/schema';
+import { Project } from '@shared/schema';
 import { Link } from 'wouter';
 
 export function CurrentProjects() {
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
   });
-  
-  // For a production app, we would fetch actual collaborators
-  // Here we're mocking some sample collaborators
-  const sampleCollaborators = [
-    { id: 1, name: 'Alex Rodriguez', avatarUrl: '' },
-    { id: 2, name: 'Sarah Lee', avatarUrl: '' },
-    { id: 3, name: 'James King', avatarUrl: '' },
-    { id: 4, name: 'Mina Tan', avatarUrl: '' },
-    { id: 5, name: 'David Chen', avatarUrl: '' },
-  ];
-  
-  // Assign random collaborators to each project
-  const getCollaboratorsForProject = (projectId: number) => {
-    // In a real app, we would fetch this data from the API
-    const count = Math.floor(Math.random() * 5) + 1; // 1-5 collaborators
-    return sampleCollaborators.slice(0, count);
-  };
   
   return (
     <div className="mb-8">
@@ -52,10 +35,7 @@ export function CurrentProjects() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects?.map((project) => (
             <Link key={project.id} href={`/projects/${project.id}`}>
-              <ProjectCard
-                project={project}
-                collaborators={getCollaboratorsForProject(project.id)}
-              />
+              <ProjectCard project={project} />
             </Link>
           ))}
           
