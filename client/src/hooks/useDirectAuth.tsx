@@ -4,6 +4,15 @@ import axios from 'axios';
 // For development - clear any stale data
 if (typeof window !== 'undefined') {
   console.log('Checking for fresh authentication data');
+  
+  // TEMP FIX: In development, we want to make sure the cache is completely cleared
+  // This helps with testing and debugging, especially when user IDs are reused
+  const forceClearCache = true;
+  if (forceClearCache) {
+    localStorage.removeItem('user');
+    localStorage.removeItem('isAuthenticated');
+    console.log('Cleared all stored auth data for fresh login');
+  }
 }
 
 // Define user type

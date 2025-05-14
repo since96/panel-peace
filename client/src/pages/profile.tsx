@@ -129,7 +129,7 @@ export default function ProfilePage() {
       setIsChangingPassword(true);
       console.log('Changing password for user ID:', user.id);
       
-      // Call API to change password - ensure we're using the correct user ID
+      // Call API to change password
       const response = await axios.post(`/api/users/${user.id}/change-password`, {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,

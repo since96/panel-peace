@@ -6,15 +6,45 @@ import jwt from 'jsonwebtoken';
 // The JWT secret key
 const JWT_SECRET = process.env.JWT_SECRET || 'comic_editor_jwt_secret_key';
 
-// TEMPORARILY DISABLED: Simple middleware to check if user is authenticated
-// Now just returns the admin user without actual authentication
-export const isAuthenticated: RequestHandler = (req, res, next) => {
-  console.log('Authentication check bypassed - using admin user');
-  
-  // TEMP: Set admin user as the authenticated user
-  (req as any).user = { id: 1 };
-  
-  return next();
+// Authentication middleware
+export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  try {
+    // Get the token from the cookie
+    const token = req.cookies?.auth_token;
+    
+    if (!token) {
+      console.log('Authentication check bypassed - using admin user');
+      // TEMP: Set admin user as the authenticated user for development
+      (req as any).user = { id: 1 };
+      return next();
+    }
+    
+    try {
+      // Verify the token
+      const decoded = jwt.verify(token, JWT_SECRET) as { id: number | string };
+      
+      if (!decoded || !decoded.id) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+      
+      // Get user from database
+      const user = await storage.getUser(decoded.id);
+      
+      if (!user) {
+        return res.status(401).json({ success: false, message: 'User not found' });
+      }
+      
+      // Set user in request
+      (req as any).user = user;
+      return next();
+    } catch (jwtError) {
+      console.error('JWT verification failed:', jwtError);
+      return res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
 
 // Simple password hashing
@@ -153,32 +183,73 @@ export function setupDirectAuth(app: express.Express) {
   // Get current user
   app.get("/api/direct-user", async (req, res) => {
     try {
-      // TEMP: Bypass authentication and use admin user
-      console.log("Bypassing authentication for direct-user endpoint");
-      const userId = 1; // Admin user ID
+      // Get the token from the cookie
+      const token = req.cookies.auth_token;
       
-      console.log(`Getting user data for admin ID: ${userId}`);
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        console.log(`No user found for ID: ${userId}`);
-        res.clearCookie('auth_token');
-        return res.status(401).json({
-          success: false,
-          message: "User not found"
+      // If there's no token, use the current fix that bypasses authentication
+      if (!token) {
+        console.log("No auth token, falling back to admin user");
+        const userId = 1; // Admin user ID
+        
+        console.log(`Getting user data for admin ID: ${userId}`);
+        const user = await storage.getUser(userId);
+        
+        if (!user) {
+          console.log(`No user found for ID: ${userId}`);
+          res.clearCookie('auth_token');
+          return res.status(401).json({
+            success: false,
+            message: "User not found"
+          });
+        }
+        
+        // Create a safe user object without password
+        const safeUser = { ...user } as any;
+        if (safeUser.password) delete safeUser.password;
+        
+        console.log(`User found: ${user.fullName || user.username}`);
+        
+        return res.json({
+          success: true,
+          user: safeUser
         });
       }
       
-      // Create a safe user object without password
-      const safeUser = { ...user } as any;
-      if (safeUser.password) delete safeUser.password;
-      
-      console.log(`User found: ${user.fullName || user.username}`);
-      
-      res.json({
-        success: true,
-        user: safeUser
-      });
+      // Verify the token
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { id: number | string };
+        const userId = decoded.id;
+        
+        console.log(`Getting user data for ID from token: ${userId}`);
+        const user = await storage.getUser(userId);
+        
+        if (!user) {
+          console.log(`No user found for token ID: ${userId}`);
+          res.clearCookie('auth_token');
+          return res.status(401).json({
+            success: false,
+            message: "User not found"
+          });
+        }
+        
+        // Create a safe user object without password
+        const safeUser = { ...user } as any;
+        if (safeUser.password) delete safeUser.password;
+        
+        console.log(`User found from token: ${user.fullName || user.username}`);
+        
+        res.json({
+          success: true,
+          user: safeUser
+        });
+      } catch (jwtError) {
+        console.error("JWT verification failed:", jwtError);
+        res.clearCookie('auth_token');
+        return res.status(401).json({
+          success: false,
+          message: "Invalid or expired token"
+        });
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
       res.clearCookie('auth_token');
