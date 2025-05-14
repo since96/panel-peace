@@ -122,7 +122,7 @@ export default function Signup() {
             <p className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}
               <a
-                onClick={() => navigate("/login")}
+                onClick={() => setLocation("/login")}
                 className="text-primary underline cursor-pointer"
               >
                 Log in

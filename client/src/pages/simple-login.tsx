@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoaderCircle } from "lucide-react";
+import { useLocation } from "wouter";
 
 export function SimpleLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [_, setLocation] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +53,9 @@ export function SimpleLogin() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Comic Editor Login</CardTitle>
+          <CardDescription className="text-center">
+            Log in to manage comic book projects
+          </CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
@@ -108,6 +113,17 @@ export function SimpleLogin() {
             </Button>
           </CardFooter>
         </form>
+        <CardFooter className="flex justify-center pt-0">
+          <p className="text-sm text-center text-muted-foreground">
+            Don't have an account?{" "}
+            <a
+              onClick={() => setLocation("/signup")}
+              className="text-primary underline cursor-pointer"
+            >
+              Sign up
+            </a>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );

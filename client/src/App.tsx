@@ -20,6 +20,7 @@ import AssetLibrary from "@/pages/asset-library";
 import Publication from "@/pages/publication";
 import FeedbackDetails from "@/pages/feedback-details";
 import { SimpleLogin } from "./pages/simple-login";
+import Signup from "./pages/signup";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
@@ -33,6 +34,9 @@ function Router() {
       </Route>
       <Route path="/simple-login">
         <SimpleLogin />
+      </Route>
+      <Route path="/signup">
+        <Signup />
       </Route>
       
       {/* All other routes use the app layout and are protected */}
