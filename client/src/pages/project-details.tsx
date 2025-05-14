@@ -766,16 +766,7 @@ export default function ProjectDetails() {
                                           className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
                                           onClick={() => {
                                             setEditingStep(step);
-                                            setShowEditStepDialog(true);
-                                            // Focus on the due date field when opened
-                                            setTimeout(() => {
-                                              const dueDateElement = document.getElementById('due-date');
-                                              if (dueDateElement) {
-                                                dueDateElement.scrollIntoView({ behavior: 'smooth' });
-                                                dueDateElement.focus();
-                                                dueDateElement.click(); // Automatically open the calendar
-                                              }
-                                            }, 100);
+                                            setShowDeadlineDialog(true);
                                           }}
                                         >
                                           <CalendarIcon className="h-4 w-4 mr-2" />
