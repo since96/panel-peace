@@ -53,13 +53,37 @@
   <div class="container" id="success-message">
     <div class="loading"></div>
     <h1>Authentication Successful</h1>
-    <p>You've been successfully authenticated. Redirecting you to the application...</p>
+    <p>You've been successfully authenticated.</p>
+    <p>If you're not automatically redirected, please click the button below:</p>
+    <a href="/" style="
+      display: inline-block;
+      background-color: #5a67d8;
+      color: white;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-top: 15px;
+      transition: background-color 0.2s;
+    ">Return to Application</a>
   </div>
   
   <div class="container" id="error-message" style="display: none;">
     <div class="loading" style="border-top-color: #e53e3e;"></div>
     <h1 style="color: #e53e3e;">Authentication Error</h1>
-    <p>There was an error during authentication. Redirecting you to the application to try again...</p>
+    <p>There was an error during authentication.</p>
+    <p>Please click the button below to return to the application:</p>
+    <a href="/" style="
+      display: inline-block;
+      background-color: #e53e3e;
+      color: white;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 4px;
+      text-decoration: none;
+      margin-top: 15px;
+      transition: background-color 0.2s;
+    ">Return to Application</a>
   </div>
 
   <script>
@@ -73,10 +97,10 @@
       document.getElementById('error-message').style.display = 'block';
     }
     
-    // Redirect to home page after a brief delay
+    // Still try to redirect automatically
     setTimeout(() => {
       window.location.href = '/';
-    }, 2000);
+    }, 5000);
   </script>
 </body>
 </html>
