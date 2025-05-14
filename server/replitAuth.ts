@@ -181,13 +181,23 @@ export async function setupAuth(app: Express) {
 
     // Authentication routes
     app.get("/api/login", (req, res, next) => {
-      console.log("Login attempt with domain:", process.env.REPLIT_DOMAINS?.split(",")[0]);
+      const domain = process.env.REPLIT_DOMAINS?.split(",")[0];
+      console.log("Login attempt with domain:", domain);
       
-      // Redirect directly to Replit auth with proper parameters
+      if (!domain) {
+        console.error("No domain found in REPLIT_DOMAINS environment variable");
+        return res.status(500).json({ message: "Server configuration error: No domain found" });
+      }
+      
+      // Construct the auth URL with all required parameters
       const authUrl = new URL(REPLIT_OAUTH_CONFIG.authorizationURL);
-      authUrl.searchParams.append("domain", process.env.REPLIT_DOMAINS?.split(",")[0] || "");
-      authUrl.searchParams.append("redirect", REPLIT_OAUTH_CONFIG.callbackURL);
+      authUrl.searchParams.append("domain", domain);
+      authUrl.searchParams.append("client_id", process.env.REPL_ID || "");
+      authUrl.searchParams.append("redirect_uri", REPLIT_OAUTH_CONFIG.callbackURL);
+      authUrl.searchParams.append("response_type", "code");
+      authUrl.searchParams.append("scope", "identity");
       
+      console.log("Redirecting to auth URL:", authUrl.toString());
       return res.redirect(authUrl.toString());
     });
 
@@ -226,8 +236,8 @@ export async function setupAuth(app: Express) {
           // Get user profile with the access token
           const userProfile = await fetchUserProfile(tokenResponse.data.access_token);
           
-          // Create a user object
-          const user = {
+          // Create a user object 
+          const user: any = {
             profile: userProfile,
             access_token: tokenResponse.data.access_token,
             expires_at: Date.now() + (tokenResponse.data.expires_in || 3600) * 1000,
