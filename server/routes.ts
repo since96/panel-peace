@@ -37,49 +37,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication status route
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
-      console.log("Fetching authenticated user, req.user:", JSON.stringify(req.user));
+      console.log("Fetching authenticated user");
       
-      // Get user from session
-      if (req.user && req.user.dbUser) {
-        // Use the dbUser directly if available
-        res.json(req.user.dbUser);
-      } else if (req.user && req.user.profile) {
-        // Extract user ID from the profile
-        const userId = req.user.profile.id || req.user.profile.sub;
-        console.log("Looking up user by ID:", userId);
-        
-        if (!userId) {
-          console.error("No user ID found in profile");
-          return res.status(401).json({ message: "Invalid user profile" });
-        }
-        
-        const user = await storage.getUser(userId);
-        
-        if (!user) {
-          console.log("User not found in database, creating new user");
-          
-          // Create a new user from the profile information
-          const userProfile = req.user.profile;
-          const newUser = await storage.upsertUser({
-            id: userId,
-            username: userProfile.username || (userProfile.email ? userProfile.email.split('@')[0] : `user_${userId}`),
-            email: userProfile.email || `user_${userId}@example.com`,
-            fullName: userProfile.name || userProfile.displayName || (userProfile.email ? userProfile.email.split('@')[0] : `User ${userId}`),
-            isEditor: true,
-            editorRole: "editor",
-            role: "editor",
-            avatarUrl: userProfile.profileImage || userProfile.avatar_url || null
-          });
-          
-          res.json(newUser);
-        } else {
-          console.log("User found:", JSON.stringify(user));
-          res.json(user);
-        }
-      } else {
-        console.error("No user information in session");
-        res.status(401).json({ message: "No user information available" });
+      // Get user from session - Direct auth stores userId directly in session
+      const userId = req.user?.id || req.session?.userId;
+      
+      if (!userId) {
+        console.error("No user ID found in session");
+        return res.status(401).json({ message: "Invalid session" });
       }
+      
+      console.log("Looking up user by ID:", userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        console.error("User not found in database");
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Create a safe user object without password
+      const safeUser = { ...user };
+      delete safeUser.password;
+      
+      console.log("User found:", user.username);
+      res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
