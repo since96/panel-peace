@@ -433,14 +433,32 @@ export default function Collaborators() {
                                   </div>
                                 )}
                                 
-                                <div className="mt-3 flex items-center text-sm text-slate-500">
-                                  <span>
-                                    {userAssignments.has(user.id) ? (
-                                      `Working on ${userAssignments.get(user.id).length} project${userAssignments.get(user.id).length !== 1 ? 's' : ''}`
-                                    ) : (
-                                      'No current assignments'
-                                    )}
-                                  </span>
+                                <div className="mt-3 flex flex-col text-sm text-slate-500">
+                                  {userAssignments.has(user.id) ? (
+                                    <>
+                                      <span className="font-medium">Current assignments:</span>
+                                      <ul className="mt-1 list-disc pl-4">
+                                        {Array.from(new Set(userAssignments.get(user.id).map((step: WorkflowStep) => step.projectId)))
+                                          .map((projectId: number) => {
+                                            const project = projects?.find(p => p.id === projectId);
+                                            const steps = userAssignments.get(user.id)
+                                              .filter((step: WorkflowStep) => step.projectId === projectId);
+                                            
+                                            return (
+                                              <li key={projectId.toString()} className="mb-1">
+                                                <span className="font-medium">{project?.title || 'Unknown project'}</span>
+                                                <span className="italic ml-1">
+                                                  ({steps.map((step: WorkflowStep) => step.title).join(', ')})
+                                                </span>
+                                              </li>
+                                            );
+                                          })
+                                        }
+                                      </ul>
+                                    </>
+                                  ) : (
+                                    <span>No current assignments</span>
+                                  )}
                                 </div>
                                 
                                 <div className="flex mt-3 gap-2">
@@ -631,11 +649,54 @@ export default function Collaborators() {
                                         <Edit className="h-4 w-4" />
                                       </button>
                                     </div>
-                                    <p className="text-xs text-slate-500">{editor.email}</p>
+                                    <p className="text-xs text-slate-500">
+                                      <a 
+                                        href={`mailto:${editor.email}`} 
+                                        className="hover:text-primary transition-colors"
+                                      >
+                                        {editor.email}
+                                      </a>
+                                    </p>
                                     <Badge className="mt-1" variant="outline">
                                       {editor.editorRole === 'editor_in_chief' ? 'Editor-in-Chief' :
                                        editor.editorRole === 'senior_editor' ? 'Senior Editor' : 'Editor'}
                                     </Badge>
+                                    
+                                    <div className="mt-3 text-xs text-slate-500">
+                                      {userAssignments.has(editor.id) ? (
+                                        <>
+                                          <p className="font-medium">Managing projects:</p>
+                                          <ul className="mt-1 list-disc pl-4">
+                                            {Array.from(new Set(userAssignments.get(editor.id).map((step: WorkflowStep) => step.projectId)))
+                                              .map((projectId: number) => {
+                                                const project = projects?.find(p => p.id === projectId);
+                                                return (
+                                                  <li key={projectId.toString()}>
+                                                    {project?.title || 'Unknown project'}
+                                                  </li>
+                                                );
+                                              })
+                                            }
+                                          </ul>
+                                        </>
+                                      ) : editor.assignedProjects && editor.assignedProjects.length > 0 ? (
+                                        <>
+                                          <p className="font-medium">Assigned projects:</p>
+                                          <ul className="mt-1 list-disc pl-4">
+                                            {editor.assignedProjects.map((projectId: number) => {
+                                              const project = projects?.find(p => p.id === projectId);
+                                              return (
+                                                <li key={projectId.toString()}>
+                                                  {project?.title || 'Unknown project'}
+                                                </li>
+                                              );
+                                            })}
+                                          </ul>
+                                        </>
+                                      ) : (
+                                        <p>No assigned projects</p>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </CardContent>
