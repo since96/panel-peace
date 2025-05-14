@@ -128,6 +128,7 @@ export class MemStorage implements IStorage {
     this.comments = new Map();
     this.workflowSteps = new Map();
     this.fileUploads = new Map();
+    this.fileLinks = new Map();
     
     this.userIdCounter = 1;
     this.projectIdCounter = 1;
@@ -139,6 +140,7 @@ export class MemStorage implements IStorage {
     this.commentIdCounter = 1;
     this.workflowStepIdCounter = 1;
     this.fileUploadIdCounter = 1;
+    this.fileLinkIdCounter = 1;
     
     // Create default admin user
     this.createUser({
@@ -897,6 +899,33 @@ export class MemStorage implements IStorage {
 
   async deleteFileUpload(id: number): Promise<boolean> {
     return this.fileUploads.delete(id);
+  }
+
+  // File link operations
+  async getFileLinksByWorkflowStep(workflowStepId: number): Promise<FileLink[]> {
+    const links: FileLink[] = [];
+    for (const link of this.fileLinks.values()) {
+      if (link.workflowStepId === workflowStepId) {
+        links.push(link);
+      }
+    }
+    return links;
+  }
+
+  async createFileLink(link: InsertFileLink): Promise<FileLink> {
+    const id = this.fileLinkIdCounter++;
+    const newLink: FileLink = {
+      id,
+      ...link,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.fileLinks.set(id, newLink);
+    return newLink;
+  }
+
+  async deleteFileLink(id: number): Promise<boolean> {
+    return this.fileLinks.delete(id);
   }
 }
 

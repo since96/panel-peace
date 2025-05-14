@@ -9,7 +9,8 @@ import {
   insertPanelLayoutSchema,
   insertCommentSchema,
   insertWorkflowStepSchema,
-  insertFileUploadSchema
+  insertFileUploadSchema,
+  insertFileLinkSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -572,6 +573,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedFileUpload);
     } catch (error) {
       res.status(500).json({ message: "Failed to update file upload" });
+    }
+  });
+
+  // File Link routes for external file references
+  app.get("/api/workflow-steps/:stepId/file-links", async (req, res) => {
+    try {
+      const stepId = parseInt(req.params.stepId);
+      if (isNaN(stepId)) {
+        return res.status(400).json({ message: "Invalid workflow step ID" });
+      }
+
+      const links = await storage.getFileLinksByWorkflowStep(stepId);
+      res.json(links);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch file links" });
+    }
+  });
+
+  app.post("/api/workflow-steps/:stepId/file-links", async (req, res) => {
+    try {
+      const stepId = parseInt(req.params.stepId);
+      if (isNaN(stepId)) {
+        return res.status(400).json({ message: "Invalid workflow step ID" });
+      }
+
+      // Validate workflow step exists
+      const step = await storage.getWorkflowStep(stepId);
+      if (!step) {
+        return res.status(404).json({ message: "Workflow step not found" });
+      }
+
+      // Add the step ID to the request data
+      const requestData = { 
+        ...req.body,
+        workflowStepId: stepId
+      };
+
+      const parsedData = insertFileLinkSchema.safeParse(requestData);
+      if (!parsedData.success) {
+        return res.status(400).json({ message: "Invalid file link data", errors: parsedData.error.format() });
+      }
+
+      const newLink = await storage.createFileLink(parsedData.data);
+      res.status(201).json(newLink);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create file link" });
+    }
+  });
+
+  app.delete("/api/file-links/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid file link ID" });
+      }
+
+      const success = await storage.deleteFileLink(id);
+      if (!success) {
+        return res.status(404).json({ message: "File link not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete file link" });
     }
   });
 
