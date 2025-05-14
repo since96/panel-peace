@@ -8,27 +8,6 @@ export function CreativeTools() {
       icon: 'ri-team-line',
       href: '/collaborators',
       color: 'primary'
-    },
-    {
-      title: 'Feedback & Reviews',
-      description: 'Review submitted work',
-      icon: 'ri-chat-1-line',
-      href: '/feedback',
-      color: 'secondary'
-    },
-    {
-      title: 'Deadlines & Schedule',
-      description: 'Track project timelines',
-      icon: 'ri-calendar-line',
-      href: '/deadlines',
-      color: 'accent'
-    },
-    {
-      title: 'Asset Library',
-      description: 'Manage submitted deliverables',
-      icon: 'ri-folder-line',
-      href: '/asset-library',
-      color: 'success'
     }
   ];
   
@@ -36,7 +15,7 @@ export function CreativeTools() {
     <div className="mb-8">
       <h2 className="text-xl font-bold text-slate-900 mb-4">Management Tools</h2>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 max-w-md gap-4">
         {tools.map((tool) => (
           <ToolCard
             key={tool.title}
