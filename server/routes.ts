@@ -52,8 +52,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create a safe user object without password
-      const safeUser = { ...user };
-      delete safeUser.password;
+      const safeUser = { ...user } as any;
+      if (safeUser.password) delete safeUser.password;
       
       console.log("User found:", user.username);
       res.json(safeUser);
