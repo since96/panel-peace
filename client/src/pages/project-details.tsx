@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { useToast } from '@/hooks/use-toast';
@@ -67,6 +67,7 @@ export default function ProjectDetails() {
   const [showDeadlineDialog, setShowDeadlineDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [commentText, setCommentText] = useState('');
   
   // The comments we'll fetch from the API
@@ -489,14 +490,25 @@ export default function ProjectDetails() {
                                   <div className="flex flex-col md:flex-row md:items-center gap-3">
                                     <div className="flex items-center gap-2">
                                       <h4 className="font-medium text-slate-900">{step.title}</h4>
-                                      <Badge variant="outline" className="ml-2">{formatStatusLabel(step.status)}</Badge>
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`ml-2 ${
+                                          step.status === 'completed' ? 'bg-green-50 border-green-200 text-green-700' :
+                                          step.status === 'in_progress' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+                                          step.status === 'blocked' ? 'bg-red-50 border-red-200 text-red-700' :
+                                          step.status === 'review' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                                          'bg-slate-50 border-slate-200 text-slate-700'
+                                        }`}
+                                      >
+                                        {formatStatusLabel(step.status)}
+                                      </Badge>
                                     </div>
                                     
                                     {step.dueDate && (
                                       <div className="flex items-center text-sm">
-                                        <CalendarIcon className="h-3.5 w-3.5 mr-1 text-slate-400" />
+                                        <CalendarIcon className={`h-3.5 w-3.5 mr-1 ${progressStatusColors.text}`} />
                                         <span className={progressStatusColors.text}>
-                                          Due {formatDateRelative(step.dueDate)}
+                                          <strong>{formatDate(step.dueDate)}</strong> ({formatDateRelative(step.dueDate)})
                                         </span>
                                       </div>
                                     )}
@@ -520,19 +532,27 @@ export default function ProjectDetails() {
                                   <div className="flex-none">
                                     <div className="flex flex-col items-end gap-2">
                                       <div className="grid grid-cols-3 gap-2 w-full">
-                                        <Button 
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => {
-                                            setSelectedStep(step);
-                                            setCommentText('');
-                                            fetchComments(step.id);
-                                            setShowCommentDialog(true);
-                                          }}
-                                        >
-                                          <MessageSquare className="h-4 w-4 mr-2" />
-                                          Comments
-                                        </Button>
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button 
+                                                size="sm"
+                                                variant="outline"
+                                                className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
+                                                onClick={() => {
+                                                  setEditingStep(step);
+                                                  setShowAssignDialog(true);
+                                                }}
+                                              >
+                                                <Users className="h-4 w-4 mr-2" />
+                                                Assign
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>Assign team member to this step</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
                                         
                                         <Button 
                                           size="sm"
@@ -547,13 +567,33 @@ export default function ProjectDetails() {
                                           Adjust Deadline
                                         </Button>
                                         
-
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button 
+                                                size="sm"
+                                                variant="outline"
+                                                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
+                                                onClick={() => {
+                                                  setSelectedStep(step);
+                                                  setShowUploadDialog(true);
+                                                }}
+                                              >
+                                                <Upload className="h-4 w-4 mr-2" />
+                                                Upload
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>Upload files for this step</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
                                       </div>
                                       
                                       <Progress 
                                         value={step.progress} 
                                         className={`h-2 w-32 mt-2`} 
-                                        indicatorColor={progressStatusColors.indicator}
+                                        indicatorClassName={progressStatusColors.bg}
                                       />
                                     </div>
                                   </div>
@@ -793,8 +833,8 @@ export default function ProjectDetails() {
           
           <div className="py-4">
             <FileUpload 
-              allowMultiple={true}
-              onFilesSelected={(files: FileData[]) => {
+              multiple={true}
+              onFilesSelected={(files) => {
                 // Here you'd handle file upload to your server
                 console.log("Selected files:", files);
                 
@@ -804,6 +844,7 @@ export default function ProjectDetails() {
                     title: "Files uploaded",
                     description: `${files.length} file(s) uploaded successfully`
                   });
+                  setShowUploadDialog(false);
                 }, 1500);
               }}
             />
