@@ -50,11 +50,28 @@ export default function Collaborators() {
     const assignments = new Map();
     
     allWorkflowSteps.forEach(step => {
+      // Handle primary assignee
       if (step.assignedTo) {
         if (!assignments.has(step.assignedTo)) {
           assignments.set(step.assignedTo, []);
         }
         assignments.get(step.assignedTo).push(step);
+      }
+      
+      // Handle additional collaborators
+      if (step.assignees && step.assignees.length > 0) {
+        step.assignees.forEach(assigneeId => {
+          const numericId = parseInt(assigneeId);
+          if (!isNaN(numericId)) {
+            if (!assignments.has(numericId)) {
+              assignments.set(numericId, []);
+            }
+            // Only add if not already added as primary assignee
+            if (numericId !== step.assignedTo) {
+              assignments.get(numericId).push(step);
+            }
+          }
+        });
       }
     });
     

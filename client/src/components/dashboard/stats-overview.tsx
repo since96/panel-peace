@@ -34,19 +34,16 @@ export function StatsOverview() {
       <StatCard
         title="Active Projects"
         count={activeProjects.length}
-        unit="comics"
       />
       
       <StatCard
         title="Pending Feedback"
         count={pendingFeedbackCount}
-        unit="items"
       />
       
       <StatCard
         title="Upcoming Deadlines"
         count={upcomingDeadlines.length}
-        unit="this week"
       />
     </div>
   );

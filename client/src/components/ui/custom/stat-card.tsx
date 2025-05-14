@@ -7,8 +7,7 @@ interface StatCardProps {
 
 export function StatCard({
   title,
-  count,
-  unit
+  count
 }: StatCardProps) {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm">
