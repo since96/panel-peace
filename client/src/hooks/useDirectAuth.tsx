@@ -7,7 +7,8 @@ if (typeof window !== 'undefined') {
   
   // TEMP FIX: In development, we want to make sure the cache is completely cleared
   // This helps with testing and debugging, especially when user IDs are reused
-  const forceClearCache = true;
+  // Setting to false now that we've fixed the login issues
+  const forceClearCache = false;
   if (forceClearCache) {
     localStorage.removeItem('user');
     localStorage.removeItem('isAuthenticated');

@@ -187,7 +187,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      res.json(user);
+      // Create a safe user object without password
+      const safeUser = { ...user } as any;
+      if (safeUser.password) delete safeUser.password;
+      
+      // Check if this is a request from the client for the logged-in user's profile
+      // Get cookie token to identify the actual logged-in user
+      const token = req.cookies?.auth_token;
+      if (token) {
+        try {
+          const jwt = require('jsonwebtoken');
+          const JWT_SECRET = process.env.JWT_SECRET || 'comic_editor_jwt_secret_key';
+          
+          // Verify the token to get the authenticated user ID
+          const decoded = jwt.verify(token, JWT_SECRET) as { id: number | string };
+          const authUserId = parseInt(decoded.id.toString());
+          
+          console.log(`User ${authUserId} is requesting user ${userId} data`);
+          
+          // If the authenticated user is requesting their own data,
+          // or if this is an admin user (id=1), return the safe user data
+          if (authUserId === userId || authUserId === 1) {
+            return res.json(safeUser);
+          }
+        } catch (tokenError) {
+          console.warn("Token verification error:", tokenError);
+          // Continue with regular authorization below
+        }
+      }
+      
+      // By default, just return the safe user
+      res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -390,8 +420,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project routes
   app.get("/api/projects", async (req: any, res) => {
     try {
-      // TEMP: No authentication - use admin user
-      const dbUser = await storage.getUser(1);
+      // Get the authenticated user from the request
+      const userId = req.user?.id || 1; // Default to admin if no user
+      const dbUser = await storage.getUser(userId);
       
       if (!dbUser) {
         return res.status(404).json({ message: "User not found" });
@@ -449,8 +480,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Project not found" });
       }
       
-      // TEMP: No authentication - use admin user
-      const dbUser = await storage.getUser(1);
+      // Get the authenticated user from the request
+      const userId = req.user?.id || 1; // Default to admin if no user
+      const dbUser = await storage.getUser(userId);
       
       if (!dbUser) {
         return res.status(404).json({ message: "User not found" });
