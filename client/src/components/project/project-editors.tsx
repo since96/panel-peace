@@ -65,10 +65,7 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
   // Mutation to assign an editor to the project
   const assignEditorMutation = useMutation({
     mutationFn: async (editorData: { userId: number; assignmentRole: string }) => {
-      return await apiRequest(`/api/projects/${projectId}/editors?userId=${currentUserId}`, {
-        method: 'POST',
-        data: editorData,
-      });
+      return await apiRequest(`/api/projects/${projectId}/editors?userId=${currentUserId}`, 'POST', editorData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/editors`] });
@@ -92,9 +89,7 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
   // Mutation to remove an editor from the project
   const removeEditorMutation = useMutation({
     mutationFn: async (userId: number) => {
-      return await apiRequest(`/api/projects/${projectId}/editors/${userId}?userId=${currentUserId}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest(`/api/projects/${projectId}/editors/${userId}?userId=${currentUserId}`, 'DELETE');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/editors`] });

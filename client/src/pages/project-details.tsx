@@ -39,6 +39,7 @@ import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as Calenda
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { CompletionTracker } from '@/components/ui/custom/completion-tracker';
+import ProjectEditors from '@/components/project/project-editors';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -1091,6 +1092,15 @@ export default function ProjectDetails() {
               </CardContent>
             </Card>
             
+          </div>
+          
+          {/* Right sidebar */}
+          <div className="lg:col-span-1">
+            <ProjectEditors 
+              projectId={Number(id)} 
+              currentUserId={DEFAULT_USER_ID}
+              userRole={project?.createdBy === DEFAULT_USER_ID ? 'editor_in_chief' : 'editor'} 
+            />
           </div>
         </div>
       </div>
