@@ -803,17 +803,7 @@ export default function ProjectDetails() {
                                           Adjust Deadline
                                         </Button>
                                         
-                                        <Button 
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => {
-                                            setSelectedStep(step);
-                                            setShowCommentDialog(true);
-                                          }}
-                                        >
-                                          <MessageCircle className="h-4 w-4 mr-2" />
-                                          Comments
-                                        </Button>
+
                                       </div>
                                       
                                       <Progress 
