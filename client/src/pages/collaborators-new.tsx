@@ -413,13 +413,23 @@ export default function Collaborators() {
                                 
                                 <div className="mt-2 text-sm text-slate-500 flex items-center">
                                   <Mail className="h-3.5 w-3.5 mr-1 inline" />
-                                  <span className="truncate">{user.email}</span>
+                                  <a 
+                                    href={`mailto:${user.email}`} 
+                                    className="truncate hover:text-primary transition-colors"
+                                  >
+                                    {user.email}
+                                  </a>
                                 </div>
                                 
                                 {user.phone && (
                                   <div className="mt-1 text-sm text-slate-500 flex items-center">
                                     <Phone className="h-3.5 w-3.5 mr-1 inline" />
-                                    <span>{user.phone}</span>
+                                    <a 
+                                      href={`tel:${user.phone}`} 
+                                      className="hover:text-primary transition-colors"
+                                    >
+                                      {user.phone}
+                                    </a>
                                   </div>
                                 )}
                                 
