@@ -6,7 +6,7 @@ import crypto from "crypto";
 // Declare session data type to make TypeScript happy
 declare module 'express-session' {
   interface SessionData {
-    userId: number | string;
+    userId?: number | string;
   }
 }
 
@@ -22,19 +22,22 @@ export const isAuthenticated: RequestHandler = (req, res, next) => {
 
 // Setup session store
 export function getSession() {
-  // Create a session middleware using express-session
-  const sessionMiddleware = session({
-    secret: process.env.SESSION_SECRET || "keyboard cat",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    },
-  });
-  
-  return sessionMiddleware;
+  // Create a session middleware using express-session with more secure settings
+  return function(req: express.Request, res: express.Response, next: express.NextFunction) {
+    session({
+      secret: process.env.SESSION_SECRET || "keyboard cat",
+      name: "comic_editor_sid", // Custom session name
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax' // Protecting against CSRF
+      },
+      rolling: true // Reset expiration on every response
+    })(req, res, next);
+  };
 }
 
 // Simple password hashing
@@ -66,7 +69,7 @@ export function setupAuth(app: express.Express) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
       
-      // Very simple password check (in a real app, use bcrypt)
+      // Simple password check
       const hashedPassword = hashPassword(password);
       
       if (user.password !== hashedPassword && password !== user.password) {
@@ -74,18 +77,31 @@ export function setupAuth(app: express.Express) {
         return res.status(401).json({ message: "Invalid username or password" });
       }
       
-      // Set user in session
-      req.session.userId = user.id;
-      
-      // Save the session explicitly to ensure it's written before responding
-      req.session.save(err => {
-        if (err) {
-          console.error("Error saving session:", err);
+      // Regenerate session to prevent session fixation
+      req.session.regenerate((regenerateErr) => {
+        if (regenerateErr) {
+          console.error("Error regenerating session:", regenerateErr);
           return res.status(500).json({ message: "Session error" });
         }
         
-        console.log(`User ${username} logged in successfully with ID ${user.id}`);
-        return res.json({ success: true, user });
+        // Set user in new session
+        req.session.userId = user.id;
+        
+        // Save the session explicitly to ensure it's written before responding
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Error saving session:", saveErr);
+            return res.status(500).json({ message: "Session error" });
+          }
+          
+          console.log(`User ${username} logged in successfully with ID ${user.id}`);
+          
+          // Sanitize user object before sending it back
+          const safeUser = { ...user };
+          if (safeUser.password) delete safeUser.password;
+          
+          return res.json({ success: true, user: safeUser });
+        });
       });
     } catch (error) {
       console.error("Login error:", error);

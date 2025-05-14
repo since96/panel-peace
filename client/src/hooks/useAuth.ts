@@ -2,12 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
 import axios from "axios";
 import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
 
 export function useAuth() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const [authChecked, setAuthChecked] = useState(false);
   
-  // Fetch current user from the simple auth endpoint
+  // Fetch current user from the simple auth endpoint, but enable the query only after initial mount
   const { 
     data: user, 
     isLoading, 
@@ -21,7 +23,13 @@ export function useAuth() {
     refetchOnReconnect: false,
     // Gracefully handle unauthorized errors
     gcTime: 0,
+    enabled: authChecked, // Only run the query after auth check
   });
+  
+  // Initial auth check
+  useEffect(() => {
+    setAuthChecked(true);
+  }, []);
 
   // Login mutation
   const loginMutation = useMutation({

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,30 +7,28 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LoaderCircle } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
 
 export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const { login, isLoading, isAuthenticated, user } = useAuth();
-  
-  // Redirect to dashboard if already logged in
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      setLocation("/");
-    }
-  }, [isAuthenticated, user, setLocation]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
     
     try {
-      const response = await login(username, password);
+      // Direct axios call instead of using hook to avoid any potential loops
+      const response = await axios.post("/api/simple-login", { 
+        username, 
+        password 
+      });
       
       if (response.data.success) {
         toast({
@@ -38,11 +36,14 @@ export function LoginPage() {
           description: `Welcome back, ${response.data.user.fullName || username}!`,
         });
         
-        // No need to redirect - useEffect will handle it when isAuthenticated becomes true
+        // Force page reload to ensure clean state
+        window.location.href = "/";
       }
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.response?.data?.message || "Failed to login. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
   
