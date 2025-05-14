@@ -621,7 +621,7 @@ export default function Collaborators() {
                           <SelectValue placeholder="Select project" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">All Projects</SelectItem>
+                          <SelectItem value="all_projects">All Projects</SelectItem>
                           {projects?.map((project) => (
                             <SelectItem key={project.id} value={project.id.toString()}>
                               {project.title} {project.issue ? `Issue #${project.issue}` : ''}
