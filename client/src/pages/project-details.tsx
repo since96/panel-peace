@@ -96,6 +96,22 @@ export default function ProjectDetails() {
   const { data: workflowSteps, isLoading: isWorkflowLoading } = useQuery<WorkflowStep[]>({
     queryKey: [`/api/projects/${id}/workflow-steps`],
     enabled: !!id,
+    onSuccess: (data) => {
+      if (data && data.length > 0 && project?.dueDate) {
+        // Check if the last step (production) is scheduled after the project due date
+        const lastStep = data[data.length - 1];
+        if (lastStep?.dueDate) {
+          const productionEndDate = new Date(lastStep.dueDate);
+          const projectDueDate = new Date(project.dueDate);
+          
+          if (productionEndDate > projectDueDate) {
+            setScheduleFeasible(false);
+          } else {
+            setScheduleFeasible(true);
+          }
+        }
+      }
+    }
   });
   
 
@@ -191,16 +207,39 @@ export default function ProjectDetails() {
     }
   });
   
+  const [scheduleFeasible, setScheduleFeasible] = useState(true);
+  
   const initializeWorkflowMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", `/api/projects/${id}/initialize-workflow`, {});
-      return res.json();
+      const data = await res.json();
+      
+      // Check the server logs for warnings about feasibility
+      const lastWorkflowStep = data[data.length - 1];
+      const productionEndDate = lastWorkflowStep?.dueDate ? new Date(lastWorkflowStep.dueDate) : null;
+      const projectDueDate = project?.dueDate ? new Date(project.dueDate) : null;
+      
+      if (productionEndDate && projectDueDate && productionEndDate > projectDueDate) {
+        setScheduleFeasible(false);
+      } else {
+        setScheduleFeasible(true);
+      }
+      
+      return data;
     },
-    onSuccess: () => {
-      toast({
-        title: "Workflow initialized",
-        description: "Comic production workflow has been set up successfully"
-      });
+    onSuccess: (data) => {
+      if (!scheduleFeasible) {
+        toast({
+          title: "Warning: Unrealistic Schedule",
+          description: "The calculated completion date is later than your project due date. Consider adjusting the schedule or due date.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Workflow initialized",
+          description: "Comic production workflow has been set up successfully"
+        });
+      }
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
     },
     onError: (error) => {
@@ -448,6 +487,41 @@ export default function ProjectDetails() {
                       </Button>
                     )}
                   </div>
+                  
+                  {!scheduleFeasible && workflowSteps && workflowSteps.length > 0 && (
+                    <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4 flex items-start">
+                      <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-red-800 mb-1">Schedule Warning</h4>
+                        <p className="text-sm text-red-700">
+                          The calculated completion date is <strong>after</strong> your project due date. 
+                          This schedule is not realistic with your current parameters.
+                        </p>
+                        <div className="flex gap-2 mt-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="bg-white border-red-200 text-red-700 hover:bg-red-50"
+                            onClick={() => {
+                              setEditing(true);
+                            }}
+                          >
+                            Adjust Project Due Date
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="bg-white border-red-200 text-red-700 hover:bg-red-50"
+                            onClick={() => {
+                              initializeWorkflowMutation.mutate();
+                            }}
+                          >
+                            Recalculate Schedule
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   {isWorkflowLoading ? (
                     <div className="space-y-3">
