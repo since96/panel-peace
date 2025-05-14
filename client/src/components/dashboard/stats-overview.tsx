@@ -35,29 +35,18 @@ export function StatsOverview() {
         title="Active Projects"
         count={activeProjects.length}
         unit="comics"
-        change={12}
-        trend="up"
-        progressValue={75}
-        progressColor="bg-success"
       />
       
       <StatCard
         title="Pending Feedback"
         count={pendingFeedbackCount}
         unit="items"
-        change={8}
-        trend="up"
-        progressValue={40}
-        progressColor="bg-danger"
       />
       
       <StatCard
         title="Upcoming Deadlines"
         count={upcomingDeadlines.length}
         unit="this week"
-        trend="same"
-        progressValue={60}
-        progressColor="bg-warning"
       />
     </div>
   );
