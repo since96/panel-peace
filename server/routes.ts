@@ -37,17 +37,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication status route
   app.get("/api/auth/user", async (req: any, res) => {
     try {
-      console.log("Fetching authenticated user");
+      console.log("Fetching authenticated user - bypassed auth");
       
-      // Get user from session - Direct auth stores userId directly in session
-      const userId = req.user?.id || req.session?.userId;
+      // TEMP: No authentication - use admin user
+      const userId = 1;
       
-      if (!userId) {
-        console.error("No user ID found in session");
-        return res.status(401).json({ message: "Invalid session" });
-      }
-      
-      console.log("Looking up user by ID:", userId);
+      console.log("Using admin user ID:", userId);
       const user = await storage.getUser(userId);
       
       if (!user) {

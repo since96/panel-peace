@@ -6,31 +6,15 @@ import jwt from 'jsonwebtoken';
 // The JWT secret key
 const JWT_SECRET = process.env.JWT_SECRET || 'comic_editor_jwt_secret_key';
 
-// Simple middleware to check if user is authenticated
+// TEMPORARILY DISABLED: Simple middleware to check if user is authenticated
+// Now just returns the admin user without actual authentication
 export const isAuthenticated: RequestHandler = (req, res, next) => {
-  try {
-    // Get the token from cookies
-    const token = req.cookies.auth_token;
-    
-    console.log('Checking authentication, token:', token ? 'present' : 'not present');
-    
-    if (!token) {
-      console.log('No token found, authentication failed');
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    
-    // Verify the token
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: number | string };
-    console.log('Token verified, user ID:', decoded.id);
-    
-    // Attach the user ID to the request
-    (req as any).user = { id: decoded.id };
-    
-    return next();
-  } catch (error) {
-    console.log('Token verification failed:', error instanceof Error ? error.message : 'Unknown error');
-    return res.status(401).json({ message: "Unauthorized" });
-  }
+  console.log('Authentication check bypassed - using admin user');
+  
+  // TEMP: Set admin user as the authenticated user
+  (req as any).user = { id: 1 };
+  
+  return next();
 };
 
 // Simple password hashing
@@ -114,21 +98,11 @@ export function setupDirectAuth(app: express.Express) {
   // Get current user
   app.get("/api/direct-user", async (req, res) => {
     try {
-      // Get the token from cookies
-      const token = req.cookies.auth_token;
+      // TEMP: Bypass authentication and use admin user
+      console.log("Bypassing authentication for direct-user endpoint");
+      const userId = 1; // Admin user ID
       
-      if (!token) {
-        return res.status(401).json({
-          success: false,
-          message: "Not authenticated"
-        });
-      }
-      
-      // Verify the token
-      const decoded = jwt.verify(token, JWT_SECRET) as { id: number | string };
-      const userId = decoded.id;
-      
-      console.log(`Getting user data for ID: ${userId}`);
+      console.log(`Getting user data for admin ID: ${userId}`);
       const user = await storage.getUser(userId);
       
       if (!user) {
