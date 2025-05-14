@@ -212,7 +212,8 @@ export const workflowSteps = pgTable("workflow_steps", {
   description: text("description"),
   status: varchar("status", { length: 20 }).notNull().default("not_started"),
   progress: integer("progress").notNull().default(0),
-  assignedTo: integer("assigned_to"),
+  assignedTo: integer("assigned_to"), // Legacy field, keeping for compatibility
+  assignees: text("assignees").array(), // New field storing array of user IDs
   startDate: timestamp("start_date"),
   dueDate: timestamp("due_date"),
   completedDate: timestamp("completed_date"),
