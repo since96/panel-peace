@@ -50,7 +50,7 @@ import {
   getTalentProgressStatusColor,
   type TalentProgressStatus
 } from '@/lib/utils';
-import { FileUpload } from '@/components/ui/custom/file-upload';
+import { FileUpload, FileData } from '@/components/ui/custom/file-upload';
 import { Helmet } from 'react-helmet-async';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -1335,17 +1335,23 @@ export default function ProjectDetails() {
                 allowedTypes={['image/jpeg', 'image/png', 'application/pdf', 'application/postscript']}
                 maxSize={25}
                 multiple={true}
-                onUploadComplete={(urls) => {
+                onUploadComplete={(fileDataArray) => {
                   // Create file upload entries in the database
-                  if (selectedStep && urls.length > 0) {
-                    urls.forEach(url => {
+                  if (selectedStep && fileDataArray.length > 0) {
+                    fileDataArray.forEach(fileData => {
+                      // Create file upload object with required fields matching the schema
                       const fileUpload = {
                         projectId: parseInt(id as string),
                         workflowStepId: selectedStep.id,
-                        name: url.split('/').pop() || 'uploaded-file',
-                        url: url,
+                        fileName: fileData.name,
+                        originalName: fileData.name,
+                        fileSize: fileData.size,
+                        mimeType: fileData.type,
+                        filePath: fileData.url,
+                        thumbnailPath: fileData.url,
                         uploadedBy: DEFAULT_USER_ID,
-                        type: url.endsWith('.pdf') ? 'pdf' : url.endsWith('.ai') ? 'ai' : 'image',
+                        version: 1,
+                        status: 'pending_review',
                       };
                       
                       // Submit to API

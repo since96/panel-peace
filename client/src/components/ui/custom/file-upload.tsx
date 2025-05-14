@@ -5,12 +5,21 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { X, Upload, File, Image, FileText, Video } from 'lucide-react';
 
+// Define a structure for file data
+export interface FileData {
+  file: File;
+  url: string;
+  size: number;
+  type: string;
+  name: string;
+}
+
 interface FileUploadProps {
   allowedTypes?: string[];
   maxSize?: number; // in MB
   multiple?: boolean;
   onFilesSelected?: (files: File[]) => void;
-  onUploadComplete?: (urls: string[]) => void;
+  onUploadComplete?: (fileData: FileData[]) => void;
 }
 
 export function FileUpload({
@@ -85,9 +94,21 @@ export function FileUpload({
       });
     }, 200);
     
-    // In a real app, you would upload the files to a server here
-    // For demo purposes, we'll simulate a successful upload after 2 seconds
-    setTimeout(() => {
+    try {
+      // In a real app, you would upload the files to a server here
+      // For demo purposes, we're creating URLs and passing file metadata
+      
+      // Create an array to store our file data
+      const fileData = selectedFiles.map(file => {
+        return {
+          file: file,
+          url: URL.createObjectURL(file),
+          size: file.size,
+          type: file.type,
+          name: file.name
+        };
+      });
+      
       clearInterval(interval);
       setProgress(100);
       setUploading(false);
@@ -98,11 +119,19 @@ export function FileUpload({
       });
       
       if (onUploadComplete) {
-        // In a real app, this would be the URLs returned from your server
-        const mockUrls = selectedFiles.map(file => URL.createObjectURL(file));
-        onUploadComplete(mockUrls);
+        // Pass the file data to the callback
+        onUploadComplete(fileData);
       }
-    }, 2000);
+    } catch (error) {
+      clearInterval(interval);
+      setUploading(false);
+      
+      toast({
+        title: "Upload failed",
+        description: "An error occurred while uploading the files",
+        variant: "destructive"
+      });
+    }
   };
 
   const triggerFileInput = () => {
