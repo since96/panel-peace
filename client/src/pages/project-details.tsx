@@ -34,10 +34,20 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link, CheckCircle, UserPlus } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
+import { CompletionTracker } from '@/components/ui/custom/completion-tracker';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { 
@@ -68,10 +78,16 @@ export default function ProjectDetails() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [showTrackerDialog, setShowTrackerDialog] = useState(false);
+  const [selectedStepForTalent, setSelectedStepForTalent] = useState<WorkflowStep | null>(null);
+  const [selectedStepForTracker, setSelectedStepForTracker] = useState<WorkflowStep | null>(null);
   const [commentText, setCommentText] = useState('');
   
   // The comments we'll fetch from the API
   const [comments, setComments] = useState<Comment[]>([]);
+  
+  // File links state
+  const [fileLinks, setFileLinks] = useState<any[]>([]);
 
 
   const { data: project, isLoading: isProjectLoading } = useQuery<Project>({
@@ -121,6 +137,21 @@ export default function ProjectDetails() {
   const { data: fileUploads, isLoading: isFileUploadsLoading } = useQuery<any[]>({
     queryKey: [`/api/projects/${id}/file-uploads`],
     enabled: !!id,
+  });
+  
+  // Query file links for a selected step when dialog opens
+  const { 
+    data: stepFileLinks, 
+    isLoading: isFileLinksLoading,
+    refetch: refetchFileLinks 
+  } = useQuery<any[]>({
+    queryKey: ['/api/workflow-steps', selectedStepForTracker?.id, 'file-links'],
+    queryFn: async () => {
+      if (!selectedStepForTracker?.id) return [];
+      const res = await apiRequest('GET', `/api/workflow-steps/${selectedStepForTracker.id}/file-links`);
+      return res.json();
+    },
+    enabled: !!selectedStepForTracker?.id,
   });
   
   
@@ -211,6 +242,64 @@ export default function ProjectDetails() {
   
   const [scheduleFeasible, setScheduleFeasible] = useState(true);
   
+  // Mutation for updating workflow step progress
+  const updateStepProgressMutation = useMutation({
+    mutationFn: async ({ stepId, progress }: { stepId: number, progress: number }) => {
+      const res = await apiRequest("PATCH", `/api/workflow-steps/${stepId}`, {
+        progress
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Progress updated",
+        description: "Workflow step progress has been updated successfully"
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${id}/workflow-steps`] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to update progress",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Mutation for adding file links
+  const addFileLinkMutation = useMutation({
+    mutationFn: async ({ 
+      stepId, 
+      url, 
+      description 
+    }: { 
+      stepId: number, 
+      url: string, 
+      description?: string 
+    }) => {
+      const res = await apiRequest("POST", `/api/workflow-steps/${stepId}/file-links`, {
+        url,
+        description,
+        addedBy: 1 // Current user (admin)
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Link added",
+        description: "File link has been added successfully"
+      });
+      refetchFileLinks();
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to add link",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   const initializeWorkflowMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", `/api/projects/${id}/initialize-workflow`, {});
