@@ -17,7 +17,7 @@ import Collaborators from "@/pages/collaborators-new";
 import AssetLibrary from "@/pages/asset-library";
 import Publication from "@/pages/publication";
 import FeedbackDetails from "@/pages/feedback-details";
-import { LoginPage } from "@/pages/login";
+import { LoginBasic } from "./pages/login-basic";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
@@ -27,7 +27,7 @@ function Router() {
     <Switch>
       {/* Login page - not protected, not using app layout */}
       <Route path="/login">
-        <LoginPage />
+        <LoginBasic />
       </Route>
       
       {/* All other routes use the app layout and are protected */}
