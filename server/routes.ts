@@ -23,15 +23,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   app.get("/api/users", async (_req, res) => {
     try {
-      // For now, simply return all users
-      const users = await Promise.all(
-        Array.from({ length: 10 }, (_, i) => i + 1).map(async (id) => {
-          return await storage.getUser(id);
-        })
-      );
+      // Get all users from storage
+      const users = [];
+      
+      // Create default users if they don't exist
+      const defaultUsers = [
+        {
+          username: "admin",
+          password: "admin123",
+          fullName: "Admin User",
+          role: "editor",
+          avatarUrl: ""
+        },
+        {
+          username: "artist1",
+          password: "password",
+          fullName: "James Wilson",
+          role: "artist",
+          avatarUrl: ""
+        },
+        {
+          username: "writer1",
+          password: "password",
+          fullName: "Sarah Miller",
+          role: "writer",
+          avatarUrl: ""
+        },
+        {
+          username: "colorist1",
+          password: "password",
+          fullName: "David Chen", 
+          role: "colorist",
+          avatarUrl: ""
+        },
+        {
+          username: "letterer1",
+          password: "password",
+          fullName: "Julia Rodriguez",
+          role: "letterer",
+          avatarUrl: ""
+        }
+      ];
+      
+      // Create each default user if they don't exist
+      let createdUsers = false;
+      for (const userData of defaultUsers) {
+        const existingUser = await storage.getUserByUsername(userData.username);
+        if (!existingUser) {
+          await storage.createUser(userData);
+          createdUsers = true;
+        }
+      }
+      
+      // Initialize sample project with workflow steps if users were created
+      if (createdUsers) {
+        // Check if Project 1 exists and has workflow steps
+        const project = await storage.getProject(1);
+        if (project) {
+          const steps = await storage.getWorkflowStepsByProject(1);
+          
+          if (!steps || steps.length === 0) {
+            // Initialize workflow steps for the project
+            await storage.initializeProjectWorkflow(1);
+            
+            // Get the initialized steps
+            const initializedSteps = await storage.getWorkflowStepsByProject(1);
+            
+            // Get all users to assign to workflow steps
+            const allUsers = [];
+            for (let i = 1; i <= 5; i++) {
+              const user = await storage.getUser(i);
+              if (user) allUsers.push(user);
+            }
+            
+            // Assign users to workflow steps based on their roles
+            for (const step of initializedSteps) {
+              let assignedUser = null;
+              
+              // Match workflow step type to user role
+              if (step.stepType === 'plot' || step.stepType === 'script') {
+                // Assign writer to plot and script
+                assignedUser = allUsers.find(u => u.role === 'writer');
+              } else if (step.stepType === 'pencils' || step.stepType === 'inks') {
+                // Assign artist to pencils and inks
+                assignedUser = allUsers.find(u => u.role === 'artist');
+              } else if (step.stepType === 'colors') {
+                // Assign colorist to colors
+                assignedUser = allUsers.find(u => u.role === 'colorist');
+              } else if (step.stepType === 'letters') {
+                // Assign letterer to letters
+                assignedUser = allUsers.find(u => u.role === 'letterer');
+              } else {
+                // Assign editor to other steps
+                assignedUser = allUsers.find(u => u.role === 'editor');
+              }
+              
+              // Update the step with the assigned user
+              if (assignedUser) {
+                await storage.updateWorkflowStep(step.id, {
+                  assignedTo: assignedUser.id,
+                  status: 'in_progress'
+                });
+              }
+            }
+          }
+        }
+      }
+      
+      // Then try to get all users by checking IDs 1-20 (more scalable solution would use a getUsers method)
+      const userPromises = Array.from({ length: 20 }, (_, i) => i + 1).map(async (id) => {
+        return await storage.getUser(id);
+      });
+      
+      const usersResult = await Promise.all(userPromises);
       
       // Filter out undefined users (IDs that don't exist)
-      const validUsers = users.filter(Boolean);
+      const validUsers = usersResult.filter(Boolean);
       res.json(validUsers);
     } catch (error) {
       console.error("Error fetching users:", error);

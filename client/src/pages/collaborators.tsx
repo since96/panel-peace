@@ -500,64 +500,147 @@ export default function Collaborators() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Invite Collaborators</CardTitle>
-                <CardDescription>Add team members to your projects</CardDescription>
+                <CardTitle>Manage Team Members</CardTitle>
+                <CardDescription>Add or invite collaborators to your projects</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Email Address</label>
-                  <Input 
-                    type="email" 
-                    placeholder="collaborator@example.com"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Role</label>
-                  <Select
-                    value={selectedRole}
-                    onValueChange={setSelectedRole}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="editor">Editor</SelectItem>
-                      <SelectItem value="writer">Writer</SelectItem>
-                      <SelectItem value="artist">Artist</SelectItem>
-                      <SelectItem value="colorist">Colorist</SelectItem>
-                      <SelectItem value="letterer">Letterer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Project</label>
-                  <Select defaultValue="">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select project" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All Projects</SelectItem>
-                      {projects?.map((project) => (
-                        <SelectItem key={project.id} value={project.id.toString()}>
-                          {project.title} {project.issue}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <Button 
-                  className="w-full" 
-                  onClick={handleInvite}
-                  disabled={!inviteEmail}
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Send Invitation
-                </Button>
+              <CardContent>
+                <Tabs defaultValue="add" className="mb-4">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="add">Add Directly</TabsTrigger>
+                    <TabsTrigger value="invite">Invite by Email</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="add" className="mt-4 space-y-4">
+                    {addTeamMemberError && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded mb-3 text-sm">
+                        {addTeamMemberError}
+                      </div>
+                    )}
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Username</label>
+                      <Input 
+                        type="text" 
+                        placeholder="username"
+                        value={newTeamMember.username}
+                        onChange={(e) => setNewTeamMember({...newTeamMember, username: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Password</label>
+                      <Input 
+                        type="password" 
+                        placeholder="password"
+                        value={newTeamMember.password}
+                        onChange={(e) => setNewTeamMember({...newTeamMember, password: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Full Name (optional)</label>
+                      <Input 
+                        type="text" 
+                        placeholder="Full name"
+                        value={newTeamMember.fullName}
+                        onChange={(e) => setNewTeamMember({...newTeamMember, fullName: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Role</label>
+                      <Select
+                        value={selectedRole}
+                        onValueChange={setSelectedRole}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {talentRoles.map(role => (
+                            <SelectItem key={role.id} value={role.id}>{role.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      onClick={handleAddTeamMember}
+                      disabled={isAddingTeamMember || !newTeamMember.username || !newTeamMember.password}
+                    >
+                      {isAddingTeamMember ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Adding...
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Add Team Member
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="invite" className="mt-4 space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Email Address</label>
+                      <Input 
+                        type="email" 
+                        placeholder="collaborator@example.com"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Role</label>
+                      <Select
+                        value={selectedRole}
+                        onValueChange={setSelectedRole}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {talentRoles.map(role => (
+                            <SelectItem key={role.id} value={role.id}>{role.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium mb-1.5 block">Project</label>
+                      <Select defaultValue="">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">All Projects</SelectItem>
+                          {projects?.map((project) => (
+                            <SelectItem key={project.id} value={project.id.toString()}>
+                              {project.title} {project.issue ? `Issue #${project.issue}` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <Button 
+                      className="w-full" 
+                      onClick={handleInvite}
+                      disabled={!inviteEmail}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Send Invitation
+                    </Button>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
             
