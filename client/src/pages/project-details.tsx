@@ -460,8 +460,23 @@ export default function ProjectDetails() {
                         let progressStatus: TalentProgressStatus = 'on_time';
                         
                         if (step.dueDate) {
+                          // Determine progress status based on due date and progress
                           const daysUntil = calculateDaysUntil(step.dueDate);
-                          progressStatus = getTalentProgressStatus(daysUntil, step.progress);
+                          if (daysUntil < 0) {
+                            // Past due date
+                            progressStatus = 'behind_schedule';
+                          } else if (daysUntil === 0 || daysUntil === 1) {
+                            // Due today or tomorrow
+                            progressStatus = step.progress >= 90 ? 'on_time' : 'one_day_late'; 
+                          } else {
+                            // Not yet due
+                            const expectedProgress = Math.max(0, 100 - (daysUntil * 5));
+                            if (step.progress < expectedProgress - 20) {
+                              progressStatus = 'behind_schedule';
+                            } else if (step.progress < expectedProgress - 10) {
+                              progressStatus = 'one_day_late';
+                            }
+                          }
                         }
                         
                         const progressStatusColors = getTalentProgressStatusColor(progressStatus);
