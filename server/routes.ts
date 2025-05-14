@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   insertProjectSchema, 
   insertFeedbackItemSchema, 
@@ -16,9 +17,24 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication
+  await setupAuth(app);
+  
   // API routes
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok" });
+  });
+  
+  // Authentication status route
+  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
   });
 
   // User routes
@@ -339,16 +355,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Project routes
-  app.get("/api/projects", async (_req, res) => {
+  app.get("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
-      const projects = await storage.getProjects();
+      const userId = req.user.claims.sub;
+      const dbUser = await storage.getUser(userId);
+      
+      if (!dbUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      let projects = [];
+      
+      // If user is an editor with editor-in-chief role, they can see all projects
+      if (dbUser.isEditor && dbUser.editorRole === "editor_in_chief") {
+        projects = await storage.getProjects();
+      } 
+      // If user is a senior editor, they can see their own projects and editor projects
+      else if (dbUser.isEditor && dbUser.editorRole === "senior_editor") {
+        // Get all projects this editor has access to
+        const editorProjects = await storage.getEditableProjects(dbUser.id);
+        projects = editorProjects;
+      }
+      // Regular editors or talent can only see their assigned projects
+      else {
+        // Get projects directly assigned to the user
+        projects = await storage.getProjectsByUser(dbUser.id);
+        
+        // If the user is an editor, also get projects they have editor permissions for
+        if (dbUser.isEditor) {
+          const editorProjects = await storage.getProjectsByEditor(dbUser.id);
+          // Combine and remove duplicates
+          const allProjects = [...projects, ...editorProjects];
+          projects = [...new Map(allProjects.map(project => [project.id, project])).values()];
+        }
+      }
+      
       res.json(projects);
     } catch (error) {
+      console.error("Failed to get projects:", error);
       res.status(500).json({ message: "Failed to fetch projects" });
     }
   });
 
-  app.get("/api/projects/:id", async (req, res) => {
+  app.get("/api/projects/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -359,9 +408,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
-
+      
+      // Check if the authenticated user has access to this project
+      const userId = req.user.claims.sub;
+      const dbUser = await storage.getUser(userId);
+      
+      if (!dbUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Editor-in-Chief can see all projects
+      if (dbUser.isEditor && dbUser.editorRole === "editor_in_chief") {
+        return res.json(project);
+      }
+      
+      // Check if user is a collaborator on this project
+      const userProjects = await storage.getProjectsByUser(dbUser.id);
+      const isCollaborator = userProjects.some(p => p.id === id);
+      
+      // Check if user is an editor of this project
+      const canEdit = await storage.canEditProject(dbUser.id, id);
+      
+      if (!isCollaborator && !canEdit) {
+        return res.status(403).json({ message: "You don't have access to this project" });
+      }
+      
       res.json(project);
     } catch (error) {
+      console.error("Failed to fetch project:", error);
       res.status(500).json({ message: "Failed to fetch project" });
     }
   });

@@ -64,7 +64,7 @@ async function upsertUser(
       ? `${claims["first_name"]} ${claims["last_name"]}` 
       : claims["email"].split('@')[0],
     username: claims["email"].split('@')[0],
-    profileImageUrl: claims["profile_image_url"],
+    avatarUrl: claims["profile_image_url"],
   });
 }
 
