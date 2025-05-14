@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { BookOpen, Plus, Settings } from 'lucide-react';
 import { Project } from '@shared/schema';
 import { useQuery } from '@tanstack/react-query';
+import { useDirectAuth } from '@/hooks/useDirectAuth';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -14,6 +15,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const [location] = useLocation();
+  const { user } = useDirectAuth();
   
   const { data: projects } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
@@ -106,12 +108,16 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       <div className="p-4 border-t border-slate-200">
         <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt="user" />
-            <AvatarFallback className="bg-primary/10 text-primary">AR</AvatarFallback>
+            <AvatarImage src={user?.avatarUrl || ""} alt={user?.fullName || "User"} />
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {user?.fullName 
+                ? user.fullName.split(' ').map(n => n[0]).join('') 
+                : user?.username?.substring(0, 2).toUpperCase() || "U"}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Alex Rodriguez</p>
-            <p className="text-xs text-slate-500 truncate">Senior Editor</p>
+            <p className="text-sm font-medium truncate">{user?.fullName || user?.username || "User"}</p>
+            <p className="text-xs text-slate-500 truncate">{user?.role || "Editor"}</p>
           </div>
           <button className="text-slate-400 hover:text-slate-600">
             <Settings className="h-4 w-4" />
