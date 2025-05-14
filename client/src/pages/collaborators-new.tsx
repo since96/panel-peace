@@ -19,8 +19,7 @@ const talentRoles = [
   { id: "writer", label: "Writer" },
   { id: "colorist", label: "Colorist" },
   { id: "letterer", label: "Letterer" },
-  { id: "editor", label: "Editor" },
-  { id: "character_designer", label: "Character Designer" },
+  { id: "inker", label: "Inker" },
   { id: "cover_artist", label: "Cover Artist" }
 ];
 
@@ -117,7 +116,7 @@ export default function Collaborators() {
     email: "",
     phone: "",
     socialMedia: "",
-    isEditor: false,
+    isEditor: false, // Always false - editor role has been removed
     role: "",
     roles: [] as string[],
     avatarUrl: "",
@@ -197,7 +196,7 @@ export default function Collaborators() {
         email: "",
         phone: "",
         socialMedia: "",
-        isEditor: false,
+        isEditor: false, // Always false - editor role has been removed
         role: "",
         roles: [],
         avatarUrl: "",
@@ -637,20 +636,9 @@ export default function Collaborators() {
                   <p className="text-xs text-slate-500 mt-1">Each talent can perform multiple roles</p>
                 </div>
                 
-                <div className="flex items-center mt-2">
-                  <input
-                    type="checkbox"
-                    id="is-editor"
-                    checked={newTeamMember.isEditor}
-                    onChange={(e) => setNewTeamMember({...newTeamMember, isEditor: e.target.checked})}
-                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <label htmlFor="is-editor" className="ml-2 text-sm text-gray-700">
-                    This person is an editor (has admin access)
-                  </label>
-                </div>
+                {/* Editor checkbox removed as requested */}
                 
-                {newTeamMember.isEditor && (
+                {false && (
                   <div className="p-3 bg-slate-50 rounded-md space-y-3">
                     <div>
                       <label className="text-sm font-medium mb-1.5 block">Username *</label>
