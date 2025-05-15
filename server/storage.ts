@@ -451,6 +451,30 @@ export class MemStorage implements IStorage {
   
   // Studio operations
   async getStudio(id: number): Promise<Studio | undefined> {
+    // For development, return hardcoded studios with IDs 998 and 999
+    if (id === 998) {
+      return {
+        id: 998,
+        name: "Marvel Comics",
+        description: "The House of Ideas",
+        logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Marvel_Logo.svg/1200px-Marvel_Logo.svg.png",
+        createdAt: new Date(),
+        createdBy: 1,
+        active: true
+      };
+    } else if (id === 999) {
+      return {
+        id: 999,
+        name: "DC Comics",
+        description: "The Distinguished Competition",
+        logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/DC_Comics_logo.svg/1200px-DC_Comics_logo.svg.png",
+        createdAt: new Date(),
+        createdBy: 1,
+        active: true
+      };
+    }
+    
+    // Otherwise check the in-memory storage
     return this.studios.get(id);
   }
   
@@ -622,6 +646,45 @@ export class MemStorage implements IStorage {
   }
   
   async getProjectsByStudio(studioId: number): Promise<Project[]> {
+    // For our hardcoded studios, return some sample projects
+    if (studioId === 998 || studioId === 999) {
+      const studioName = studioId === 998 ? "Marvel Comics" : "DC Comics";
+      const sampleProjects = [];
+      
+      // Add a sample project for this studio
+      for (let i = 1; i <= 3; i++) {
+        sampleProjects.push({
+          id: 1000 + i + (studioId === 999 ? 10 : 0), // Different IDs for each studio
+          studioId: studioId,
+          title: `${studioName} Project ${i}`,
+          issue: `Issue #${i}`,
+          description: `Sample ${studioName} project ${i}`,
+          status: i % 2 === 0 ? 'in_progress' : 'not_started',
+          coverImage: null,
+          progress: Math.floor(Math.random() * 100),
+          isPrivate: false,
+          plotDeadline: new Date(new Date().setDate(new Date().getDate() + 30)),
+          scriptDeadline: new Date(new Date().setDate(new Date().getDate() + 45)),
+          artDeadline: new Date(new Date().setDate(new Date().getDate() + 60)),
+          colorDeadline: new Date(new Date().setDate(new Date().getDate() + 75)),
+          letteringDeadline: new Date(new Date().setDate(new Date().getDate() + 90)),
+          proofDeadline: new Date(new Date().setDate(new Date().getDate() + 100)),
+          printDeadline: new Date(new Date().setDate(new Date().getDate() + 120)),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          createdBy: 1,
+          genre: "Superhero",
+          targetAudience: "All Ages",
+          format: "Comic Book",
+          pageCount: 22,
+          dueDate: new Date(new Date().setDate(new Date().getDate() + 120)),
+        });
+      }
+      
+      return sampleProjects;
+    }
+    
+    // Otherwise check the in-memory projects
     return Array.from(this.projects.values()).filter(
       project => project.studioId === studioId
     );

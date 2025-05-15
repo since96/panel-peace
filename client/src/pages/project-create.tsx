@@ -51,6 +51,11 @@ export default function ProjectCreate() {
   const [_, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Parse URL parameters for studioId
+  const searchParams = new URLSearchParams(window.location.search);
+  const studioIdParam = searchParams.get('studioId');
+  const studioId = studioIdParam ? parseInt(studioIdParam) : null;
+  
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
@@ -140,12 +145,15 @@ export default function ProjectCreate() {
     // The server expects strings that it can parse into database timestamps
     const apiData = {
       ...submissionData,
+      // Add studio ID
+      studioId: studioId || 998, // Use the studio ID from URL or default to Marvel Comics (998)
       // Convert date fields to ISO strings for the API
       dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined,
       plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
       coverDeadline: submissionData.coverDeadline ? submissionData.coverDeadline.toISOString() : undefined
     };
     
+    console.log("Creating project with data:", apiData);
     createProjectMutation.mutateAsync(apiData);
   };
   
