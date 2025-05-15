@@ -317,7 +317,29 @@ export class MemStorage implements IStorage {
   
   // Project operations
   async getProject(id: number): Promise<Project | undefined> {
-    return this.projects.get(id);
+    // First check if the project exists in our regular storage
+    const project = this.projects.get(id);
+    if (project) {
+      return project;
+    }
+    
+    // For hardcoded IDs (1000+), check if it's a sample project
+    if (id >= 1000) {
+      // Determine which studio this sample project belongs to
+      let studioId = 998; // Default to Marvel
+      if (id >= 1010) {
+        studioId = 999; // DC Comics
+      }
+      
+      // Get all sample projects for this studio
+      const sampleProjects = await this.getProjectsByStudio(studioId);
+      
+      // Find the specific project with this ID
+      return sampleProjects.find(p => p.id === id);
+    }
+    
+    // Project not found
+    return undefined;
   }
   
   async getProjects(): Promise<Project[]> {
@@ -860,7 +882,19 @@ export class MemStorage implements IStorage {
   }
   
   async getProjectsByStudio(studioId: number): Promise<Project[]> {
-    // For our hardcoded studios, return some sample projects
+    // First get any real projects from storage for this studio
+    const realProjects = Array.from(this.projects.values()).filter(
+      project => project.studioId === studioId
+    );
+    
+    console.log(`Found ${realProjects.length} real projects for studio ${studioId}`);
+    
+    // If we have real projects for this studio or if it's a user-created studio, return them
+    if (realProjects.length > 0 || (studioId !== 998 && studioId !== 999)) {
+      return realProjects;
+    }
+    
+    // For our hardcoded studios with no real projects, return some sample projects
     if (studioId === 998 || studioId === 999) {
       const studioName = studioId === 998 ? "Marvel Comics" : "DC Comics";
       const sampleProjects = [];
@@ -895,13 +929,11 @@ export class MemStorage implements IStorage {
         });
       }
       
+      console.log(`Returning ${sampleProjects.length} sample projects for hardcoded studio ${studioId}`);
       return sampleProjects;
     }
     
-    // Otherwise check the in-memory projects
-    return Array.from(this.projects.values()).filter(
-      project => project.studioId === studioId
-    );
+    return [];
   }
   
   // Feedback operations
