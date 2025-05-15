@@ -113,10 +113,38 @@ export default function ProjectCreate() {
     mutationFn: async (data: any) => {
       try {
         console.log("Making POST request to /api/projects with data:", data);
-        const res = await apiRequest("POST", "/api/projects", data);
-        console.log("API response status:", res.status);
-        const jsonResponse = await res.json();
+        
+        // Use raw fetch with better error handling
+        const response = await fetch('/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+        
+        console.log("API response status:", response.status);
+        
+        // Get the response text first
+        const responseText = await response.text();
+        console.log("API raw response:", responseText);
+        
+        // Then try to parse it as JSON if possible
+        let jsonResponse;
+        try {
+          jsonResponse = JSON.parse(responseText);
+        } catch (e) {
+          console.error("Failed to parse response as JSON:", e);
+          throw new Error(`Server returned non-JSON response: ${responseText}`);
+        }
+        
         console.log("API response data:", jsonResponse);
+        
+        // Check if response was successful
+        if (!response.ok) {
+          throw jsonResponse;
+        }
+        
         return jsonResponse;
       } catch (error) {
         console.error("API request error:", error);
@@ -248,7 +276,11 @@ export default function ProjectCreate() {
                       <FormItem>
                         <FormLabel>Issue Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g. #1 or Vol. 2, #5" {...field} />
+                          <Input 
+                            placeholder="e.g. #1 or Vol. 2, #5" 
+                            {...field} 
+                            value={field.value || ''} 
+                          />
                         </FormControl>
                         <FormDescription>
                           The issue number or identifier
@@ -270,6 +302,7 @@ export default function ProjectCreate() {
                           placeholder="Brief description of the comic story and concept"
                           className="min-h-[120px]"
                           {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
                       <FormDescription>
