@@ -113,7 +113,7 @@ export default function Projects() {
                     ? "You haven't created any projects yet. Create your first project to get started."
                     : `You don't have any projects with '${statusFilter.replace('_', ' ')}' status.`}
                 </p>
-                <Link href="/projects/new">
+                <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
                   <Button className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     <span>Create New Project</span>
