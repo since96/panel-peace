@@ -116,18 +116,22 @@ export function setupStudioAuth(app: express.Express) {
         socialMedia: userData.socialMedia,
         isEditor: true,
         editorRole: 'editor_in_chief',
-        isSiteAdmin: false,
-        // Add studioId to user's properties
-        assignedProjects: userData.assignedProjects,
-        role: userData.role,
-        roles: userData.roles,
-        avatarUrl: userData.avatarUrl,
+        // Set defaults for remaining required fields
+        assignedProjects: userData.assignedProjects || [],
+        role: userData.role || "editor_in_chief",
+        roles: userData.roles || ["editor_in_chief"],
+        avatarUrl: userData.avatarUrl || null,
       });
       
       // Update user with studioId using a separate call to avoid type issues
-      await storage.updateUser(newUser.id, {
-        studioId: studio.id
-      });
+      try {
+        await storage.updateUser(newUser.id, {
+          studioId: studio.id,
+          isSiteAdmin: false
+        });
+      } catch (error) {
+        console.warn("Failed to update user with studioId:", error);
+      }
       
       // Update the studio with the actual creator
       await storage.updateStudio(studio.id, {
