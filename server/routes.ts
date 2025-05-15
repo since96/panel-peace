@@ -59,7 +59,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         // Fetch updated user
         const updatedUser = await storage.getUser(1);
-        user = updatedUser || user;
+        if (updatedUser) {
+          return res.json(updatedUser);
+        }
       }
       
       // Create a safe user object without password
@@ -1714,6 +1716,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching studio projects:", error);
       res.status(500).json({ message: "Failed to fetch studio projects" });
+    }
+  });
+  
+  // DELETE endpoint for studios (site admin only)
+  app.delete("/api/studios/:id", async (req, res) => {
+    try {
+      // Check if the user is a site admin
+      // For development, we'll use the default admin user (ID 1)
+      const userId = 1; // Use admin ID for development
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.isSiteAdmin) {
+        return res.status(403).json({ 
+          message: "Unauthorized. Only site administrators can delete studios." 
+        });
+      }
+      
+      const studioId = parseInt(req.params.id);
+      if (isNaN(studioId)) {
+        return res.status(400).json({ message: "Invalid studio ID" });
+      }
+      
+      // Check if the studio with the given ID exists
+      const studio = await storage.getStudio(studioId);
+      if (!studio) {
+        return res.status(404).json({ message: "Studio not found" });
+      }
+      
+      // Delete the studio
+      const success = await storage.deleteStudio(studioId);
+      
+      if (success) {
+        return res.status(200).json({ 
+          message: `Studio ${studio.name} successfully deleted` 
+        });
+      } else {
+        return res.status(500).json({ 
+          message: "Failed to delete studio" 
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting studio:", error);
+      res.status(500).json({ message: "Failed to delete studio" });
     }
   });
   

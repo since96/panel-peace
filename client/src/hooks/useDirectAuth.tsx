@@ -76,7 +76,10 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
             username: 'admin',
             fullName: 'Comic Editor Admin',
             email: 'admin@example.com',
-            role: 'Editor'
+            role: 'Editor',
+            isSiteAdmin: true,
+            isEditor: true,
+            editorRole: 'editor_in_chief'
           };
           
           setUser(fallbackUser);
