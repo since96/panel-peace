@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -60,6 +60,23 @@ export default function ProjectCreate() {
   console.log("URL search:", window.location.search);
   console.log("Studio ID from URL:", studioIdParam);
   console.log("Parsed studio ID:", studioId);
+  
+  useEffect(() => {
+    // Warn if no studio ID is provided
+    if (!studioId) {
+      console.warn("No studio ID provided in URL. Defaulting to Marvel Comics (998)");
+      toast({
+        title: "Studio Selection",
+        description: "No studio selected. Creating project for Marvel Comics.",
+      });
+    } else {
+      console.log(`Creating project for studio ID: ${studioId}`);
+      toast({
+        title: "Studio Selected",
+        description: `Creating project for studio ID: ${studioId}`,
+      });
+    }
+  }, [studioId, toast]);
   
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),

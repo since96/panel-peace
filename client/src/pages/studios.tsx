@@ -298,8 +298,14 @@ function StudioCard({ studio }: { studio: Studio }) {
             <Link to={`/projects?studioId=${studio.id}`}>View Projects</Link>
           </Button>
           
-          <Button className="flex-1" asChild>
-            <Link to={`/projects/new?studioId=${studio.id}`} onClick={() => console.log("Clicked New Project link for studio", studio.id)}>New Project</Link>
+          <Button 
+            className="flex-1" 
+            onClick={() => {
+              console.log("Clicked New Project button for studio", studio.id);
+              window.location.href = `/projects/new?studioId=${studio.id}`;
+            }}
+          >
+            New Project
           </Button>
         </div>
       </CardFooter>

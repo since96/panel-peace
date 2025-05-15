@@ -52,12 +52,17 @@ export default function Projects() {
             <p className="text-slate-500 mt-1">Manage your comic book projects</p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                <span>New Project</span>
-              </Button>
-            </Link>
+            <Button 
+              className="flex items-center gap-2"
+              onClick={() => {
+                const url = studioId ? `/projects/new?studioId=${studioId}` : "/projects/new";
+                console.log("Navigating to:", url);
+                window.location.href = url;
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              <span>New Project</span>
+            </Button>
           </div>
         </div>
         
@@ -113,12 +118,17 @@ export default function Projects() {
                     ? "You haven't created any projects yet. Create your first project to get started."
                     : `You don't have any projects with '${statusFilter.replace('_', ' ')}' status.`}
                 </p>
-                <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
-                  <Button className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    <span>Create New Project</span>
-                  </Button>
-                </Link>
+                <Button 
+                  className="flex items-center gap-2"
+                  onClick={() => {
+                    const url = studioId ? `/projects/new?studioId=${studioId}` : "/projects/new";
+                    console.log("Navigating to empty state:", url);
+                    window.location.href = url;
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create New Project</span>
+                </Button>
               </div>
             )}
           </>
