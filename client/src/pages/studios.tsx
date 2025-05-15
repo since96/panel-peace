@@ -1,11 +1,24 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BuildingIcon, Users, PencilRuler, UsersRound } from 'lucide-react';
+import { BuildingIcon, Users, PencilRuler, UsersRound, Trash2 } from 'lucide-react';
 import { CreateStudioDialog } from '@/components/studio/create-studio-dialog';
 import axios from 'axios';
+import { useDirectAuth } from '@/hooks/useDirectAuth';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Base layout components (you should adjust these to match your actual layout)
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -121,6 +134,14 @@ export default function StudiosPage() {
 }
 
 function StudioCard({ studio }: { studio: Studio }) {
+  const { user } = useDirectAuth();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
+  
+  // Determine if current user is a site admin
+  const isSiteAdmin = user?.isSiteAdmin === true;
+  
   // Fetch studio editors (using React Query's defaults if data doesn't exist yet)
   const { data: editors = [] } = useQuery({
     queryKey: ['/api/studios', studio.id, 'editors'],
@@ -137,6 +158,30 @@ function StudioCard({ studio }: { studio: Studio }) {
       const response = await axios.get(`/api/studios/${studio.id}/projects`);
       return response.data;
     },
+  });
+  
+  // Delete studio mutation
+  const deleteStudioMutation = useMutation({
+    mutationFn: async () => {
+      return await axios.delete(`/api/studios/${studio.id}`);
+    },
+    onSuccess: () => {
+      setIsDeleteOpen(false);
+      // Invalidate the studios query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['/api/studios'] });
+      toast({
+        title: "Studio deleted",
+        description: `${studio.name} has been permanently deleted.`,
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting studio:', error);
+      toast({
+        title: "Error deleting studio",
+        description: "There was a problem deleting the studio. Please try again later.",
+        variant: "destructive"
+      });
+    }
   });
 
   return (
@@ -165,11 +210,53 @@ function StudioCard({ studio }: { studio: Studio }) {
             </CardDescription>
           </div>
           
-          {!studio.active && (
-            <Badge variant="outline" className="ml-2 bg-yellow-50 text-yellow-700 border-yellow-300">
-              Pending Approval
-            </Badge>
-          )}
+          <div className="flex items-center">
+            {!studio.active && (
+              <Badge variant="outline" className="ml-2 bg-yellow-50 text-yellow-700 border-yellow-300">
+                Pending Approval
+              </Badge>
+            )}
+            
+            {/* Delete Studio button - only visible to site admins */}
+            {isSiteAdmin && (
+              <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="ml-2 text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete Studio</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Studio</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete <strong>{studio.name}</strong>? This action will permanently delete
+                      the studio, all its projects, and remove all users associated with it.
+                      <br /><br />
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        deleteStudioMutation.mutate();
+                      }}
+                      disabled={deleteStudioMutation.isPending}
+                    >
+                      {deleteStudioMutation.isPending ? 'Deleting...' : 'Delete Studio'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </div>
       </CardHeader>
       

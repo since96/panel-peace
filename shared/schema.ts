@@ -66,6 +66,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   socialMedia: true,
   isEditor: true,
   editorRole: true,
+  isSiteAdmin: true,
+  studioId: true,
   assignedProjects: true,
   role: true,
   roles: true,
