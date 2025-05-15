@@ -116,6 +116,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private studios: Map<number, Studio>;
   private users: Map<number, User>;
   private projects: Map<number, Project>;
   private collaborators: Map<number, Collaborator>;
@@ -127,6 +128,7 @@ export class MemStorage implements IStorage {
   private comments: Map<number, Comment>;
   private workflowSteps: Map<number, WorkflowStep>;
   
+  private studioIdCounter: number;
   private userIdCounter: number;
   private projectIdCounter: number;
   private collaboratorIdCounter: number;
@@ -145,6 +147,7 @@ export class MemStorage implements IStorage {
   private fileLinkIdCounter: number;
 
   constructor() {
+    this.studios = new Map();
     this.users = new Map();
     this.projects = new Map();
     this.collaborators = new Map();
@@ -158,6 +161,7 @@ export class MemStorage implements IStorage {
     this.fileUploads = new Map();
     this.fileLinks = new Map();
     
+    this.studioIdCounter = 1;
     this.userIdCounter = 1;
     this.projectIdCounter = 1;
     this.collaboratorIdCounter = 1;
