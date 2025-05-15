@@ -24,6 +24,7 @@ export interface IStorage {
   getStudios(): Promise<Studio[]>;
   createStudio(studio: InsertStudio): Promise<Studio>;
   updateStudio(id: number, studio: Partial<InsertStudio>): Promise<Studio | undefined>;
+  deleteStudio(id: number): Promise<boolean>; // Allow site admins to delete studios
   getStudioEditors(studioId: number): Promise<User[]>; // Get all editors in a studio
   getStudiosByAdmin(userId: number): Promise<Studio[]>; // Get studios where user is an EIC
   
@@ -498,6 +499,44 @@ export class MemStorage implements IStorage {
     return updatedStudio;
   }
   
+  async deleteStudio(id: number): Promise<boolean> {
+    // First, check if this studio exists
+    const studioToDelete = await this.getStudio(id);
+    if (!studioToDelete) {
+      return false; // Studio doesn't exist
+    }
+    
+    // Special case: don't allow deleting hard-coded studios during development
+    if (id >= 998) {
+      console.log(`WARNING: Attempted to delete hard-coded studio with ID ${id}`);
+      return false;
+    }
+    
+    // Before deleting studio, get all projects associated with this studio
+    const studioProjects = await this.getProjectsByStudio(id);
+    
+    // Get all users associated with this studio
+    const studioUsers = await this.getUsersByStudio(id);
+    
+    // Delete all projects in this studio
+    for (const project of studioProjects) {
+      await this.deleteProject(project.id);
+    }
+    
+    // Disassociate users from this studio (don't delete them)
+    for (const user of studioUsers) {
+      await this.updateUser(user.id, {
+        studioId: null
+      });
+    }
+    
+    // Finally, delete the studio
+    const result = this.studios.delete(id);
+    
+    console.log(`${result ? 'Successfully deleted' : 'Failed to delete'} studio with ID ${id}`);
+    return result;
+  }
+  
   async getStudioEditors(studioId: number): Promise<User[]> {
     return Array.from(this.users.values()).filter(
       user => user.studioId === studioId && user.isEditor === true
@@ -526,6 +565,51 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).filter(
       user => user.studioId === studioId
     );
+  }
+  
+  async getUsersByRole(role: string, studioId?: number): Promise<User[]> {
+    let users = Array.from(this.users.values());
+    
+    // Filter by role
+    if (role === 'admin') {
+      users = users.filter(user => user.isSiteAdmin === true);
+    } else if (role === 'editor_in_chief') {
+      users = users.filter(user => user.isEditor === true && user.editorRole === 'editor_in_chief');
+    } else if (role === 'editor') {
+      users = users.filter(user => user.isEditor === true && user.editorRole === 'editor');
+    } else if (role === 'talent') {
+      users = users.filter(user => !user.isEditor);
+    }
+    
+    // Additionally filter by studio if provided
+    if (studioId !== undefined) {
+      users = users.filter(user => user.studioId === studioId);
+    }
+    
+    return users;
+  }
+  
+  async getViewableProjects(userId: number): Promise<Project[]> {
+    const user = await this.getUser(userId);
+    if (!user) return [];
+    
+    // Site admins can view all projects
+    if (user.isSiteAdmin) {
+      return await this.getProjects();
+    }
+    
+    // If editor-in-chief, can view all projects in their studio
+    if (user.isEditor && user.editorRole === 'editor_in_chief' && user.studioId) {
+      return await this.getProjectsByStudio(user.studioId);
+    }
+    
+    // Editors can view projects they're assigned to
+    if (user.isEditor) {
+      return await this.getProjectsByEditor(userId);
+    }
+    
+    // Non-editors (talent) can only view projects they're collaborators on
+    return await this.getProjectsByUser(userId);
   }
   
   // Debug methods - temporary

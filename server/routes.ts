@@ -1618,6 +1618,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(studio);
     } catch (error) {
       console.error("Error fetching studio:", error);
+      res.status(500).json({ message: "Failed to fetch studio" });
+    }
+  });
+  
+  // Delete a studio (only site admins can do this)
+  app.delete("/api/studios/:id", async (req: any, res) => {
+    try {
+      const studioId = parseInt(req.params.id);
+      if (isNaN(studioId)) {
+        return res.status(400).json({ message: "Invalid studio ID" });
+      }
+      
+      // TEMP: No authentication - use admin user
+      const dbUser = await storage.getUser(1);
+      
+      if (!dbUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Only site admins can delete studios
+      if (!dbUser.isSiteAdmin) {
+        return res.status(403).json({ message: "Only site administrators can delete studios" });
+      }
+      
+      // Check if studio exists
+      const studio = await storage.getStudio(studioId);
+      if (!studio) {
+        return res.status(404).json({ message: "Studio not found" });
+      }
+      
+      // Delete the studio and all its projects
+      const result = await storage.deleteStudio(studioId);
+      
+      if (result) {
+        res.json({ message: `Successfully deleted studio '${studio.name}' and all its projects` });
+      } else {
+        res.status(500).json({ message: "Failed to delete studio" });
+      }
+    } catch (error) {
+      console.error("Error deleting studio:", error);
+      res.status(500).json({ message: "Failed to delete studio" });
     }
   });
   
