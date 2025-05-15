@@ -3,11 +3,21 @@ import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupDirectAuth } from "./direct-auth";
+import { setupStudioAuth } from "./studio-auth";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// Set up authentication systems
+console.log("Setting up direct authentication with JWT...");
+setupDirectAuth(app);
+console.log("Direct authentication setup complete");
+
+console.log("Setting up studio authentication system...");
+setupStudioAuth(app);
+console.log("Studio authentication setup complete");
 
 app.use((req, res, next) => {
   const start = Date.now();

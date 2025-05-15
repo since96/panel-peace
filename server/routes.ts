@@ -19,8 +19,7 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication
-  setupDirectAuth(app);
+  // Authentication is already setup in index.ts
   
   // API routes
   app.get("/api/health", (_req, res) => {
@@ -1490,6 +1489,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Studio routes
+  app.get("/api/studios", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req as any).user?.id || 1; // Use admin ID if no authenticated user
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      let studios = [];
+      
+      // If user is a site admin, they can see all studios
+      if (user.isSiteAdmin) {
+        studios = await storage.getStudios();
+      } 
+      // If user is an editor, they can see their own studio
+      else if (user.studioId) {
+        const studio = await storage.getStudio(user.studioId);
+        if (studio) studios = [studio];
+      }
+      
+      res.json(studios);
+    } catch (error) {
+      console.error("Error fetching studios:", error);
+      res.status(500).json({ message: "Failed to fetch studios" });
+    }
+  });
+  
+  app.get("/api/studios/:id", isAuthenticated, async (req, res) => {
+    try {
+      const studioId = parseInt(req.params.id);
+      if (isNaN(studioId)) {
+        return res.status(400).json({ message: "Invalid studio ID" });
+      }
+      
+      const studio = await storage.getStudio(studioId);
+      if (!studio) {
+        return res.status(404).json({ message: "Studio not found" });
+      }
+      
+      res.json(studio);
+    } catch (error) {
+      console.error("Error fetching studio:", error);
+      res.status(500).json({ message: "Failed to fetch studio" });
+    }
+  });
+  
+  app.get("/api/studios/:id/editors", isAuthenticated, async (req, res) => {
+    try {
+      const studioId = parseInt(req.params.id);
+      if (isNaN(studioId)) {
+        return res.status(400).json({ message: "Invalid studio ID" });
+      }
+      
+      const editors = await storage.getStudioEditors(studioId);
+      res.json(editors);
+    } catch (error) {
+      console.error("Error fetching studio editors:", error);
+      res.status(500).json({ message: "Failed to fetch studio editors" });
+    }
+  });
+  
+  app.get("/api/studios/:id/projects", isAuthenticated, async (req, res) => {
+    try {
+      const studioId = parseInt(req.params.id);
+      if (isNaN(studioId)) {
+        return res.status(400).json({ message: "Invalid studio ID" });
+      }
+      
+      const projects = await storage.getProjectsByStudio(studioId);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching studio projects:", error);
+      res.status(500).json({ message: "Failed to fetch studio projects" });
+    }
+  });
+  
   // Email routes for project export
   app.post("/api/email/send", isAuthenticated, async (req, res) => {
     try {

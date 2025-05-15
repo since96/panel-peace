@@ -1,0 +1,173 @@
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { BuildingIcon, Users, PencilRuler, UsersRound } from 'lucide-react';
+import { CreateStudioDialog } from '@/components/studio/create-studio-dialog';
+import axios from 'axios';
+
+// Base layout components (you should adjust these to match your actual layout)
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+export interface Studio {
+  id: number;
+  name: string;
+  description: string;
+  logoUrl: string | null;
+  createdAt: string;
+  createdBy: number;
+  active: boolean;
+}
+
+export default function StudiosPage() {
+  // Fetch studios
+  const { data: studios = [], isLoading, error } = useQuery({
+    queryKey: ['/api/studios'],
+    queryFn: async () => {
+      const response = await axios.get('/api/studios');
+      return response.data;
+    },
+  });
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Studios</h1>
+          <Breadcrumb className="mt-2">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/studios">Studios</BreadcrumbLink>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+        <CreateStudioDialog />
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <p>Loading studios...</p>
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <p>Error loading studios. Please try again.</p>
+        </div>
+      ) : studios.length === 0 ? (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-10 text-center">
+          <BuildingIcon className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-4 text-lg font-medium">No studios found</h3>
+          <p className="mt-2 text-gray-500">Get started by creating a new studio.</p>
+          <div className="mt-6">
+            <CreateStudioDialog />
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {studios.map((studio: Studio) => (
+            <StudioCard key={studio.id} studio={studio} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StudioCard({ studio }: { studio: Studio }) {
+  // Fetch studio editors (using React Query's defaults if data doesn't exist yet)
+  const { data: editors = [] } = useQuery({
+    queryKey: ['/api/studios', studio.id, 'editors'],
+    queryFn: async () => {
+      const response = await axios.get(`/api/studios/${studio.id}/editors`);
+      return response.data;
+    },
+  });
+
+  // Fetch studio projects
+  const { data: projects = [] } = useQuery({
+    queryKey: ['/api/studios', studio.id, 'projects'],
+    queryFn: async () => {
+      const response = await axios.get(`/api/studios/${studio.id}/projects`);
+      return response.data;
+    },
+  });
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="h-24 bg-gradient-to-r from-primary/20 to-primary/10 relative">
+        {studio.logoUrl && (
+          <img
+            src={studio.logoUrl}
+            alt={`${studio.name} logo`}
+            className="absolute bottom-0 right-4 translate-y-1/2 h-20 w-20 object-cover rounded-lg border-4 border-background"
+          />
+        )}
+        {!studio.logoUrl && (
+          <div className="absolute bottom-0 right-4 translate-y-1/2 h-20 w-20 flex items-center justify-center rounded-lg border-4 border-background bg-primary/10">
+            <BuildingIcon className="h-8 w-8 text-primary" />
+          </div>
+        )}
+      </div>
+      
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-xl">{studio.name}</CardTitle>
+            <CardDescription className="mt-1 line-clamp-2">
+              {studio.description || 'No description provided'}
+            </CardDescription>
+          </div>
+          
+          {!studio.active && (
+            <Badge variant="outline" className="ml-2 bg-yellow-50 text-yellow-700 border-yellow-300">
+              Pending Approval
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <UsersRound className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{editors.length} Editors</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <PencilRuler className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{projects.length} Projects</span>
+            </div>
+          </div>
+          
+          {editors.length > 0 && (
+            <div>
+              <h4 className="text-sm font-medium mb-2">Editor in Chief</h4>
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={editors[0]?.profileImageUrl} />
+                  <AvatarFallback>{editors[0]?.fullName?.substring(0, 2) || 'EIC'}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{editors[0]?.fullName || 'Unnamed'}</p>
+                  <p className="text-xs text-muted-foreground">{editors[0]?.email || 'No email'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+      
+      <CardFooter className="border-t pt-4">
+        <Button variant="outline" className="w-full" asChild>
+          <a href={`/studios/${studio.id}`}>View Studio</a>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
