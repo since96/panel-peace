@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Download, Send, User, AtSign } from 'lucide-react';
+import { Mail, Download, Send, User, AtSign, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -266,6 +266,105 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
     `;
   };
 
+  // Function to generate iCalendar file for workflow steps
+  const downloadCalendar = () => {
+    try {
+      // Start building the iCalendar content
+      let icsContent = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Comic Book Editor//Project Calendar//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        `X-WR-CALNAME:${projectTitle} Schedule`,
+        'X-WR-TIMEZONE:UTC',
+      ];
+      
+      // Current time for the DTSTAMP field
+      const now = new Date();
+      const stampString = formatDateForICS(now);
+      
+      // Generate unique ID for this calendar
+      const calendarUid = `project-${projectId}-${Math.floor(Date.now() / 1000)}`;
+      
+      // Add each workflow step with a due date as an event
+      workflowSteps.forEach((step, index) => {
+        if (step.dueDate) {
+          const dueDate = new Date(step.dueDate);
+          const dueDateString = formatDateForICS(dueDate);
+          
+          // Create a unique ID for this event
+          const eventUid = `${calendarUid}-step-${index}`;
+          
+          // Add event to calendar
+          icsContent = icsContent.concat([
+            'BEGIN:VEVENT',
+            `UID:${eventUid}@comiceditor.app`,
+            `DTSTAMP:${stampString}`,
+            `DTSTART:${dueDateString}`,
+            `DTEND:${dueDateString}`,
+            `SUMMARY:${projectTitle} - ${step.title} Due`,
+            `DESCRIPTION:Status: ${step.status}\\nAssigned to: ${getAssigneeName(step.assignedTo)}`,
+            'END:VEVENT'
+          ]);
+        }
+      });
+      
+      // Add the project final due date as an event if it exists
+      const projectDueDate = workflowSteps.find(step => step.title.toLowerCase().includes('final'))?.dueDate;
+      if (projectDueDate) {
+        const dueDate = new Date(projectDueDate);
+        const dueDateString = formatDateForICS(dueDate);
+        
+        icsContent = icsContent.concat([
+          'BEGIN:VEVENT',
+          `UID:${calendarUid}-final@comiceditor.app`,
+          `DTSTAMP:${stampString}`,
+          `DTSTART:${dueDateString}`,
+          `DTEND:${dueDateString}`,
+          `SUMMARY:${projectTitle} - Final Deadline`,
+          'DESCRIPTION:Project final deadline',
+          'END:VEVENT'
+        ]);
+      }
+      
+      // End the calendar
+      icsContent.push('END:VCALENDAR');
+      
+      // Create a blob from the ICS content
+      const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create a link element to trigger the download
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${projectTitle.replace(/\s+/g, '_')}_Calendar.ics`);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Calendar File Downloaded",
+        description: "The schedule has been exported to an iCalendar file. You can import this into Google Calendar, Outlook, or other calendar apps.",
+      });
+    } catch (error) {
+      console.error('Calendar generation error:', error);
+      toast({
+        title: "Calendar Export Failed",
+        description: "There was an error generating the calendar file.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Helper function to format date for iCalendar
+  const formatDateForICS = (date: Date) => {
+    return date.toISOString().replace(/-|:|\.\d+/g, '').split('T').join('T');
+  };
+
   return (
     <div className="flex space-x-2">
       <Button variant="outline" onClick={openEmailDialog}>
@@ -276,6 +375,11 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
       <Button variant="outline" onClick={downloadPdf}>
         <Download className="mr-2 h-4 w-4" />
         Download PDF
+      </Button>
+      
+      <Button variant="outline" onClick={downloadCalendar}>
+        <Calendar className="mr-2 h-4 w-4" />
+        Export to Calendar
       </Button>
       
       <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
