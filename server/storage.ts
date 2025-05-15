@@ -192,6 +192,14 @@ export class MemStorage implements IStorage {
       role: "Editor",
       avatarUrl: ""
     });
+    
+    // Initialize sample data for testing
+    // We use setTimeout to ensure this runs after all initialization is complete
+    setTimeout(() => {
+      this.initializeSampleData().catch(err => {
+        console.error("Error initializing sample data:", err);
+      });
+    }, 1000);
   }
   
   private async initializeSampleData() {
@@ -431,8 +439,6 @@ export class MemStorage implements IStorage {
         const collaborator = await this.addCollaborator({
           projectId: project.id,
           userId: user.id,
-          name: t.name,
-          email: t.email,
           role: t.role,
           availability: t.availability
         });
@@ -530,9 +536,7 @@ export class MemStorage implements IStorage {
           progress: step.progress,
           comments: step.comments,
           stepType: "production",
-          sortOrder: i,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          sortOrder: i
         });
       }
       
