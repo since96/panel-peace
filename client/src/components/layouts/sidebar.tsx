@@ -56,46 +56,65 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       </div>
       
       <div className="p-4 border-b border-slate-200">
-        <Link href="/projects/new">
-          <Button className="w-full flex items-center justify-center gap-2">
-            <Plus className="h-4 w-4" />
-            <span>New Project</span>
-          </Button>
-        </Link>
+        <Button 
+          className="w-full flex items-center justify-center gap-2"
+          onClick={() => {
+            // Use direct navigation
+            window.location.href = '/projects/new?studioId=998';
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          <span>New Marvel Project</span>
+        </Button>
+        
+        <Button 
+          className="w-full flex items-center justify-center gap-2 mt-2"
+          onClick={() => {
+            // Use direct navigation
+            window.location.href = '/projects/new?studioId=999';
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          <span>New DC Project</span>
+        </Button>
       </div>
       
       <ScrollArea className="flex-1">
         <nav className="p-4 space-y-1">
           {navigation.map((item) => (
-            <Link
+            <div
               key={item.name}
-              href={item.href}
-              onClick={onClose}
               className={cn(
-                'flex items-center space-x-2 py-2 px-3 rounded-lg transition-colors',
+                'flex items-center space-x-2 py-2 px-3 rounded-lg transition-colors cursor-pointer',
                 location === item.href 
                   ? 'bg-primary/10 text-primary font-medium'
                   : 'hover:bg-slate-100'
               )}
+              onClick={() => {
+                if (onClose) onClose();
+                window.location.href = item.href;
+              }}
             >
               <i className={item.icon}></i>
               <span>{item.name}</span>
-            </Link>
+            </div>
           ))}
           
           <div className="pt-4 mt-4 border-t border-slate-200">
             <p className="px-3 text-xs text-slate-500 uppercase font-medium">Recent Projects</p>
             <div className="mt-2 space-y-1">
               {recentProjects.map((project) => (
-                <Link
+                <div
                   key={project.id}
-                  href={`/projects/${project.id}`}
-                  onClick={onClose}
-                  className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                  onClick={() => {
+                    if (onClose) onClose();
+                    window.location.href = `/projects/${project.id}`;
+                  }}
                 >
                   <span className={`w-2 h-2 rounded-full ${getStatusIndicator(project.status)}`}></span>
                   <span className="truncate">{project.title} {project.issue}</span>
-                </Link>
+                </div>
               ))}
               
               {recentProjects.length === 0 && (

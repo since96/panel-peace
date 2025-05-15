@@ -111,16 +111,28 @@ export default function ProjectCreate() {
   
   const createProjectMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await apiRequest("POST", "/api/projects", data);
-      return res.json();
+      try {
+        console.log("Making POST request to /api/projects with data:", data);
+        const res = await apiRequest("POST", "/api/projects", data);
+        console.log("API response status:", res.status);
+        const jsonResponse = await res.json();
+        console.log("API response data:", jsonResponse);
+        return jsonResponse;
+      } catch (error) {
+        console.error("API request error:", error);
+        throw error;
+      }
     },
     onSuccess: (data) => {
+      console.log("Project created successfully:", data);
       toast({
         title: "Project created",
         description: "Your project has been created successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      navigate(`/projects/${data.id}`);
+      
+      // Use window.location instead of navigate for consistency
+      window.location.href = `/projects/${data.id}`;
     },
     onError: (error: any) => {
       console.error('Project creation error:', error);
@@ -174,6 +186,9 @@ export default function ProjectCreate() {
       plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
       coverDeadline: submissionData.coverDeadline ? submissionData.coverDeadline.toISOString() : undefined
     };
+    
+    // Debug the API data
+    console.log("API data being sent:", JSON.stringify(apiData, null, 2));
     
     console.log("Creating project with data:", apiData);
     createProjectMutation.mutateAsync(apiData);

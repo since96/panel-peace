@@ -301,8 +301,11 @@ function StudioCard({ studio }: { studio: Studio }) {
           <Button 
             className="flex-1" 
             onClick={() => {
+              const url = `/projects/new?studioId=${studio.id}`;
               console.log("Clicked New Project button for studio", studio.id);
-              window.location.href = `/projects/new?studioId=${studio.id}`;
+              console.log("Navigating to", url);
+              // Try a different approach for navigation
+              window.open(url, "_self");
             }}
           >
             New Project
