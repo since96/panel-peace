@@ -1753,6 +1753,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Email routes for project export
+  // API endpoint for requesting email service configuration
+  app.post("/api/request-email-secrets", isAuthenticated, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const userId = user?.id;
+      
+      // Check if user has admin privileges to make this request
+      const isAdmin = await storage.isUserAdmin(userId);
+      
+      if (!isAdmin) {
+        return res.status(403).json({ 
+          success: false,
+          message: "Only administrators can request email service configuration"
+        });
+      }
+      
+      // Check if the API keys are already configured
+      const hasKeys = process.env.SENDGRID_API_KEY && process.env.FROM_EMAIL;
+      
+      if (hasKeys) {
+        return res.json({
+          success: true,
+          configured: true,
+          message: "Email service is already configured"
+        });
+      }
+      
+      // Log the configuration request
+      console.log(`Admin user ${userId} requested email service configuration`);
+      
+      // Here we would typically request the secrets
+      // Since we can't do that directly from the server, we'll return instructions
+      
+      res.json({ 
+        success: true,
+        configured: false,
+        message: "Email service configuration request received. Please set the SENDGRID_API_KEY and FROM_EMAIL environment variables in your project."
+      });
+    } catch (error: any) {
+      console.error('Request secrets error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: error.message || "Failed to process configuration request" 
+      });
+    }
+  });
+
   app.post("/api/email/send", isAuthenticated, async (req, res) => {
     try {
       // First we need to validate if the user has access to the project

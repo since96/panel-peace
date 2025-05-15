@@ -36,6 +36,7 @@ export interface IStorage {
   upsertUser(userData: Partial<InsertUser> & { id: string | number }): Promise<User>;
   getUsersByStudio(studioId: number): Promise<User[]>; // Get all users in a studio
   getUsersByRole(role: string, studioId?: number): Promise<User[]>; // Get users by role, optionally filtered by studio
+  isUserAdmin(userId: number | string): Promise<boolean>; // Check if user is a site admin
   
   // Project operations
   getProject(id: number): Promise<Project | undefined>;
@@ -294,6 +295,15 @@ export class MemStorage implements IStorage {
     
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+  
+  // Check if user is a site admin
+  async isUserAdmin(userId: number | string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+    
+    // Check for isSiteAdmin flag
+    return user.isSiteAdmin === true;
   }
   
   // Project operations
