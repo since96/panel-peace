@@ -451,7 +451,10 @@ export class MemStorage implements IStorage {
   }
   
   async getStudios(): Promise<Studio[]> {
-    return Array.from(this.studios.values());
+    const studios = Array.from(this.studios.values());
+    console.log("STUDIOS DEBUG: Found", studios.length, "studios in storage");
+    console.log("STUDIOS DEBUG: Studio map keys:", Array.from(this.studios.keys()));
+    return studios;
   }
   
   async createStudio(studioData: InsertStudio): Promise<Studio> {
@@ -468,7 +471,14 @@ export class MemStorage implements IStorage {
       active: studioData.active !== undefined ? studioData.active : true
     };
     
+    console.log("STUDIOS DEBUG: Creating studio with ID", id, "and name", newStudio.name);
     this.studios.set(id, newStudio);
+    
+    // Verify it was added
+    const studioExists = this.studios.has(id);
+    console.log("STUDIOS DEBUG: Studio added to map?", studioExists);
+    console.log("STUDIOS DEBUG: Updated studio map keys:", Array.from(this.studios.keys()));
+    
     return newStudio;
   }
   
