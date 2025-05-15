@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import * as crypto from "crypto";
 import { setupDirectAuth, isAuthenticated } from "./direct-auth";
+import sgMail from '@sendgrid/mail';
 import { 
   insertProjectSchema, 
   insertFeedbackItemSchema, 
@@ -1489,6 +1490,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email routes for project export
+  app.post("/api/email/send", isAuthenticated, async (req, res) => {
+    try {
+      // First we need to validate if the user has access to the project
+      const projectId = req.body.projectId;
+      const userId = (req as any).user?.id || 1; // Use admin ID if no authenticated user
+      
+      if (projectId) {
+        const canView = await storage.canViewProject(userId, projectId);
+        if (!canView) {
+          return res.status(403).json({
+            success: false,
+            message: "You don't have permission to share this project"
+          });
+        }
+      }
+      
+      // Check if SendGrid API key is set
+      const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+      if (!SENDGRID_API_KEY) {
+        console.warn("SendGrid API key not found. Email cannot be sent.");
+        return res.status(503).json({
+          success: false,
+          message: "Email service is not configured. Please contact an administrator."
+        });
+      }
+      
+      // Set up SendGrid
+      sgMail.setApiKey(SENDGRID_API_KEY);
+      
+      // Get user information
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+      
+      // Prepare email
+      const msg = {
+        to: req.body.to,
+        from: process.env.FROM_EMAIL || "noreply@comiceditor.com", // Use configured sender or default
+        subject: req.body.subject,
+        text: req.body.text || "Comic Editor Project Schedule",
+        html: req.body.html || "<p>Comic Editor Project Schedule</p>",
+        replyTo: user.email, // Set reply-to as the current user's email
+      };
+      
+      // Send email
+      await sgMail.send(msg);
+      
+      // Return success
+      res.status(200).json({
+        success: true,
+        message: "Email sent successfully"
+      });
+    } catch (error) {
+      console.error("Email sending error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to send email",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
   const httpServer = createServer(app);
   return httpServer;
 }
