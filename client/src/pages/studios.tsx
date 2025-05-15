@@ -8,6 +8,7 @@ import { CreateStudioDialog } from '@/components/studio/create-studio-dialog';
 import axios from 'axios';
 import { useDirectAuth } from '@/hooks/useDirectAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'wouter';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -292,9 +293,15 @@ function StudioCard({ studio }: { studio: Studio }) {
       </CardContent>
       
       <CardFooter className="border-t pt-4">
-        <Button variant="outline" className="w-full" asChild>
-          <a href={`/studios/${studio.id}`}>View Studio</a>
-        </Button>
+        <div className="flex w-full space-x-2">
+          <Button variant="outline" className="flex-1" asChild>
+            <Link to={`/projects?studioId=${studio.id}`}>View Projects</Link>
+          </Button>
+          
+          <Button className="flex-1" asChild>
+            <Link to={`/projects/new?studioId=${studio.id}`}>New Project</Link>
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

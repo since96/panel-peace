@@ -1,16 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
 import { Project } from '@shared/schema';
 import { ProjectCard } from '@/components/ui/custom/project-card';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Helmet } from 'react-helmet-async';
+import axios from 'axios';
 
 export default function Projects() {
+  // Get the studioId from URL query parameters
+  const searchParams = new URLSearchParams(window.location.search);
+  const studioId = searchParams.get('studioId');
+  
+  // If studioId is present, fetch projects for the specific studio
+  const apiUrl = studioId ? `/api/studios/${studioId}/projects` : '/api/projects';
+  
   const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ['/api/projects'],
+    queryKey: [apiUrl],
+    queryFn: async () => {
+      const response = await axios.get(apiUrl);
+      return response.data;
+    },
   });
   
   const [statusFilter, setStatusFilter] = useState('all');
