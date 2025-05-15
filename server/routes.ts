@@ -1490,7 +1490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Studio routes
-  app.get("/api/studios", isAuthenticated, async (req, res) => {
+  app.get("/api/studios", async (req, res) => {
     try {
       const userId = (req as any).user?.id || 1; // Use admin ID if no authenticated user
       const user = await storage.getUser(userId);
@@ -1518,7 +1518,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/studios/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/studios/:id", async (req, res) => {
     try {
       const studioId = parseInt(req.params.id);
       if (isNaN(studioId)) {
@@ -1537,7 +1537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/studios/:id/editors", isAuthenticated, async (req, res) => {
+  app.get("/api/studios/:id/editors", async (req, res) => {
     try {
       const studioId = parseInt(req.params.id);
       if (isNaN(studioId)) {
@@ -1552,7 +1552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/studios/:id/projects", isAuthenticated, async (req, res) => {
+  app.get("/api/studios/:id/projects", async (req, res) => {
     try {
       const studioId = parseInt(req.params.id);
       if (isNaN(studioId)) {
