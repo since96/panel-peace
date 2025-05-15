@@ -51,11 +51,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // TEMPORARY FIX: Ensure admin is site admin for development
+      if (user.id === 1 && !user.isSiteAdmin) {
+        await storage.updateUser(1, {
+          isSiteAdmin: true
+        });
+        // Fetch updated user
+        const updatedUser = await storage.getUser(1);
+        user = updatedUser || user;
+      }
+      
       // Create a safe user object without password
       const safeUser = { ...user } as any;
       if (safeUser.password) delete safeUser.password;
       
-      console.log("User found:", user.username);
+      console.log("User found:", user.username, "isSiteAdmin:", user.isSiteAdmin);
       res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -79,6 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: "Editor",
           roles: ["editor"],
           isEditor: true,
+          isSiteAdmin: true, // Make this user a site admin
           avatarUrl: ""
         }
       ];
@@ -97,6 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             role: userData.role,
             roles: userData.roles,
             isEditor: userData.isEditor,
+            isSiteAdmin: userData.isSiteAdmin || false,
             avatarUrl: userData.avatarUrl
           });
           createdUsers = true;
