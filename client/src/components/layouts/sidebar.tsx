@@ -28,6 +28,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     { name: 'Dashboard', href: '/', icon: 'ri-dashboard-line' },
     { name: 'My Projects', href: '/projects', icon: 'ri-file-list-line' },
     { name: 'Talent Management', href: '/collaborators', icon: 'ri-team-line' },
+    { name: 'Studios', href: '/studios', icon: 'ri-building-line' },
   ];
   
   // Get status color for each project

@@ -104,6 +104,11 @@ function Router() {
                 <ProfilePage />
               </SimpleProtected>
             </Route>
+            <Route path="/studios">
+              <SimpleProtected>
+                <StudiosPage />
+              </SimpleProtected>
+            </Route>
             <Route>
               <NotFound />
             </Route>
