@@ -4,7 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Download, Send } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Mail, Download, Send, User, AtSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -20,9 +22,19 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
   const { toast } = useToast();
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState('');
+  const [selectedCollaborator, setSelectedCollaborator] = useState<number | null>(null);
   const [emailSubject, setEmailSubject] = useState(`Project Schedule: ${projectTitle}`);
   const [emailMessage, setEmailMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
+  
+  // Function to open email dialog and reset state
+  const openEmailDialog = () => {
+    setRecipientEmail('');
+    setSelectedCollaborator(null);
+    setEmailSubject(`Project Schedule: ${projectTitle}`);
+    setEmailMessage('');
+    setEmailDialogOpen(true);
+  };
 
   // Function to download project schedule as PDF
   const downloadPdf = () => {
@@ -104,10 +116,22 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
   
   // Function to send project schedule via email using mailto link
   const sendEmail = () => {
-    if (!recipientEmail) {
+    // Get the final recipient email - either direct input or from selected collaborator
+    let finalRecipientEmail = recipientEmail;
+    
+    // If a collaborator is selected, use their email instead of manual input
+    if (selectedCollaborator !== null) {
+      const selectedUser = collaborators.find(c => c.userId === selectedCollaborator);
+      if (selectedUser && selectedUser.email) {
+        finalRecipientEmail = selectedUser.email;
+      }
+    }
+    
+    // Validate we have an email address
+    if (!finalRecipientEmail) {
       toast({
         title: "Missing Email",
-        description: "Please enter a recipient email address.",
+        description: "Please enter a recipient email address or select a collaborator.",
         variant: "destructive"
       });
       return;
@@ -118,14 +142,14 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
       const textContent = generatePlainTextSchedule();
       
       // Create the mailto link with the schedule content
-      const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailMessage + '\n\n' + textContent)}`;
+      const mailtoLink = `mailto:${finalRecipientEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailMessage + '\n\n' + textContent)}`;
       
       // Open the user's default email client
       window.open(mailtoLink, '_blank');
       
       toast({
         title: "Email Client Opened",
-        description: "Your default email client has been opened with the project schedule.",
+        description: `Your default email client has been opened to send to ${finalRecipientEmail}.`,
       });
       setEmailDialogOpen(false);
     } catch (error) {
@@ -244,7 +268,7 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
 
   return (
     <div className="flex space-x-2">
-      <Button variant="outline" onClick={() => setEmailDialogOpen(true)}>
+      <Button variant="outline" onClick={openEmailDialog}>
         <Mail className="mr-2 h-4 w-4" />
         Email Schedule
       </Button>
@@ -264,15 +288,61 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="recipient">Recipient Email</Label>
-              <Input
-                id="recipient"
-                placeholder="email@example.com"
-                value={recipientEmail}
-                onChange={(e) => setRecipientEmail(e.target.value)}
-              />
-            </div>
+            <Tabs defaultValue="email" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="email">
+                  <AtSign className="mr-2 h-4 w-4" />
+                  Email Address
+                </TabsTrigger>
+                <TabsTrigger value="collaborator">
+                  <User className="mr-2 h-4 w-4" />
+                  Project Collaborator
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="email" className="pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="recipient">Recipient Email</Label>
+                  <Input
+                    id="recipient"
+                    placeholder="email@example.com"
+                    value={recipientEmail}
+                    onChange={(e) => {
+                      setRecipientEmail(e.target.value);
+                      setSelectedCollaborator(null); // Clear collaborator selection
+                    }}
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="collaborator" className="pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="collaborator">Select Collaborator</Label>
+                  <Select
+                    value={selectedCollaborator?.toString() || ""}
+                    onValueChange={(value) => {
+                      const id = parseInt(value);
+                      setSelectedCollaborator(id);
+                      setRecipientEmail(""); // Clear manual email input
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a collaborator" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {collaborators.map((collaborator) => (
+                        <SelectItem 
+                          key={collaborator.userId} 
+                          value={collaborator.userId.toString()}
+                        >
+                          {collaborator.name || collaborator.fullName} - {collaborator.email || "No email"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </TabsContent>
+            </Tabs>
             
             <div className="space-y-2">
               <Label htmlFor="subject">Subject</Label>
@@ -308,14 +378,8 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
               onClick={sendEmail}
               disabled={isSending}
             >
-              {isSending ? (
-                <>Sending...</>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Send Email
-                </>
-              )}
+              <Send className="mr-2 h-4 w-4" />
+              Open Email Client
             </Button>
           </DialogFooter>
         </DialogContent>
