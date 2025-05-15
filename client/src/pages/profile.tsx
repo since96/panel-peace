@@ -49,9 +49,10 @@ export default function ProfilePage() {
   // Profile update form
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      fullName: user?.fullName || '',
-      email: user?.email || '',
+    values: {
+      // Dynamically update values when user data changes
+      fullName: user?.fullName || localStorage.getItem('fullName') || 'Your Name',
+      email: user?.email || localStorage.getItem('email') || 'your.email@example.com',
     },
   });
   
@@ -182,14 +183,14 @@ export default function ProfilePage() {
         <CardHeader>
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage alt={user.fullName || user.username} />
+              <AvatarImage alt={user?.fullName || profileForm.getValues('fullName')} />
               <AvatarFallback className="text-xl bg-primary/10 text-primary">
-                {getInitials(user.fullName || user.username || '')}
+                {getInitials(profileForm.getValues('fullName'))}
               </AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle>{user.fullName || user.username}</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">{user.role || 'Editor'}</p>
+              <CardTitle>{profileForm.getValues('fullName')}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">{user?.role || 'Editor'}</p>
             </div>
           </div>
         </CardHeader>

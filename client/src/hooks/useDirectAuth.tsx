@@ -76,35 +76,44 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
   }, []);
 
-  // Login function
+  // Login function with direct cookie access for debugging
   const login = async (username: string, password: string) => {
     try {
       console.log('Attempting login with:', username, password);
       setIsLoading(true);
+      
+      // Perform login
       const response = await axios.post('/api/direct-login', { username, password });
       console.log('Login response:', response.data);
       
       if (response.data.success && response.data.user) {
-        // Double-check with server to get the most up-to-date user data
-        try {
-          const userResponse = await axios.get(`/api/users/${response.data.user.id}`);
-          if (userResponse.data) {
-            // Use the fresh user data
-            setUser(userResponse.data);
-            localStorage.setItem('user', JSON.stringify(userResponse.data));
-            localStorage.setItem('isAuthenticated', 'true');
-            console.log('Fresh user data stored:', userResponse.data);
-          } else {
-            setUser(response.data.user);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            localStorage.setItem('isAuthenticated', 'true');
+        // First store the initial user data
+        const userData = response.data.user;
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('isAuthenticated', 'true');
+        
+        console.log('Stored initial user data. Now checking if authentication worked...');
+        
+        // Wait a moment to ensure cookie is set
+        setTimeout(async () => {
+          try {
+            // Make a direct request to verify we're logged in
+            const authCheck = await axios.get('/api/direct-user');
+            console.log('Auth check result:', authCheck.data);
+            
+            if (authCheck.data.success && authCheck.data.user) {
+              console.log('AUTHENTICATION CONFIRMED! User is fully logged in', authCheck.data.user);
+              // Update with the fresh user data
+              setUser(authCheck.data.user);
+              localStorage.setItem('user', JSON.stringify(authCheck.data.user));
+            } else {
+              console.warn('Auth failed after login! Cookie may not be properly set');
+            }
+          } catch (authError) {
+            console.error('Auth check failed after login!', authError);
           }
-        } catch (freshError) {
-          console.warn('Could not get fresh user data, using login response', freshError);
-          setUser(response.data.user);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          localStorage.setItem('isAuthenticated', 'true');
-        }
+        }, 500);
       }
       
       return response.data;

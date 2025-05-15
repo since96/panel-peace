@@ -108,16 +108,18 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       <div className="p-4 border-t border-slate-200">
         <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.avatarUrl || ""} alt={user?.fullName || "User"} />
+            <AvatarImage src={user?.avatarUrl || ""} alt={user?.fullName || localStorage.getItem('fullName') || "User"} />
             <AvatarFallback className="bg-primary/10 text-primary">
-              {user?.fullName 
-                ? user.fullName.split(' ').map(n => n[0]).join('') 
-                : user?.username?.substring(0, 2).toUpperCase() || "U"}
+              {user?.fullName || localStorage.getItem('fullName') 
+                ? (user?.fullName || localStorage.getItem('fullName') || "").split(' ').map(n => n?.[0] || "").join('') 
+                : (user?.username || localStorage.getItem('username') || "").substring(0, 2).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.fullName || user?.username || "User"}</p>
-            <p className="text-xs text-slate-500 truncate">{user?.role || "Editor"}</p>
+            <p className="text-sm font-medium truncate">
+              {user?.fullName || localStorage.getItem('fullName') || user?.username || localStorage.getItem('username') || "User"}
+            </p>
+            <p className="text-xs text-slate-500 truncate">{user?.role || localStorage.getItem('role') || "Editor"}</p>
           </div>
           <Link href="/profile" className="text-slate-400 hover:text-slate-600">
             <Settings className="h-4 w-4" />

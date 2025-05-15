@@ -155,12 +155,12 @@ export function setupDirectAuth(app: express.Express) {
       
       console.log(`User '${username}' logged in successfully with ID ${user.id}`);
       
-      // Set the token as an HTTP-only cookie
+      // Set the token as a cookie that can be accessed in development environment
       res.cookie('auth_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        httpOnly: false, // Set to false for development to debug
+        secure: false, // Set to false for development
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        sameSite: 'lax',
+        sameSite: 'none',
         path: '/',
       });
       
