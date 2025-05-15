@@ -1510,9 +1510,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("STUDIOS GET: Returning hard-coded studios for development");
       
       // Generate some studios with proper types for development
+      // Using high IDs (999+) to avoid conflicts with real studios
       const hardcodedStudios: Studio[] = [
         {
-          id: 1,
+          id: 998, // Much higher than real IDs to avoid conflicts
           name: "Marvel Comics",
           description: "The House of Ideas",
           logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Marvel_Logo.svg/1200px-Marvel_Logo.svg.png",
@@ -1521,7 +1522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           active: true as unknown as boolean
         },
         {
-          id: 2,
+          id: 999, // Much higher than real IDs to avoid conflicts
           name: "DC Comics",
           description: "The Distinguished Competition",
           logoUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/DC_Comics_logo.svg/1200px-DC_Comics_logo.svg.png",
