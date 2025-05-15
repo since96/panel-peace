@@ -13,7 +13,23 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Users table (already defined, extended with additional fields)
+// Studios/Publishers table (new)
+export const studios = pgTable("studios", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  logoUrl: text("logo_url"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdBy: integer("created_by").notNull(), // User ID of site admin who created it
+  active: boolean("active").default(true),
+});
+
+export const insertStudioSchema = createInsertSchema(studios).omit({
+  id: true, 
+  createdAt: true
+});
+
+// Users table (extended with studio relationship)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(), // For admin/editors only
@@ -22,12 +38,23 @@ export const users = pgTable("users", {
   email: text("email").notNull(), // Mandatory for all users
   phone: text("phone"),
   socialMedia: text("social_media"), // JSON string of social media links
+  
+  // Role system
   isEditor: boolean("is_editor").default(false), // Flag to separate editors from talent
   editorRole: text("editor_role"), // Editor role type: editor, senior_editor, editor_in_chief
+  isSiteAdmin: boolean("is_site_admin").default(false), // Top-level site administrator
+  
+  // Studio membership
+  studioId: integer("studio_id"), // Which studio they belong to
+  
+  // Legacy/compatibility fields
   assignedProjects: integer("assigned_projects").array(), // Projects assigned to editor (only relevant for editors)
   role: text("role"), // Primary role (backwards compatibility)
   roles: text("roles").array(), // Multiple roles support
   avatarUrl: text("avatar_url"),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -55,6 +82,10 @@ export const projects = pgTable("projects", {
   coverImage: text("cover_image"),
   progress: integer("progress").notNull().default(0),
   
+  // Studio relationship
+  studioId: integer("studio_id").notNull(), // Which studio this project belongs to
+  isPrivate: boolean("is_private").default(true), // Whether project is private (only EIC and assigned editors)
+  
   // Deadline fields
   plotDeadline: timestamp("plot_deadline"), // Manual plot deadline
   coverDeadline: timestamp("cover_deadline"), // Manual cover deadline
@@ -62,6 +93,7 @@ export const projects = pgTable("projects", {
   // Metadata fields
   createdBy: integer("created_by").notNull(), // User ID of creator
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   
   // Comic book metrics
   coverCount: integer("cover_count").default(1), // Number of covers
@@ -114,6 +146,7 @@ export const projectEditors = pgTable("project_editors", {
   projectId: integer("project_id").notNull(),
   assignedBy: integer("assigned_by"), // ID of the editor who made the assignment
   assignmentRole: text("assignment_role").default("editor"), // Role within this specific project
+  accessLevel: text("access_level").default("view"), // view or edit
   createdAt: timestamp("created_at").defaultNow(), // Renamed from assignedAt to match convention
 });
 
@@ -212,6 +245,9 @@ export const insertCommentSchema = createInsertSchema(comments).omit({
 });
 
 // Type definitions
+export type Studio = typeof studios.$inferSelect;
+export type InsertStudio = z.infer<typeof insertStudioSchema>;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 

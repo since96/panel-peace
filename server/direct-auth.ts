@@ -6,20 +6,199 @@ import jwt from 'jsonwebtoken';
 // The JWT secret key
 const JWT_SECRET = process.env.JWT_SECRET || 'comic_editor_jwt_secret_key';
 
-// EMERGENCY FIX: Authentication middleware - bypassed for development
+// Authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  console.log('EMERGENCY BYPASS: Authentication entirely bypassed');
-  
-  // Always allow access and provide admin user for development
-  (req as any).user = { id: 1 };
-  
-  return next();
+  try {
+    // Get the token from the cookie
+    const token = req.cookies?.auth_token;
+    
+    if (!token) {
+      console.log('No auth token, returning unauthorized');
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    
+    try {
+      // Verify the token
+      const decoded = jwt.verify(token, JWT_SECRET) as { id: number | string };
+      
+      if (!decoded || !decoded.id) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+      
+      // Get user from database
+      const user = await storage.getUser(decoded.id);
+      
+      if (!user) {
+        return res.status(401).json({ success: false, message: 'User not found' });
+      }
+      
+      // Set user in request
+      (req as any).user = user;
+      return next();
+    } catch (jwtError) {
+      console.error('JWT verification failed:', jwtError);
+      return res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
 
 // Simple password hashing
 function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
+
+// Check if user is site admin
+export const isSiteAdmin: RequestHandler = async (req, res, next) => {
+  const user = (req as any).user;
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  
+  if (!user.isSiteAdmin) {
+    return res.status(403).json({ success: false, message: 'Forbidden - Site admin access required' });
+  }
+  
+  return next();
+};
+
+// Check if user is an editor-in-chief of a studio
+export const isEditorInChief: RequestHandler = async (req, res, next) => {
+  const user = (req as any).user;
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  
+  if (user.isSiteAdmin) {
+    // Site admins can do everything
+    return next();
+  }
+  
+  if (user.editorRole !== 'editor_in_chief') {
+    return res.status(403).json({ success: false, message: 'Forbidden - Editor-in-chief access required' });
+  }
+  
+  return next();
+};
+
+// Check if user is an editor in a studio
+export const isEditor: RequestHandler = async (req, res, next) => {
+  const user = (req as any).user;
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  
+  if (user.isSiteAdmin || user.isEditor) {
+    // Site admins and any editor type can access
+    return next();
+  }
+  
+  return res.status(403).json({ success: false, message: 'Forbidden - Editor access required' });
+};
+
+// Check if user can access a specific studio
+export const canAccessStudio: (studioId: number) => RequestHandler = (studioId) => async (req, res, next) => {
+  const user = (req as any).user;
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  
+  if (user.isSiteAdmin) {
+    // Site admins can access all studios
+    return next();
+  }
+  
+  if (user.studioId !== studioId) {
+    return res.status(403).json({ success: false, message: 'Forbidden - You do not have access to this studio' });
+  }
+  
+  return next();
+};
+
+// Check if user can view a project
+export const canViewProject: (projectId: number) => RequestHandler = (projectId) => async (req, res, next) => {
+  const user = (req as any).user;
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  
+  if (user.isSiteAdmin) {
+    // Site admins can view all projects
+    return next();
+  }
+  
+  // Get the project to check its studio
+  const project = await storage.getProject(projectId);
+  if (!project) {
+    return res.status(404).json({ success: false, message: 'Project not found' });
+  }
+  
+  if (user.studioId !== project.studioId) {
+    return res.status(403).json({ success: false, message: 'Forbidden - You do not have access to this project' });
+  }
+  
+  // Check if user is editor-in-chief (can view all studio projects)
+  if (user.editorRole === 'editor_in_chief') {
+    return next();
+  }
+  
+  // Check if project is private (if not, any studio member can view)
+  if (!project.isPrivate) {
+    return next();
+  }
+  
+  // If private, check if user is specifically assigned to this project
+  const canView = await storage.canViewProject(user.id, projectId);
+  if (!canView) {
+    return res.status(403).json({ success: false, message: 'Forbidden - You do not have access to this project' });
+  }
+  
+  return next();
+};
+
+// Check if user can edit a project
+export const canEditProject: (projectId: number) => RequestHandler = (projectId) => async (req, res, next) => {
+  const user = (req as any).user;
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  
+  if (user.isSiteAdmin) {
+    // Site admins can edit all projects
+    return next();
+  }
+  
+  // Get the project to check its studio
+  const project = await storage.getProject(projectId);
+  if (!project) {
+    return res.status(404).json({ success: false, message: 'Project not found' });
+  }
+  
+  if (user.studioId !== project.studioId) {
+    return res.status(403).json({ success: false, message: 'Forbidden - You do not have access to this project' });
+  }
+  
+  // Check if user is editor-in-chief (can edit all studio projects)
+  if (user.editorRole === 'editor_in_chief') {
+    return next();
+  }
+  
+  // Check if user has edit permission for this project
+  const canEdit = await storage.canEditProject(user.id, projectId);
+  if (!canEdit) {
+    return res.status(403).json({ success: false, message: 'Forbidden - You do not have edit access to this project' });
+  }
+  
+  return next();
+};
 
 // Setup direct authentication routes
 export function setupDirectAuth(app: express.Express) {

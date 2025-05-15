@@ -1,4 +1,5 @@
 import {
+  studios, Studio, InsertStudio,
   users, User, InsertUser,
   projects, Project, InsertProject,
   collaborators, Collaborator, InsertCollaborator,
@@ -15,18 +16,29 @@ import {
 
 // Interface for storage operations
 export interface IStorage {
+  // Studio operations
+  getStudio(id: number): Promise<Studio | undefined>;
+  getStudios(): Promise<Studio[]>;
+  createStudio(studio: InsertStudio): Promise<Studio>;
+  updateStudio(id: number, studio: Partial<InsertStudio>): Promise<Studio | undefined>;
+  getStudioEditors(studioId: number): Promise<User[]>; // Get all editors in a studio
+  getStudiosByAdmin(userId: number): Promise<Studio[]>; // Get studios where user is an EIC
+  
   // User operations
   getUser(id: number | string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   upsertUser(userData: Partial<InsertUser> & { id: string | number }): Promise<User>;
+  getUsersByStudio(studioId: number): Promise<User[]>; // Get all users in a studio
+  getUsersByRole(role: string, studioId?: number): Promise<User[]>; // Get users by role, optionally filtered by studio
   
   // Project operations
   getProject(id: number): Promise<Project | undefined>;
   getProjects(): Promise<Project[]>;
   getProjectsByUser(userId: number): Promise<Project[]>;
   getProjectsByEditor(editorId: number): Promise<Project[]>; // Projects where user is an editor
+  getProjectsByStudio(studioId: number): Promise<Project[]>; // Get all projects in a studio
   createProject(project: InsertProject): Promise<Project>;
   updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
@@ -34,9 +46,11 @@ export interface IStorage {
   // Project editor operations
   getProjectEditors(projectId: number): Promise<ProjectEditor[]>;
   getEditableProjects(userId: number): Promise<Project[]>; // All projects user can edit
+  getViewableProjects(userId: number): Promise<Project[]>; // All projects user can view
   assignEditorToProject(assignment: InsertProjectEditor): Promise<ProjectEditor>;
   removeEditorFromProject(userId: number, projectId: number): Promise<boolean>;
   canEditProject(userId: number, projectId: number): Promise<boolean>;
+  canViewProject(userId: number, projectId: number): Promise<boolean>;
   
   // Collaborator operations
   getCollaboratorsByProject(projectId: number): Promise<Collaborator[]>;
