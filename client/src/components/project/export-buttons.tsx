@@ -21,6 +21,7 @@ interface ExportButtonsProps {
 export function ExportButtons({ projectId, projectTitle, workflowSteps, collaborators }: ExportButtonsProps) {
   const { toast } = useToast();
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [apiKeysDialogOpen, setApiKeysDialogOpen] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState('');
   const [selectedCollaborator, setSelectedCollaborator] = useState<number | null>(null);
   const [emailSubject, setEmailSubject] = useState(`Project Schedule: ${projectTitle}`);
@@ -159,6 +160,86 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
         description: "There was an error creating the email link. Please try again.",
         variant: "destructive"
       });
+    }
+  };
+  
+  // Function to send project schedule via server-side SendGrid
+  const sendServerEmail = async () => {
+    try {
+      setIsSending(true);
+      
+      // Get the final recipient email - either direct input or from selected collaborator
+      let finalRecipientEmail = recipientEmail;
+      
+      // If a collaborator is selected, use their email instead of manual input
+      if (selectedCollaborator !== null) {
+        const selectedUser = collaborators.find(c => c.userId === selectedCollaborator);
+        if (selectedUser && selectedUser.email) {
+          finalRecipientEmail = selectedUser.email;
+        }
+      }
+      
+      // Validate email address
+      if (!finalRecipientEmail) {
+        toast({
+          title: "Missing Email",
+          description: "Please enter a recipient email address or select a collaborator.",
+          variant: "destructive"
+        });
+        setIsSending(false);
+        return;
+      }
+      
+      // Generate the HTML and text content
+      const htmlContent = generateEmailHtml();
+      const textContent = generatePlainTextSchedule();
+      
+      // Prepare the email data
+      const emailData = {
+        projectId,
+        to: finalRecipientEmail,
+        subject: emailSubject,
+        text: emailMessage ? `${emailMessage}\n\n${textContent}` : textContent,
+        html: htmlContent
+      };
+      
+      // Send the request to the server endpoint
+      const response = await fetch('/api/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailData),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to send email');
+      }
+      
+      toast({
+        title: "Email Sent",
+        description: `Schedule successfully sent to ${finalRecipientEmail}.`,
+      });
+      
+      setEmailDialogOpen(false);
+    } catch (error: any) {
+      console.error('Server email error:', error);
+      
+      // Check if the error is due to missing API keys
+      if (error.message?.includes('not configured')) {
+        // Show the API keys configuration dialog
+        setApiKeysDialogOpen(true);
+      } else {
+        toast({
+          title: "Email Failed",
+          description: error.message || "There was an error sending the email. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setIsSending(false);
     }
   };
   
@@ -469,22 +550,41 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
             </div>
           </div>
           
-          <DialogFooter className="sm:justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setEmailDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="button" 
-              onClick={sendEmail}
-              disabled={isSending}
-            >
-              <Send className="mr-2 h-4 w-4" />
-              Open Email Client
-            </Button>
+          <DialogFooter className="flex-col space-y-2 sm:space-y-0">
+            <div className="flex justify-between w-full">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEmailDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              
+              <div className="flex space-x-2">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={sendEmail}
+                  disabled={isSending}
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Open Email Client
+                </Button>
+                
+                <Button 
+                  type="button" 
+                  onClick={sendServerEmail}
+                  disabled={isSending || (!recipientEmail && !selectedCollaborator)}
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Send via Server
+                </Button>
+              </div>
+            </div>
+            
+            <div className="text-xs text-muted-foreground text-center">
+              <p>Direct email option opens your email client. Server option requires SendGrid configuration.</p>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
