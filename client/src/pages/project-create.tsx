@@ -204,12 +204,15 @@ export default function ProjectCreate() {
     // Create a copy of the data for the mutation that we can safely modify
     const submissionData = { ...data };
     
+    // Ensure we have the studio ID (should be 998 if not provided)
+    console.log(`Final submission with studio ID: ${studioId}`);
+    
     // Convert date fields to string format for API submission
     // The server expects strings that it can parse into database timestamps
     const apiData = {
       ...submissionData,
-      // Add studio ID
-      studioId: studioId || 998, // Use the studio ID from URL or default to Marvel Comics (998)
+      // Always include studio ID (should be 998 at this point if not explicitly set)
+      studioId: studioId,
       // Convert date fields to ISO strings for the API
       dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined,
       plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
