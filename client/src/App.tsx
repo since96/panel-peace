@@ -23,6 +23,7 @@ import { SimpleLogin } from "./pages/simple-login";
 import Signup from "./pages/signup";
 import ProfilePage from "./pages/profile";
 import StudiosPage from "./pages/studios";
+import RouteTest from "./pages/route-test";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
@@ -107,6 +108,11 @@ function Router() {
             <Route path="/studios">
               <SimpleProtected>
                 <StudiosPage />
+              </SimpleProtected>
+            </Route>
+            <Route path="/route-test">
+              <SimpleProtected>
+                <RouteTest />
               </SimpleProtected>
             </Route>
             <Route>

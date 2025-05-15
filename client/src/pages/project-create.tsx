@@ -56,6 +56,11 @@ export default function ProjectCreate() {
   const studioIdParam = searchParams.get('studioId');
   const studioId = studioIdParam ? parseInt(studioIdParam) : null;
   
+  // Debug logs
+  console.log("URL search:", window.location.search);
+  console.log("Studio ID from URL:", studioIdParam);
+  console.log("Parsed studio ID:", studioId);
+  
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
