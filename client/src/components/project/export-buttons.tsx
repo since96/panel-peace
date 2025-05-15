@@ -111,7 +111,7 @@ export function ExportButtons({ projectId, projectTitle, workflowSteps, collabor
       
       doc.text(`Total Steps: ${totalSteps}`, 20, 55);
       doc.text(`Completed: ${completedSteps} (${progressPercent}%)`, 80, 55);
-      doc.text(`Estimated Completion: ${latestDueDate ? latestDueDate.toLocaleDateString() : 'Not set'}`, 150, 55);
+      doc.text(`Estimated Completion: ${latestDueDate instanceof Date ? latestDueDate.toLocaleDateString() : 'Not set'}`, 150, 55);
       doc.text(`Assignees: ${collaborators.length}`, 20, 62);
       
       // Set up workflow steps table with improved formatting

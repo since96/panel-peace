@@ -121,6 +121,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  // This is a partial implementation for rapid prototyping and testing
   private studios: Map<number, Studio>;
   private users: Map<number, User>;
   private projects: Map<number, Project>;
