@@ -54,14 +54,12 @@ export default function Projects() {
           <div className="mt-4 md:mt-0">
             <Button 
               className="flex items-center gap-2"
-              onClick={() => {
-                const url = studioId ? `/projects/new?studioId=${studioId}` : "/projects/new";
-                console.log("Navigating to:", url);
-                window.location.href = url;
-              }}
+              asChild
             >
-              <Plus className="h-4 w-4" />
-              <span>New Project</span>
+              <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
+                <Plus className="h-4 w-4" />
+                <span>New Project</span>
+              </Link>
             </Button>
           </div>
         </div>
@@ -120,14 +118,12 @@ export default function Projects() {
                 </p>
                 <Button 
                   className="flex items-center gap-2"
-                  onClick={() => {
-                    const url = studioId ? `/projects/new?studioId=${studioId}` : "/projects/new";
-                    console.log("Navigating to empty state:", url);
-                    window.location.href = url;
-                  }}
+                  asChild
                 >
-                  <Plus className="h-4 w-4" />
-                  <span>Create New Project</span>
+                  <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
+                    <Plus className="h-4 w-4" />
+                    <span>Create New Project</span>
+                  </Link>
                 </Button>
               </div>
             )}

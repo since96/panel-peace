@@ -299,16 +299,12 @@ function StudioCard({ studio }: { studio: Studio }) {
           </Button>
           
           <Button 
-            className="flex-1" 
-            onClick={() => {
-              const url = `/projects/new?studioId=${studio.id}`;
-              console.log("Clicked New Project button for studio", studio.id);
-              console.log("Navigating to", url);
-              // Try a different approach for navigation
-              window.open(url, "_self");
-            }}
+            className="flex-1"
+            asChild
           >
-            New Project
+            <Link to={`/projects/new?studioId=${studio.id}`}>
+              New Project
+            </Link>
           </Button>
         </div>
       </CardFooter>
