@@ -194,9 +194,9 @@ export class MemStorage implements IStorage {
     });
   }
   
-  private initializeSampleData() {
-    // No sample data needed - users will create their own projects and content
-    // This keeps the system clean without any fake talent entries
+  private async initializeSampleData() {
+    // Create a sample project for export testing
+    await this.createSampleProject();
   }
 
   // User operations
@@ -351,6 +351,205 @@ export class MemStorage implements IStorage {
   
   async deleteProject(id: number): Promise<boolean> {
     return this.projects.delete(id);
+  }
+  
+  // Create a sample project with workflow steps and collaborators for export testing
+  async createSampleProject() {
+    try {
+      console.log("Creating sample project for export testing...");
+      
+      // Create a sample studio if needed
+      let studio = await this.getStudio(998);
+      if (!studio) {
+        studio = await this.createStudio({
+          name: "Marvel Comics",
+          description: "The House of Ideas",
+          createdBy: 1
+        });
+      }
+      
+      // Create sample project
+      const project = await this.createProject({
+        title: "Fantastic Four Relaunch",
+        studioId: studio.id,
+        createdBy: 1,  // Admin user
+        status: "in_progress",
+        progress: 65,
+        description: "The First Family returns in this exciting relaunch series!",
+        issue: "Issue #1",
+        coverImage: null
+      });
+      
+      console.log(`Created sample project with ID: ${project.id}`);
+      
+      // Create some sample talent
+      const talent = [
+        {
+          name: "John Smith",
+          role: "Writer",
+          email: "john@example.com",
+          availability: "full_time"
+        },
+        {
+          name: "Sarah Johnson",
+          role: "Penciler",
+          email: "sarah@example.com",
+          availability: "part_time"
+        },
+        {
+          name: "Mike Lee",
+          role: "Inker",
+          email: "mike@example.com",
+          availability: "full_time"
+        },
+        {
+          name: "Lisa Wong",
+          role: "Colorist",
+          email: "lisa@example.com",
+          availability: "contract"
+        },
+        {
+          name: "Dave Miller",
+          role: "Letterer",
+          email: "dave@example.com",
+          availability: "contract"
+        }
+      ];
+      
+      // Add collaborators to project
+      let collaborators = [];
+      for (const t of talent) {
+        const user = await this.createUser({
+          username: t.name.toLowerCase().replace(/\s+/g, '.'),
+          password: "password123",
+          fullName: t.name,
+          email: t.email,
+          isEditor: false,
+          isSiteAdmin: false
+        });
+        
+        const collaborator = await this.addCollaborator({
+          projectId: project.id,
+          userId: user.id,
+          name: t.name,
+          email: t.email,
+          role: t.role,
+          availability: t.availability
+        });
+        
+        collaborators.push(collaborator);
+      }
+      
+      // Add workflow steps
+      const now = new Date();
+      const steps = [
+        {
+          title: "Plot Development",
+          description: "Develop main plot and character arcs",
+          assignedTo: collaborators[0].id,
+          status: "completed",
+          dueDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+          progress: 100,
+          comments: "Approved with minor revisions"
+        },
+        {
+          title: "Script Writing",
+          description: "Write full script",
+          assignedTo: collaborators[0].id,
+          status: "completed",
+          dueDate: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
+          progress: 100,
+          comments: "Final script approved by editorial"
+        },
+        {
+          title: "Pencils",
+          description: "Complete pencil artwork",
+          assignedTo: collaborators[1].id,
+          status: "completed",
+          dueDate: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+          progress: 100,
+          comments: "Excellent work on the action sequences"
+        },
+        {
+          title: "Inks",
+          description: "Complete ink artwork",
+          assignedTo: collaborators[2].id,
+          status: "in_progress",
+          dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+          progress: 75,
+          comments: "Pages 1-15 approved, waiting on remaining pages"
+        },
+        {
+          title: "Colors",
+          description: "Complete color artwork",
+          assignedTo: collaborators[3].id,
+          status: "in_progress",
+          dueDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
+          progress: 40,
+          comments: "Pages 1-8 approved, good progress"
+        },
+        {
+          title: "Lettering",
+          description: "Complete lettering",
+          assignedTo: collaborators[4].id,
+          status: "not_started",
+          dueDate: new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000), // 25 days from now
+          progress: 0,
+          comments: "Waiting for more finished pages"
+        },
+        {
+          title: "Final Review",
+          description: "Editorial final review",
+          assignedTo: 1, // Admin user
+          status: "not_started",
+          dueDate: new Date(now.getTime() + 35 * 24 * 60 * 60 * 1000), // 35 days from now
+          progress: 0,
+          comments: "Not started"
+        },
+        {
+          title: "Production",
+          description: "Prepare for printing",
+          assignedTo: 1, // Admin user
+          status: "not_started",
+          dueDate: new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000), // 45 days from now
+          progress: 0,
+          comments: "Not started"
+        }
+      ];
+      
+      // Add steps to project
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        await this.createWorkflowStep({
+          projectId: project.id,
+          title: step.title,
+          description: step.description,
+          assignedTo: step.assignedTo,
+          status: step.status,
+          dueDate: step.dueDate,
+          progress: step.progress,
+          comments: step.comments,
+          stepType: "production",
+          sortOrder: i,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+      
+      // Assign admin user as project editor
+      await this.assignEditorToProject({
+        projectId: project.id,
+        userId: 1,
+        assignedBy: 1,
+        assignmentRole: "editor"
+      });
+      
+      console.log("Sample project creation completed!");
+      return project;
+    } catch (error) {
+      console.error("Error creating sample project:", error);
+      return null;
+    }
   }
   
   // Collaborator operations

@@ -528,17 +528,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/projects", async (req: any, res) => {
     try {
-      console.log("PROJECT CREATE: Request received with body:", req.body);
+      console.log("PROJECT CREATE: Request received with body:", JSON.stringify(req.body, null, 2));
       
       // Pre-process the date field to handle string date from client
       const requestData = { ...req.body };
+      
+      // Log the processed request data
+      console.log("PROJECT CREATE: Processed request data:", JSON.stringify(requestData, null, 2));
       
       // TEMP: No authentication - use admin user
       const dbUser = await storage.getUser(1);
       
       if (!dbUser) {
+        console.error("PROJECT CREATE: User with ID 1 not found");
         return res.status(404).json({ message: "User not found" });
       }
+      
+      console.log("PROJECT CREATE: Found user:", JSON.stringify(dbUser, null, 2));
       
       // Temporarily disable editor check for development
       // if (!dbUser.isEditor) {
@@ -571,6 +577,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create a simplified project with only required fields
+      console.log("PROJECT CREATE: Attempting to create project with data:", {
+        title: requestData.title || "Untitled Project",
+        studioId: requestData.studioId,
+        createdBy: dbUser.id,
+        status: requestData.status || "in_progress",
+        progress: requestData.progress || 0,
+      });
+      
+      // Create the project
       const newProject = await storage.createProject({
         title: requestData.title || "Untitled Project",
         studioId: requestData.studioId, 
@@ -582,7 +597,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         coverImage: null
       });
       
-      console.log(`PROJECT CREATE: Created project "${newProject.title}" (ID: ${newProject.id}) for studio ${newProject.studioId}`);
+      console.log(`PROJECT CREATE: Successfully created project "${newProject.title}" (ID: ${newProject.id}) for studio ${newProject.studioId}`);
+      
+      // Return early if project creation fails
+      if (!newProject || !newProject.id) {
+        console.error("PROJECT CREATE: Failed to create project - no valid project returned");
+        return res.status(500).json({ 
+          message: "Failed to create project", 
+          details: "Project creation did not return a valid project object"
+        });
+      }
       
       // Automatically assign the creator as an editor of the project
       await storage.assignEditorToProject({
