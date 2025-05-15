@@ -299,7 +299,7 @@ function StudioCard({ studio }: { studio: Studio }) {
           </Button>
           
           <Button className="flex-1" asChild>
-            <Link to={`/projects/new?studioId=${studio.id}`}>New Project</Link>
+            <Link to={`/projects/new?studioId=${studio.id}`} onClick={() => console.log("Clicked New Project link for studio", studio.id)}>New Project</Link>
           </Button>
         </div>
       </CardFooter>
