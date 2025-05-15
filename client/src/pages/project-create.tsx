@@ -54,29 +54,30 @@ export default function ProjectCreate() {
   // Parse URL parameters for studioId
   const searchParams = new URLSearchParams(window.location.search);
   const studioIdParam = searchParams.get('studioId');
-  const studioId = studioIdParam ? parseInt(studioIdParam) : null;
+  // Default to Marvel Comics (998) if no studio ID is provided
+  const studioId = studioIdParam ? parseInt(studioIdParam) : 998;
   
   // Debug logs
   console.log("URL search:", window.location.search);
   console.log("Studio ID from URL:", studioIdParam);
-  console.log("Parsed studio ID:", studioId);
+  console.log("Using studio ID:", studioId);
   
   useEffect(() => {
-    // Warn if no studio ID is provided
-    if (!studioId) {
-      console.warn("No studio ID provided in URL. Defaulting to Marvel Comics (998)");
-      toast({
-        title: "Studio Selection",
-        description: "No studio selected. Creating project for Marvel Comics.",
-      });
-    } else {
+    // Display studio selection info
+    if (studioIdParam) {
       console.log(`Creating project for studio ID: ${studioId}`);
       toast({
         title: "Studio Selected",
         description: `Creating project for studio ID: ${studioId}`,
       });
+    } else {
+      console.log("No studio ID provided in URL. Using Marvel Comics (998) as default");
+      toast({
+        title: "Default Studio",
+        description: "Using Marvel Comics as the default studio for this project.",
+      });
     }
-  }, [studioId, toast]);
+  }, [studioId, studioIdParam, toast]);
   
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
