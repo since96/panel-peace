@@ -10,9 +10,10 @@ import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 
 export default function Projects() {
-  // Get the studioId from URL query parameters
+  // Get the studioId from URL query parameters if it exists
   const searchParams = new URLSearchParams(window.location.search);
-  const studioId = searchParams.get('studioId');
+  const studioIdParam = searchParams.get('studioId');
+  const studioId = studioIdParam ? parseInt(studioIdParam) : null;
   
   // If studioId is present, fetch projects for the specific studio
   const apiUrl = studioId ? `/api/studios/${studioId}/projects` : '/api/projects';
@@ -33,20 +34,8 @@ export default function Projects() {
     return project.status === statusFilter;
   });
   
-  // Sample collaborators (in a real app, fetch from API)
-  const sampleCollaborators = [
-    { id: 1, name: 'Alex Rodriguez', avatarUrl: '' },
-    { id: 2, name: 'Sarah Lee', avatarUrl: '' },
-    { id: 3, name: 'James King', avatarUrl: '' },
-    { id: 4, name: 'Mina Tan', avatarUrl: '' },
-  ];
-  
-  // Assign random collaborators to each project
-  const getCollaboratorsForProject = (projectId: number) => {
-    // In a real app, we would fetch this data from the API
-    const count = Math.floor(Math.random() * 5) + 1; // 1-5 collaborators
-    return sampleCollaborators.slice(0, count);
-  };
+  // We'll fetch actual collaborators in a future enhancement
+  // For now, we won't display random collaborators
   
   return (
     <>
@@ -63,7 +52,7 @@ export default function Projects() {
             <p className="text-slate-500 mt-1">Manage your comic book projects</p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Link href="/projects/new">
+            <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 <span>New Project</span>
@@ -108,13 +97,8 @@ export default function Projects() {
             {filteredProjects && filteredProjects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProjects.map((project) => (
-                  <Link key={project.id} href={`/projects/${project.id}`}>
-                    <a>
-                      <ProjectCard
-                        project={project}
-                        collaborators={getCollaboratorsForProject(project.id)}
-                      />
-                    </a>
+                  <Link key={project.id} to={`/projects/${project.id}`}>
+                    <ProjectCard project={project} />
                   </Link>
                 ))}
               </div>
