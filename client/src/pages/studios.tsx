@@ -26,13 +26,41 @@ export default function StudiosPage() {
   const { data: studios = [], isLoading, error, refetch } = useQuery({
     queryKey: ['/api/studios'],
     queryFn: async () => {
-      const response = await axios.get('/api/studios');
-      console.log('Fetched studios:', response.data);
-      return response.data;
+      try {
+        const response = await axios.get('/api/studios');
+        console.log('Fetched studios:', response.data);
+        
+        if (!response.data || !Array.isArray(response.data)) {
+          console.error('Invalid studios data:', response.data);
+          return [];
+        }
+        
+        // Add placeholder if empty (shouldn't happen with hardcoded studios)
+        if (response.data.length === 0) {
+          console.warn('No studios found, using placeholder data');
+          return [
+            {
+              id: 999,
+              name: "Placeholder Studio",
+              description: "This studio is a placeholder for development",
+              active: true,
+              createdAt: new Date().toISOString(),
+              createdBy: 1
+            }
+          ];
+        }
+        
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching studios:', error);
+        return [];
+      }
     },
+    // Aggressive refetching for development
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 5000, // Refetch every 5 seconds during development
+    refetchInterval: 3000, // Refetch every 3 seconds during development
+    retry: 3
   });
 
   return (

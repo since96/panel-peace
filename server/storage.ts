@@ -16,6 +16,9 @@ import {
 
 // Interface for storage operations
 export interface IStorage {
+  // Debugging tools (temporary)
+  debugGetAllUsers(): Promise<Record<number, User>>;
+  
   // Studio operations
   getStudio(id: number): Promise<Studio | undefined>;
   getStudios(): Promise<Studio[]>;
@@ -523,6 +526,15 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).filter(
       user => user.studioId === studioId
     );
+  }
+  
+  // Debug methods - temporary
+  async debugGetAllUsers(): Promise<Record<number, User>> {
+    const result: Record<number, User> = {};
+    this.users.forEach((user, id) => {
+      result[id] = user;
+    });
+    return result;
   }
   
   async getProjectsByStudio(studioId: number): Promise<Project[]> {
