@@ -93,10 +93,19 @@ export function CreateStudioDialog() {
   // Mutation for creating studio
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
-      const response = await axios.post('/api/studio/signup', data);
-      return response.data;
+      try {
+        console.log('Sending studio creation data:', JSON.stringify(data));
+        const response = await axios.post('/api/studio/signup', data);
+        console.log('Studio creation response:', response.data);
+        return response.data;
+      } catch (error: any) {
+        console.error('API error creating studio:', error.response?.data || error.message);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Studio created successfully:', data);
+      
       // Reset form and close dialog
       form.reset();
       setOpen(false);
@@ -105,20 +114,22 @@ export function CreateStudioDialog() {
       // Show success toast
       toast({
         title: "Studio created",
-        description: "The studio has been created and is pending admin approval.",
+        description: "The studio has been created successfully.",
       });
       
-      // Invalidate studios query to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['/api/studios'] });
+      // Force invalidate studios query to refresh the list
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/studios'] });
+      }, 500);
     },
     onError: (error: any) => {
       console.error('Error creating studio:', error);
       
-      // Show error toast
+      // Show detailed error toast
       toast({
         variant: "destructive",
         title: "Failed to create studio",
-        description: error.response?.data?.message || "Please try again later.",
+        description: error.response?.data?.message || error.message || "Please try again later.",
       });
     },
   });

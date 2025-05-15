@@ -23,12 +23,16 @@ export interface Studio {
 
 export default function StudiosPage() {
   // Fetch studios
-  const { data: studios = [], isLoading, error } = useQuery({
+  const { data: studios = [], isLoading, error, refetch } = useQuery({
     queryKey: ['/api/studios'],
     queryFn: async () => {
       const response = await axios.get('/api/studios');
+      console.log('Fetched studios:', response.data);
       return response.data;
     },
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: 5000, // Refetch every 5 seconds during development
   });
 
   return (
@@ -48,7 +52,16 @@ export default function StudiosPage() {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <CreateStudioDialog />
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Refreshing...' : 'Refresh'}
+          </Button>
+          <CreateStudioDialog />
+        </div>
       </div>
 
       {isLoading ? (
