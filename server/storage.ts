@@ -420,6 +420,107 @@ export class MemStorage implements IStorage {
     return !!editorAssignment;
   }
   
+  async canViewProject(userId: number, projectId: number): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+    
+    // Site admins can view all projects
+    if (user.isSiteAdmin) return true;
+    
+    const project = await this.getProject(projectId);
+    if (!project) return false;
+    
+    // User created this project
+    if (project.createdBy === userId) return true;
+    
+    // Check if user is an editor for this project with at least view access
+    const editorAssignment = Array.from(this.projectEditors.values()).find(
+      (pe) => pe.userId === userId && pe.projectId === projectId
+    );
+    if (editorAssignment) return true;
+    
+    // If not a private project, check if user is in the same studio
+    if (!project.isPrivate && user.studioId === project.studioId) return true;
+    
+    return false;
+  }
+  
+  // Studio operations
+  async getStudio(id: number): Promise<Studio | undefined> {
+    return this.studios.get(id);
+  }
+  
+  async getStudios(): Promise<Studio[]> {
+    return Array.from(this.studios.values());
+  }
+  
+  async createStudio(studioData: InsertStudio): Promise<Studio> {
+    const id = this.studioIdCounter++;
+    const now = new Date();
+    
+    const newStudio: Studio = {
+      id,
+      name: studioData.name,
+      description: studioData.description || '',
+      logoUrl: studioData.logoUrl || null,
+      createdAt: now,
+      createdBy: studioData.createdBy,
+      active: studioData.active !== undefined ? studioData.active : true
+    };
+    
+    this.studios.set(id, newStudio);
+    return newStudio;
+  }
+  
+  async updateStudio(id: number, studioData: Partial<InsertStudio>): Promise<Studio | undefined> {
+    const existingStudio = await this.getStudio(id);
+    if (!existingStudio) return undefined;
+    
+    const updatedStudio: Studio = {
+      ...existingStudio,
+      ...studioData
+    };
+    
+    this.studios.set(id, updatedStudio);
+    return updatedStudio;
+  }
+  
+  async getStudioEditors(studioId: number): Promise<User[]> {
+    return Array.from(this.users.values()).filter(
+      user => user.studioId === studioId && user.isEditor === true
+    );
+  }
+  
+  async getStudiosByAdmin(userId: number): Promise<Studio[]> {
+    const user = await this.getUser(userId);
+    if (!user) return [];
+    
+    // If site admin, return all studios
+    if (user.isSiteAdmin) {
+      return await this.getStudios();
+    }
+    
+    // If editor-in-chief, return their studio
+    if (user.isEditor && user.editorRole === 'editor_in_chief' && user.studioId) {
+      const studio = await this.getStudio(user.studioId);
+      return studio ? [studio] : [];
+    }
+    
+    return [];
+  }
+  
+  async getUsersByStudio(studioId: number): Promise<User[]> {
+    return Array.from(this.users.values()).filter(
+      user => user.studioId === studioId
+    );
+  }
+  
+  async getProjectsByStudio(studioId: number): Promise<Project[]> {
+    return Array.from(this.projects.values()).filter(
+      project => project.studioId === studioId
+    );
+  }
+  
   // Feedback operations
   async getFeedbackItem(id: number): Promise<FeedbackItem | undefined> {
     return this.feedbackItems.get(id);

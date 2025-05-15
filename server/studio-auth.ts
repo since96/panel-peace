@@ -9,6 +9,7 @@ import { insertStudioSchema, insertUserSchema } from "@shared/schema";
 const studioSignupSchema = z.object({
   studioData: insertStudioSchema,
   userData: insertUserSchema.extend({
+    password: z.string().min(6),
     isEditor: z.boolean().optional().default(true),
     editorRole: z.string().optional().default("editor_in_chief"),
   }),
@@ -105,14 +106,27 @@ export function setupStudioAuth(app: express.Express) {
         active: false, // Require site admin approval
       });
       
-      // Create Editor-in-Chief user
+      // Create Editor-in-Chief user with proper type handling
       const newUser = await storage.createUser({
-        ...userData,
-        password: hashPassword(userData.password),
-        studioId: studio.id,
+        username: userData.username,
+        password: hashPassword(userData.password || ''),
+        fullName: userData.fullName,
+        email: userData.email,
+        phone: userData.phone,
+        socialMedia: userData.socialMedia,
         isEditor: true,
         editorRole: 'editor_in_chief',
         isSiteAdmin: false,
+        // Add studioId to user's properties
+        assignedProjects: userData.assignedProjects,
+        role: userData.role,
+        roles: userData.roles,
+        avatarUrl: userData.avatarUrl,
+      });
+      
+      // Update user with studioId using a separate call to avoid type issues
+      await storage.updateUser(newUser.id, {
+        studioId: studio.id
       });
       
       // Update the studio with the actual creator

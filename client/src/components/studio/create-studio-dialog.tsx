@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-// UI Components
 import {
   Dialog,
   DialogContent,
@@ -26,202 +25,277 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle, Building2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from '@/hooks/use-toast';
+import { PlusCircle, Loader2 } from 'lucide-react';
 
-// Schema for studio creation
-const studioSchema = z.object({
-  name: z.string().min(2, "Studio name must be at least 2 characters").max(50, "Studio name must be less than 50 characters"),
+// Form validation schema
+const studioFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Studio name must be at least 2 characters.",
+  }),
   description: z.string().optional(),
-  logoUrl: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
+  logoUrl: z.string().optional(),
 });
 
-// Schema for EIC creation
-const eicSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z.string().optional(),
-  socialMedia: z.string().optional(),
+// EIC validation schema
+const eicFormSchema = z.object({
+  username: z.string().min(3, {
+    message: "Username must be at least 3 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  fullName: z.string().min(2, {
+    message: "Full name must be at least 2 characters.",
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
+  }),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
-// Combined schema for studio with EIC
-const studioWithEicSchema = z.object({
-  studio: studioSchema,
-  eic: eicSchema,
-});
-
-// Schema for creating studio with default EIC
-const studioWithDefaultEicSchema = studioSchema.extend({
-  createDefaultEic: z.boolean().default(true),
+// Combined schema for full form
+const formSchema = z.object({
+  studioData: studioFormSchema,
+  userData: eicFormSchema,
 });
 
 export function CreateStudioDialog() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<'with-eic' | 'default-eic'>('with-eic');
-
-  // Form for creating studio with EIC
-  const withEicForm = useForm<z.infer<typeof studioWithEicSchema>>({
-    resolver: zodResolver(studioWithEicSchema),
+  const [activeTab, setActiveTab] = useState('studio');
+  const { toast } = useToast();
+  
+  // Create form
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      studio: {
+      studioData: {
         name: '',
         description: '',
         logoUrl: '',
       },
-      eic: {
+      userData: {
         username: '',
-        password: '',
-        fullName: '',
         email: '',
-        phone: '',
-        socialMedia: '',
-      },
+        fullName: '',
+        password: '',
+        confirmPassword: '',
+      }
     },
   });
-
-  // Form for creating studio with default EIC
-  const defaultEicForm = useForm<z.infer<typeof studioWithDefaultEicSchema>>({
-    resolver: zodResolver(studioWithDefaultEicSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      logoUrl: '',
-      createDefaultEic: true,
+  
+  // Mutation for creating studio
+  const mutation = useMutation({
+    mutationFn: async (data: z.infer<typeof formSchema>) => {
+      const response = await axios.post('/api/studio/signup', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      // Reset form and close dialog
+      form.reset();
+      setOpen(false);
+      setActiveTab('studio');
+      
+      // Show success toast
+      toast({
+        title: "Studio created",
+        description: "The studio has been created and is pending admin approval.",
+      });
+      
+      // Invalidate studios query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['/api/studios'] });
+    },
+    onError: (error: any) => {
+      console.error('Error creating studio:', error);
+      
+      // Show error toast
+      toast({
+        variant: "destructive",
+        title: "Failed to create studio",
+        description: error.response?.data?.message || "Please try again later.",
+      });
     },
   });
-
-  // Handle submit for studio with EIC
-  const onSubmitWithEic = async (data: z.infer<typeof studioWithEicSchema>) => {
-    try {
-      // Create studio with EIC
-      const response = await axios.post('/api/studio/signup', {
-        studioData: data.studio,
-        userData: {
-          ...data.eic,
-          isEditor: true,
-          editorRole: 'editor_in_chief'
-        }
-      });
-
-      if (response.status === 201) {
-        // Success
-        toast({
-          title: "Studio created!",
-          description: `Studio "${data.studio.name}" has been created with ${data.eic.fullName} as Editor-in-Chief.`,
-        });
-        
-        // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['/api/studios'] });
-        
-        // Close the dialog
-        setOpen(false);
-        // Reset form
-        withEicForm.reset();
-      }
-    } catch (error: any) {
-      console.error("Error creating studio with EIC:", error);
-      toast({
-        title: "Error creating studio",
-        description: error.response?.data?.message || "An error occurred while creating the studio.",
-        variant: "destructive",
-      });
+  
+  // Handle form submission
+  function onSubmit(data: z.infer<typeof formSchema>) {
+    mutation.mutate(data);
+  }
+  
+  // Handle tab change
+  function handleTabChange(value: string) {
+    setActiveTab(value);
+    
+    // Validate current tab before allowing to move to the next
+    if (value === 'eic') {
+      form.trigger('studioData');
     }
-  };
-
-  // Handle submit for studio with default EIC
-  const onSubmitDefaultEic = async (data: z.infer<typeof studioWithDefaultEicSchema>) => {
-    try {
-      // Create studio with default EIC
-      const defaultEicData = {
-        username: `eic_${Date.now()}`,
-        password: `password_${Math.random().toString(36).slice(2, 10)}`,
-        fullName: `${data.name} Editor-in-Chief`,
-        email: `eic_${Date.now()}@placeholder.com`,
-        isEditor: true,
-        editorRole: 'editor_in_chief'
-      };
-
-      const response = await axios.post('/api/studio/signup', {
-        studioData: {
-          name: data.name,
-          description: data.description,
-          logoUrl: data.logoUrl
-        },
-        userData: defaultEicData
-      });
-
-      if (response.status === 201) {
-        // Success
-        toast({
-          title: "Studio created!",
-          description: `Studio "${data.name}" has been created with a default Editor-in-Chief. Please provide them with these credentials:\nUsername: ${defaultEicData.username}\nPassword: ${defaultEicData.password}`,
-          duration: 10000, // Show longer so they can copy credentials
-        });
-        
-        // Invalidate queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['/api/studios'] });
-        
-        // Close the dialog
-        setOpen(false);
-        // Reset form
-        defaultEicForm.reset();
-      }
-    } catch (error: any) {
-      console.error("Error creating studio with default EIC:", error);
-      toast({
-        title: "Error creating studio",
-        description: error.response?.data?.message || "An error occurred while creating the studio.",
-        variant: "destructive",
-      });
-    }
-  };
-
+  }
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
+        <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Create New Studio
+          Create Studio
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create a New Studio</DialogTitle>
+          <DialogTitle>Create a new studio</DialogTitle>
           <DialogDescription>
-            Create a new studio and assign an Editor-in-Chief who will manage it.
+            Create a new studio for your comic book and set up the Editor-in-Chief account.
           </DialogDescription>
         </DialogHeader>
-
-        <Tabs defaultValue="with-eic" className="w-full" onValueChange={(value) => setMode(value as any)}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="with-eic">Editor-in-Chief Info</TabsTrigger>
-            <TabsTrigger value="default-eic">Default EIC Account</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="with-eic">
-            <Form {...withEicForm}>
-              <form onSubmit={withEicForm.handleSubmit(onSubmitWithEic)} className="space-y-4 py-4">
-                <div className="space-y-4 border p-4 rounded-md">
-                  <h3 className="font-medium flex items-center">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Studio Information
-                  </h3>
-                  
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="studio">Studio Details</TabsTrigger>
+                <TabsTrigger 
+                  value="eic" 
+                  disabled={!form.formState.dirtyFields.studioData || 
+                   (form.formState.errors.studioData !== undefined)}>
+                  Editor-in-Chief
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="studio" className="space-y-4 py-4">
+                <FormField
+                  control={form.control}
+                  name="studioData.name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Studio Name*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter the studio name" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The name of your publishing studio.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="studioData.description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Enter a description for the studio" 
+                          className="resize-none"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        A brief description of the studio and its focus.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="studioData.logoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Logo URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com/logo.png" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        A URL to your studio's logo image.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="pt-4 flex justify-end">
+                  <Button 
+                    type="button" 
+                    onClick={() => handleTabChange('eic')}
+                    disabled={!form.formState.dirtyFields.studioData || 
+                      (form.formState.errors.studioData !== undefined)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="eic" className="space-y-4 py-4">
+                <FormField
+                  control={form.control}
+                  name="userData.username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter a username" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Username for the Editor-in-Chief account.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="userData.fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter full name" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Full name of the Editor-in-Chief.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="userData.email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email*</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="editor@example.com" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Email address for the Editor-in-Chief.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
-                    control={withEicForm.control}
-                    name="studio.name"
+                    control={form.control}
+                    name="userData.password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Studio Name*</FormLabel>
+                        <FormLabel>Password*</FormLabel>
                         <FormControl>
-                          <Input placeholder="Marvel Comics" {...field} />
+                          <Input type="password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -229,229 +303,43 @@ export function CreateStudioDialog() {
                   />
                   
                   <FormField
-                    control={withEicForm.control}
-                    name="studio.description"
+                    control={form.control}
+                    name="userData.confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>Confirm Password*</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of the studio..."
-                            className="min-h-[80px]"
-                            {...field}
-                          />
+                          <Input type="password" {...field} />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={withEicForm.control}
-                    name="studio.logoUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Logo URL</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://example.com/logo.png" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          URL to the studio's logo image
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
                 
-                <div className="space-y-4 border p-4 rounded-md">
-                  <h3 className="font-medium">Editor-in-Chief Information</h3>
+                <div className="pt-4 flex justify-between">
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => handleTabChange('studio')}
+                  >
+                    Back
+                  </Button>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={withEicForm.control}
-                      name="eic.username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Username*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="john_editor" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={withEicForm.control}
-                      name="eic.password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password*</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={withEicForm.control}
-                    name="eic.fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name*</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Editor" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                  <Button 
+                    type="submit"
+                    disabled={mutation.isPending}
+                  >
+                    {mutation.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                  />
-                  
-                  <FormField
-                    control={withEicForm.control}
-                    name="eic.email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email*</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="john@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={withEicForm.control}
-                      name="eic.phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone</FormLabel>
-                          <FormControl>
-                            <Input placeholder="+1 (555) 123-4567" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={withEicForm.control}
-                      name="eic.socialMedia"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Social Media</FormLabel>
-                          <FormControl>
-                            <Input placeholder="@johneditor" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                    Create Studio
+                  </Button>
                 </div>
-                
-                <DialogFooter>
-                  <Button type="submit">Create Studio with EIC</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </TabsContent>
-          
-          <TabsContent value="default-eic">
-            <Form {...defaultEicForm}>
-              <form onSubmit={defaultEicForm.handleSubmit(onSubmitDefaultEic)} className="space-y-4 py-4">
-                <div className="space-y-4 border p-4 rounded-md">
-                  <h3 className="font-medium flex items-center">
-                    <Building2 className="mr-2 h-4 w-4" />
-                    Studio Information
-                  </h3>
-                  
-                  <FormField
-                    control={defaultEicForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Studio Name*</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Marvel Comics" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={defaultEicForm.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of the studio..."
-                            className="min-h-[80px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={defaultEicForm.control}
-                    name="logoUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Logo URL</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://example.com/logo.png" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          URL to the studio's logo image
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <div className="space-y-2 border p-4 rounded-md">
-                  <FormField
-                    control={defaultEicForm.control}
-                    name="createDefaultEic"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg p-3">
-                        <div className="space-y-0.5">
-                          <FormLabel>Create Default Editor-in-Chief</FormLabel>
-                          <FormDescription>
-                            We'll create a default EIC account with random credentials that the EIC can change later
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <DialogFooter>
-                  <Button type="submit">Create Studio with Default EIC</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </TabsContent>
-        </Tabs>
+              </TabsContent>
+            </Tabs>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

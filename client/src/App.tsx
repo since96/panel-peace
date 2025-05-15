@@ -22,6 +22,7 @@ import FeedbackDetails from "@/pages/feedback-details";
 import { SimpleLogin } from "./pages/simple-login";
 import Signup from "./pages/signup";
 import ProfilePage from "./pages/profile";
+import StudiosPage from "./pages/studios";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
