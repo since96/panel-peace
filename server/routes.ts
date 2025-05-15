@@ -544,6 +544,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store the creator's user ID
       requestData.createdBy = dbUser.id;
       
+      // Ensure a studioId is provided (projects must belong to a studio)
+      if (!requestData.studioId) {
+        return res.status(400).json({ 
+          message: "Studio ID is required", 
+          errors: { studioId: { _errors: ["Studio ID is required"] } } 
+        });
+      }
+      
+      // Verify the studio exists
+      const studio = await storage.getStudio(requestData.studioId);
+      if (!studio) {
+        return res.status(404).json({ 
+          message: "Studio not found", 
+          errors: { studioId: { _errors: ["Studio not found"] } } 
+        });
+      }
+      
       // Handle all date fields by converting string dates to Date objects for Zod validation
       const dateFields = ['dueDate', 'plotDeadline', 'coverDeadline'];
       
@@ -569,7 +586,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const newProject = await storage.createProject({
         ...parsedData.data,
-        createdBy: dbUser.id // Ensure createdBy is the authenticated user
+        createdBy: dbUser.id, // Ensure createdBy is the authenticated user
+        studioId: requestData.studioId // Ensure the project is associated with a studio
       });
       
       // Automatically assign the creator as an editor of the project
@@ -579,6 +597,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         assignedBy: dbUser.id,
         assignmentRole: dbUser.editorRole || "editor"
       });
+      
+      console.log(`Created new project "${newProject.title}" (ID: ${newProject.id}) for studio ${newProject.studioId}`);
       
       res.status(201).json(newProject);
     } catch (error) {
@@ -1598,6 +1618,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(studio);
     } catch (error) {
       console.error("Error fetching studio:", error);
+    }
+  });
+  
+  // Get projects for a specific studio
+  app.get("/api/studios/:studioId/projects", async (req, res) => {
+    try {
+      const studioId = parseInt(req.params.studioId);
+      if (isNaN(studioId)) {
+        return res.status(400).json({ message: "Invalid studio ID" });
+      }
+      
+      // Get the studio to make sure it exists
+      const studio = await storage.getStudio(studioId);
+      if (!studio) {
+        return res.status(404).json({ message: "Studio not found" });
+      }
+      
+      // Get projects for this studio
+      const projects = await storage.getProjectsByStudio(studioId);
+      console.log(`Found ${projects.length} projects for studio ${studioId}`);
+      
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching studio projects:", error);
       res.status(500).json({ message: "Failed to fetch studio" });
     }
   });
