@@ -7,7 +7,7 @@ import { insertStudioSchema, insertUserSchema } from "@shared/schema";
 
 // Schema for studio creation
 const studioSignupSchema = z.object({
-  studioData: insertStudioSchema,
+  studioData: insertStudioSchema.partial({ createdBy: true }),
   userData: insertUserSchema.extend({
     password: z.string().min(6),
     isEditor: z.boolean().optional().default(true),
