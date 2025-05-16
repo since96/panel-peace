@@ -753,7 +753,7 @@ export default function Collaborators() {
                                           className="text-slate-400 hover:text-red-500 transition-colors"
                                           title="Delete editor"
                                         >
-                                          <X className="h-4 w-4" />
+                                          <Trash2 className="h-4 w-4" />
                                         </button>
                                       </div>
                                     </div>

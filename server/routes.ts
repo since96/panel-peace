@@ -392,7 +392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a talent (non-editor user)
+  // Delete a user (talent or editor)
   app.delete("/api/users/:id", isAuthenticated, async (req, res) => {
     try {
       const userId = parseInt(req.params.id, 10);
@@ -401,28 +401,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid user ID" });
       }
       
-      // Get the user to verify it's a talent (not an editor)
+      // Get the user
       const user = await storage.getUser(userId);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Only allow deleting talent (non-editors)
-      if (user.isEditor) {
-        return res.status(403).json({ message: "Cannot delete editor users through this endpoint" });
+      // Prevent deletion of site admin
+      if (user.isSiteAdmin) {
+        return res.status(403).json({ message: "Cannot delete site administrator" });
+      }
+      
+      // Check if this user has any workflow steps assigned
+      const steps = await storage.getWorkflowStepsAssignedToUser(userId);
+      if (steps && steps.length > 0) {
+        // Unassign user from workflow steps
+        for (const step of steps) {
+          await storage.updateWorkflowStep(step.id, {
+            assignedTo: null,
+            status: 'not_started'
+          });
+        }
       }
       
       const success = await storage.deleteUser(userId);
       
       if (success) {
-        res.json({ message: "Talent deleted successfully" });
+        const userType = user.isEditor ? "Editor" : "Talent";
+        res.json({ message: `${userType} deleted successfully` });
       } else {
-        res.status(500).json({ message: "Failed to delete talent" });
+        res.status(500).json({ message: "Failed to delete user" });
       }
     } catch (error) {
-      console.error("Error deleting talent:", error);
-      res.status(500).json({ message: "Server error deleting talent" });
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Server error deleting user" });
     }
   });
   
