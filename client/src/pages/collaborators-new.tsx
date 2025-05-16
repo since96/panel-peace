@@ -120,19 +120,10 @@ export default function Collaborators() {
   // Setup talent deletion mutation
   const deleteTalentMutation = useMutation({
     mutationFn: async (userId: number) => {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete talent");
-      }
-      
-      return await response.json();
+      // Use our API utility to handle authentication and errors
+      return import('../lib/api').then(api => 
+        api.apiDelete(`/api/users/${userId}`)
+      );
     },
     onSuccess: () => {
       toast({
@@ -323,13 +314,10 @@ export default function Collaborators() {
     if (!userToDelete) return;
     
     try {
-      const response = await fetch(`/api/users/${userToDelete.id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete user');
-      }
+      // Use our API utility to handle authentication and errors
+      await import('../lib/api').then(api => 
+        api.apiDelete(`/api/users/${userToDelete.id}`)
+      );
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/users'] });

@@ -150,22 +150,10 @@ export default function ProjectCreate() {
         
         console.log("Making POST request to /api/projects with data:", data);
         
-        // Use fetch directly with proper content type header for cross-browser compatibility
-        const response = await fetch('/api/projects', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-          credentials: 'same-origin'
+        // Use our API utility to handle authentication and errors
+        const result = await import('../lib/api').then(module => {
+          return module.apiPost('/api/projects', data);
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw errorData;
-        }
-        
-        const result = await response.json();
         console.log("Project created successfully:", result);
         return result;
       } catch (error) {
