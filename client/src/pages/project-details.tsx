@@ -560,9 +560,9 @@ export default function ProjectDetails() {
               >
                 {editing ? 'Cancel Edit' : 'Edit Project'}
               </Button>
-              {project && !isProjectEditorsLoading && (
+              {project && !isProjectEditorsLoading && workflowSteps && (
                 <ExportButtons 
-                  project={project} 
+                  project={{...project, workflowSteps}} 
                   collaborators={projectEditors || []} 
                 />
               )}
