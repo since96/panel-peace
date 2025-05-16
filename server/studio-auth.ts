@@ -73,7 +73,7 @@ export const isEditorInChief: RequestHandler = async (req, res, next) => {
 // Studio signup endpoint
 export function setupStudioAuth(app: express.Express) {
   // Create a new studio with an Editor-in-Chief
-  app.post("/api/studio/signup", async (req, res) => {
+  app.post("/api/studio/signup", isSiteAdmin, async (req, res) => {
     try {
       // Validate the request
       const validationResult = studioSignupSchema.safeParse(req.body);
