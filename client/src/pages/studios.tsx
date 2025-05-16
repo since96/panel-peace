@@ -25,7 +25,7 @@ import {
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export interface Studio {
+export interface Bullpen {
   id: number;
   name: string;
   description: string;
@@ -81,7 +81,7 @@ export default function StudiosPage() {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Studios</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Bullpens</h1>
           <Breadcrumb className="mt-2">
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -89,7 +89,7 @@ export default function StudiosPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/studios">Studios</BreadcrumbLink>
+                <BreadcrumbLink href="/studios">Bullpens</BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -125,8 +125,8 @@ export default function StudiosPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {studios.map((studio: Studio) => (
-            <StudioCard key={studio.id} studio={studio} />
+          {studios.map((studio: Bullpen) => (
+            <BullpenCard key={studio.id} studio={studio} />
           ))}
         </div>
       )}
@@ -134,7 +134,7 @@ export default function StudiosPage() {
   );
 }
 
-function StudioCard({ studio }: { studio: Studio }) {
+function BullpenCard({ studio }: { studio: Bullpen }) {
   const { user } = useDirectAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();

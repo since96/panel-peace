@@ -971,62 +971,10 @@ export default function Collaborators() {
               </RadioGroup>
             </div>
             
-            {newTeamMember.editorRole === 'editor' && (
-              <div className="grid gap-2">
-                <Label>Assigned Projects</Label>
-                <Select 
-                  value="select-projects"
-                  onValueChange={(value) => {
-                    if (value === "select-projects") return;
-                    const projectId = parseInt(value);
-                    if (!isNaN(projectId) && !newTeamMember.assignedProjects.includes(projectId)) {
-                      setNewTeamMember({
-                        ...newTeamMember, 
-                        assignedProjects: [...newTeamMember.assignedProjects, projectId]
-                      });
-                    }
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select projects to assign" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="select-projects">Select projects...</SelectItem>
-                    {projects?.map(project => (
-                      <SelectItem key={project.id} value={project.id.toString()}>
-                        {project.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {newTeamMember.assignedProjects.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {newTeamMember.assignedProjects.map(projectId => {
-                      const project = projects?.find(p => p.id === projectId);
-                      return project ? (
-                        <Badge key={projectId} className="pl-2 flex items-center gap-1">
-                          {project.title}
-                          <button 
-                            className="ml-1 text-xs hover:bg-primary/20 rounded-full p-0.5"
-                            onClick={() => setNewTeamMember({
-                              ...newTeamMember,
-                              assignedProjects: newTeamMember.assignedProjects.filter(id => id !== projectId)
-                            })}
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ) : null;
-                    })}
-                  </div>
-                )}
-                
-                <p className="text-xs text-slate-500 mt-1">
-                  Regular editors can only see and manage their assigned projects
-                </p>
-              </div>
-            )}
+            {/* Project assignment section removed - editors will be assigned to projects later */}
+            <p className="text-xs text-slate-500 mt-2">
+              Editors will need to be assigned to specific projects after creation
+            </p>
             
             {addTeamMemberError && (
               <div className="bg-red-50 border border-red-200 p-3 rounded-md flex items-start">
