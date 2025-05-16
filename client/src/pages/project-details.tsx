@@ -1739,57 +1739,58 @@ export default function ProjectDetails() {
             </Button>
             <Button
               onClick={() => {
-                if (!newFileLink.trim()) return;
-                
-                // Choose the endpoint based on whether we have a selected step
-                const endpoint = selectedWorkflowStepForLink
-                  ? `/api/workflow-steps/${selectedWorkflowStepForLink}/file-links`
-                  : `/api/projects/${id}/file-links`;
-                
-                // Add the new file link
-                fetch(endpoint, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    url: newFileLink,
-                    description: null,
-                    addedBy: 1 // Default admin user
-                  }),
-                }).then(async (response) => {
-                  if (!response.ok) {
-                    throw new Error('Failed to add file link');
-                  }
-                  
-                  const newLink = await response.json();
-                  
-                  // Update the file links map
-                  const stepId = selectedWorkflowStepForLink || 0; // Use 0 for project-wide links
-                  setFileLinksMap(prev => {
-                    const updated = { ...prev };
-                    if (!updated[stepId]) {
-                      updated[stepId] = [];
-                    }
-                    updated[stepId] = [...updated[stepId], newLink];
-                    return updated;
-                  });
-                  
-                  setShowFileLinkDialog(false);
-                  setNewFileLink('');
-                  setSelectedWorkflowStepForLink(null);
-                  
+                if (!newFileLink.trim()) {
                   toast({
-                    title: "Link added",
-                    description: "File link has been added successfully"
-                  });
-                }).catch(error => {
-                  toast({
-                    title: "Failed to add link",
-                    description: error.message,
+                    title: "Error",
+                    description: "Please enter a valid URL",
                     variant: "destructive"
                   });
+                  return;
+                }
+                
+                // Must have a workflow step ID
+                if (!selectedWorkflowStepForLink) {
+                  if (workflowSteps && workflowSteps.length > 0) {
+                    // Auto-select first step if none selected
+                    toast({
+                      title: "Info",
+                      description: "Auto-selecting first workflow step"
+                    });
+                    // Use the first step
+                    const firstStepId = workflowSteps[0].id;
+                    
+                    // Call the existing mutation
+                    addFileLinkMutation.mutate({
+                      stepId: firstStepId,
+                      url: newFileLink,
+                      description: null
+                    });
+                    
+                    // Close the dialog
+                    setShowFileLinkDialog(false);
+                    setNewFileLink('');
+                    setSelectedWorkflowStepForLink(null);
+                  } else {
+                    toast({
+                      title: "Error",
+                      description: "No workflow steps available. Please initialize workflow first.",
+                      variant: "destructive"
+                    });
+                  }
+                  return;
+                }
+                
+                // Use our mutation to add the link
+                addFileLinkMutation.mutate({
+                  stepId: selectedWorkflowStepForLink,
+                  url: newFileLink,
+                  description: null
                 });
+                
+                // Close dialog
+                setShowFileLinkDialog(false);
+                setNewFileLink('');
+                setSelectedWorkflowStepForLink(null);
               }}
               disabled={!newFileLink.trim()}
             >
