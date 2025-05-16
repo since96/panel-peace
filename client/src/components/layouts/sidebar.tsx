@@ -25,7 +25,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const recentProjects = projects?.slice(0, 3) || [];
   
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: 'ri-dashboard-line' },
+    { name: 'Dashboard', href: '/dashboard', icon: 'ri-dashboard-line' },
     { name: 'Comic Books', href: '/projects', icon: 'ri-file-list-line' },
     { name: 'Creators & Editors', href: '/collaborators', icon: 'ri-team-line' },
     { name: 'Bullpens', href: '/studios', icon: 'ri-building-line' },
