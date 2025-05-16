@@ -668,6 +668,20 @@ export class MemStorage implements IStorage {
     const id = this.projectEditorIdCounter++;
     const newAssignment: ProjectEditor = { id, ...assignment };
     this.projectEditors.set(id, newAssignment);
+    
+    // Update the user's assignedProjects array
+    const user = await this.getUser(assignment.userId);
+    if (user) {
+      const assignedProjects = user.assignedProjects || [];
+      if (!assignedProjects.includes(assignment.projectId)) {
+        // Add the project to the user's assignedProjects array
+        assignedProjects.push(assignment.projectId);
+        await this.updateUser(user.id, { 
+          assignedProjects: assignedProjects 
+        });
+      }
+    }
+    
     return newAssignment;
   }
   
@@ -677,6 +691,16 @@ export class MemStorage implements IStorage {
     );
     
     if (!editor) return false;
+    
+    // Remove this project from the user's assignedProjects array
+    const user = await this.getUser(userId);
+    if (user && user.assignedProjects) {
+      const updatedAssignedProjects = user.assignedProjects.filter(id => id !== projectId);
+      await this.updateUser(userId, { 
+        assignedProjects: updatedAssignedProjects
+      });
+    }
+    
     return this.projectEditors.delete(editor.id);
   }
   
