@@ -131,11 +131,17 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
             yPosition += 6;
           }
           
-          const formattedStatus = step.status
-            .split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-          const statusText = `Status: ${formattedStatus}`;
+          // Format status - replace "Not Started" with percentage complete
+          let statusText = '';
+          if (step.status === 'not_started') {
+            statusText = `Status: ${step.progress || 0}% Complete`;
+          } else {
+            const formattedStatus = step.status
+              .split('_')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            statusText = `Status: ${formattedStatus}`;
+          }
           doc.text(statusText, 14, yPosition);
           yPosition += 10;
         }
@@ -264,7 +270,9 @@ ${project.workflowSteps && project.workflowSteps.length > 0
   ? project.workflowSteps.map((step: any) => 
       `${step.title.toUpperCase()}
 Deadline: ${step.dueDate ? formatDate(step.dueDate) : 'No deadline set'}
-Status: ${step.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}`
+Status: ${step.status === 'not_started' 
+  ? `${step.progress || 0}% Complete` 
+  : step.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}`
     ).join('\n\n')
   : "No workflow steps defined."}
 
