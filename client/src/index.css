@@ -1,3 +1,6 @@
+/* Import theme palette options */
+@import './theme-palettes.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

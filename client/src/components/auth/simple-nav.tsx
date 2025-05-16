@@ -2,6 +2,7 @@ import { useDirectAuth } from '@/hooks/useDirectAuth';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { UserCircle, LogOut } from 'lucide-react';
+import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
 export function SimpleNav() {
   const { user, isAuthenticated, logout } = useDirectAuth();
@@ -21,6 +22,8 @@ export function SimpleNav() {
         </div>
 
         <div className="flex items-center space-x-4">
+          {isAuthenticated && <ThemeSwitcher />}
+          
           {isAuthenticated ? (
             <>
               <div className="flex items-center space-x-2">
