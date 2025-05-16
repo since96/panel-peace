@@ -23,6 +23,7 @@ import { SimpleLogin } from "./pages/simple-login";
 import Signup from "./pages/signup";
 import ProfilePage from "./pages/profile";
 import StudiosPage from "./pages/studios";
+import DeadlineHelper from "./pages/deadline-helper";
 import RouteTest from "./pages/route-test";
 import { HelmetProvider } from "react-helmet-async";
 
