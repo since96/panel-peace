@@ -799,11 +799,11 @@ export default function Collaborators() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>{isEditingUser ? "Edit Talent" : "Add New Talent"}</CardTitle>
+                <CardTitle>{isEditingUser ? "Edit Creator" : "Add a New Creator"}</CardTitle>
                 <CardDescription>
                   {isEditingUser 
-                    ? "Update talent information and roles" 
-                    : "Add a new talent to your roster"}
+                    ? "Update creator information and roles" 
+                    : "Add a new creator to your roster"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
