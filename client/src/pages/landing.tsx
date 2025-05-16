@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { PenNib, Clock, BookOpen, Users } from "lucide-react";
 
 export default function Landing() {
   const [_, navigate] = useLocation();
@@ -125,7 +124,7 @@ export default function Landing() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="flex flex-col items-center text-center p-6 rounded-lg">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <PenNib className="h-6 w-6 text-primary" />
+                  <div className="text-primary font-bold text-xl">✏️</div>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Talent Management</h3>
                 <p className="text-slate-600">Track your creative talent and efficiently assign talent to projects.</p>
@@ -133,7 +132,7 @@ export default function Landing() {
               
               <div className="flex flex-col items-center text-center p-6 rounded-lg">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Clock className="h-6 w-6 text-primary" />
+                  <div className="text-primary font-bold text-xl">⏱️</div>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Deadline Tracking</h3>
                 <p className="text-slate-600">Calculate realistic timelines and monitor progress to ensure on-time delivery.</p>
@@ -141,7 +140,7 @@ export default function Landing() {
               
               <div className="flex flex-col items-center text-center p-6 rounded-lg">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <BookOpen className="h-6 w-6 text-primary" />
+                  <div className="text-primary font-bold text-xl">📚</div>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Asset Management</h3>
                 <p className="text-slate-600">Organize assets throughout the entire comic creation workflow.</p>
@@ -149,7 +148,7 @@ export default function Landing() {
               
               <div className="flex flex-col items-center text-center p-6 rounded-lg">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-primary" />
+                  <div className="text-primary font-bold text-xl">👥</div>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Bullpen Organization</h3>
                 <p className="text-slate-600">Manage editorial teams and control project access with flexible permissions.</p>
