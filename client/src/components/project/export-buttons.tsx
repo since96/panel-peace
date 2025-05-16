@@ -261,6 +261,7 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
       let body = `----- PROJECT DETAILS -----
 
 PROJECT: ${project.title} ${project.issue || ""}
+BULLPEN: ${project.studioName || "Not assigned"}
 
 ${project.description || "No description provided."}
 
@@ -364,6 +365,9 @@ Contact: ${email}`;
               {project.title} {project.issue} 
               <Badge variant="outline">{project.status}</Badge>
             </h3>
+            <div className="flex items-center mt-1 mb-2">
+              <Badge variant="secondary" className="text-xs">Bullpen: {project.studioName || "Not assigned"}</Badge>
+            </div>
             <p className="text-sm text-muted-foreground mt-1">
               {project.description || "No description provided."}
             </p>

@@ -657,10 +657,19 @@ export default function ProjectDetails() {
           <div className="lg:col-span-3">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle>Project Overview</CardTitle>
-                <CardDescription>
-                  Track progress and manage comic book assets
-                </CardDescription>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+                  <div>
+                    <CardTitle>Project Overview</CardTitle>
+                    <CardDescription>
+                      Track progress and manage comic book assets
+                    </CardDescription>
+                  </div>
+                  {project.studioName && (
+                    <Badge variant="outline" className="mt-2 sm:mt-0 text-sm px-3 py-1">
+                      Bullpen: {project.studioName}
+                    </Badge>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-4">
