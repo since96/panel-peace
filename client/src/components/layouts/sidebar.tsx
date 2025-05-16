@@ -29,6 +29,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     { name: 'Comic Books', href: '/projects', icon: 'ri-file-list-line' },
     { name: 'Creators & Editors', href: '/collaborators', icon: 'ri-team-line' },
     { name: 'Bullpens', href: '/studios', icon: 'ri-building-line' },
+    { name: 'Deadline Helper', href: '/deadline-helper', icon: 'ri-calendar-check-line' },
   ];
   
   // Get status color for each project

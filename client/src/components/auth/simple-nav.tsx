@@ -15,27 +15,10 @@ export function SimpleNav() {
   return (
     <div className="bg-white border-b border-gray-200 py-2 px-4">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center space-x-6">
+        <div>
           <a href="/" className="text-xl font-bold text-primary hover:text-primary/80">
             Comic Editor Pro
           </a>
-          
-          {isAuthenticated && (
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link href="/projects" className="text-sm font-medium text-gray-700 hover:text-primary">
-                Comics
-              </Link>
-              <Link href="/collaborators" className="text-sm font-medium text-gray-700 hover:text-primary">
-                Talent
-              </Link>
-              <Link href="/studios" className="text-sm font-medium text-gray-700 hover:text-primary">
-                Bullpens
-              </Link>
-              <Link href="/deadline-helper" className="text-sm font-medium text-gray-700 hover:text-primary">
-                Deadline Helper
-              </Link>
-            </nav>
-          )}
         </div>
 
         <div className="flex items-center space-x-4">
