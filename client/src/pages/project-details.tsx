@@ -879,8 +879,8 @@ export default function ProjectDetails() {
                                         className={`ml-2 ${
                                           step.status === 'completed' ? 'bg-green-50 border-green-200 text-green-700' :
                                           step.status === 'in_progress' ? 'bg-blue-50 border-blue-200 text-blue-700' :
-                                          step.status === 'blocked' ? 'bg-red-50 border-red-200 text-red-700' :
-                                          step.status === 'review' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                                          step.status === 'delayed' ? 'bg-red-50 border-red-200 text-red-700' :
+                                          step.status === 'needs_review' ? 'bg-amber-50 border-amber-200 text-amber-700' :
                                           'bg-slate-50 border-slate-200 text-slate-700'
                                         }`}
                                       >
@@ -1318,11 +1318,10 @@ export default function ProjectDetails() {
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="not_started">Not Started</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="review">In Review</SelectItem>
+                    <SelectItem value="needs_review">Needs Review</SelectItem>
+                    <SelectItem value="delayed">Delayed</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="blocked">Blocked</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

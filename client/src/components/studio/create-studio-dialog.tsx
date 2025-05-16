@@ -57,8 +57,14 @@ export function CreateStudioDialog() {
   const mutation = useMutation({
     mutationFn: async (data: z.infer<typeof formSchema>) => {
       try {
-        console.log('Sending bullpen creation data:', JSON.stringify(data));
-        const response = await axios.post('/api/studio/signup', data);
+        // Format data to match the expected API structure
+        const formattedData = {
+          studioData: data,
+          userData: null // Setting userData to null to indicate no EIC is being created
+        };
+        
+        console.log('Sending bullpen creation data:', JSON.stringify(formattedData));
+        const response = await axios.post('/api/studio/signup', formattedData);
         console.log('Bullpen creation response:', response.data);
         return response.data;
       } catch (error: any) {
