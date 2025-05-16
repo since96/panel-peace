@@ -194,11 +194,25 @@ export default function ProjectDetails() {
   const handleAddComment = () => {
     if (!selectedStep || !commentText.trim()) return;
     
+    // Get current user from local storage
+    const currentUser = localStorage.getItem('user') 
+      ? JSON.parse(localStorage.getItem('user') || '{}')
+      : null;
+    
+    if (!currentUser) {
+      toast({
+        title: "Authentication error",
+        description: "You must be logged in to add comments",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Create and post the comment
     addCommentMutation.mutate({
       content: commentText,
       feedbackId: selectedStep.id, // Using step ID since we're attaching to a workflow step
-      userId: DEFAULT_USER_ID
+      userId: currentUser.id
     });
   };
 
@@ -1757,21 +1771,8 @@ export default function ProjectDetails() {
                   <div className="text-xs text-slate-500">
                     {comments.length} comment{comments.length !== 1 ? 's' : ''}
                   </div>
-                  <div>
-                    {users && (
-                      <Select defaultValue={users[0]?.id.toString()}>
-                        <SelectTrigger className="w-[140px] h-8 text-xs">
-                          <SelectValue placeholder="Posting as..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {users.map(user => (
-                            <SelectItem key={user.id} value={user.id.toString()}>
-                              {user.username}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
+                  <div className="text-xs text-slate-500">
+                    Posting as: {localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}').fullName || JSON.parse(localStorage.getItem('user') || '{}').username : 'You'}
                   </div>
                 </div>
                 <div className="flex justify-end mt-2">
