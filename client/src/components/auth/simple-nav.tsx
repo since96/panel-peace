@@ -19,7 +19,7 @@ export function SimpleNav() {
       <div className="container mx-auto flex justify-between items-center">
         <div>
           <a href="/" className="text-xl font-bold text-primary hover:text-primary/80">
-            Comic Editor Pro
+            Panel Peace
           </a>
         </div>
 
