@@ -181,12 +181,7 @@ export default function Collaborators() {
           return;
         }
         
-        // For regular editors, validate project assignments
-        if (newTeamMember.editorRole === 'editor' && newTeamMember.assignedProjects.length === 0) {
-          setAddTeamMemberError("Please assign at least one project to this editor");
-          setIsAddingTeamMember(false);
-          return;
-        }
+        // Project assignment validation has been removed - editors will be assigned to projects later
         
         // For all editors, require username/password
         if (!newTeamMember.username) {
