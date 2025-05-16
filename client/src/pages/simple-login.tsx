@@ -66,10 +66,15 @@ export function SimpleLogin() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Comic Editor Login</CardTitle>
+          <CardTitle className="text-2xl text-center">Panel Peace Login</CardTitle>
           <CardDescription className="text-center">
             Log in to manage comic book projects
           </CardDescription>
+          <div className="mt-4 bg-amber-50 p-4 rounded-md border border-amber-100 text-amber-800">
+            <p className="text-sm">
+              Welcome to the Sneak Preview of Panel Peace! Use the admin code provided to log in and poke around. And get ready to shed a few editorial happy tears.
+            </p>
+          </div>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>

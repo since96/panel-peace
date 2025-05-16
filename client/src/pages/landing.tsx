@@ -127,21 +127,7 @@ export default function Landing() {
             <Button 
               variant="secondary"
               className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
-              onClick={() => {
-                // Auto-login as admin
-                fetch('/api/auto-login-demo', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ username: 'admin', password: 'admin123' }),
-                })
-                .then(response => {
-                  if (response.ok) {
-                    navigate('/');
-                  }
-                });
-              }}
+              onClick={() => navigate('/simple-login')}
             >
               Take Me for a Test Drive
             </Button>
