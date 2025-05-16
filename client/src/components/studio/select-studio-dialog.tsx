@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Plus } from 'lucide-react';
@@ -37,7 +37,7 @@ interface Bullpen {
 
 export function SelectStudioDialog() {
   const [open, setOpen] = useState(false);
-  const [_, navigate] = useNavigate();
+  const [_, navigate] = useLocation();
   const { toast } = useToast();
   
   // Fetch available bullpens

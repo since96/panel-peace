@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
+import { SelectStudioDialog } from '@/components/studio/select-studio-dialog';
 
 export default function Projects() {
   // Get the studioId from URL query parameters if it exists
@@ -52,15 +53,19 @@ export default function Projects() {
             <p className="text-slate-500 mt-1">Manage your comic book titles and issues</p>
           </div>
           <div className="mt-4 md:mt-0">
-            <Button 
-              className="flex items-center gap-2"
-              asChild
-            >
-              <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
-                <Plus className="h-4 w-4" />
-                <span>New Comic</span>
-              </Link>
-            </Button>
+            {studioId ? (
+              <Button 
+                className="flex items-center gap-2"
+                asChild
+              >
+                <Link to={`/projects/new?studioId=${studioId}`}>
+                  <Plus className="h-4 w-4" />
+                  <span>New Comic</span>
+                </Link>
+              </Button>
+            ) : (
+              <SelectStudioDialog />
+            )}
           </div>
         </div>
         
@@ -116,15 +121,19 @@ export default function Projects() {
                     ? "You haven't created any projects yet. Create your first project to get started."
                     : `You don't have any projects with '${statusFilter.replace('_', ' ')}' status.`}
                 </p>
-                <Button 
-                  className="flex items-center gap-2"
-                  asChild
-                >
-                  <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
-                    <Plus className="h-4 w-4" />
-                    <span>Create New Comic</span>
-                  </Link>
-                </Button>
+                {studioId ? (
+                  <Button 
+                    className="flex items-center gap-2"
+                    asChild
+                  >
+                    <Link to={`/projects/new?studioId=${studioId}`}>
+                      <Plus className="h-4 w-4" />
+                      <span>Create New Comic</span>
+                    </Link>
+                  </Button>
+                ) : (
+                  <SelectStudioDialog />
+                )}
               </div>
             )}
           </>
