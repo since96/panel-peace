@@ -45,77 +45,69 @@ export default function Landing() {
             Comic Editor Pro
           </h1>
           
-          <div className="relative h-24 w-full max-w-2xl overflow-hidden my-8">
+          <div className="relative h-36 w-full max-w-2xl overflow-visible my-8">
             <AnimatePresence>
-              {/* First phase: "Fueled by Comic Book Editor Tears" */}
-              <motion.div
-                className="text-2xl md:text-4xl font-medium tracking-wide absolute left-0 right-0 flex justify-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                exit={{ opacity: 0 }}
-                key="initial-text"
-              >
-                <motion.span
-                  style={{ display: "inline-block" }}
-                  initial={{ x: 0 }}
-                  animate={{ x: -70 }}
-                  transition={{ 
-                    delay: 3,
-                    duration: 1.5, 
-                    ease: "easeInOut",
-                  }}
+              {/* First phase: Text layout in three lines */}
+              <div className="flex flex-col items-center absolute left-0 right-0 text-center">
+                <motion.div
+                  className="text-2xl md:text-4xl font-medium tracking-wide"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  key="line1"
                 >
-                  Fueled by Comic Book Editor
-                </motion.span>
-
-                {/* Middle space for HAPPY to appear */}
-                <motion.span 
-                  style={{ 
-                    visibility: "hidden", 
-                    width: "0px",
-                    display: "inline-block" 
-                  }}
-                  animate={{ width: "140px" }}
-                  transition={{ 
-                    delay: 3,
-                    duration: 1.5, 
-                    ease: "easeInOut",
-                  }}
+                  Fueled by Comic Book
+                </motion.div>
+                
+                <motion.div
+                  className="text-2xl md:text-4xl font-medium tracking-wide"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  key="line2"
                 >
-                </motion.span>
-
-                <motion.span
-                  style={{ display: "inline-block" }}
-                  initial={{ x: 0 }}
-                  animate={{ x: 70 }}
-                  transition={{ 
-                    delay: 3,
-                    duration: 1.5, 
-                    ease: "easeInOut",
-                  }}
+                  Editor
+                </motion.div>
+                
+                <motion.div
+                  className="text-2xl md:text-4xl font-medium tracking-wide relative"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  key="line3"
                 >
-                  Tears
-                </motion.span>
-              </motion.div>
-
-              {/* Second phase: Add "HAPPY" */}
-              <motion.span
-                className="text-2xl md:text-4xl font-bold text-accent absolute left-[50%] transform -translate-x-[50%]"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1
-                }}
-                transition={{ 
-                  delay: 5, 
-                  duration: 0.8,
-                  onComplete: () => setAnimationComplete(true)
-                }}
-                key="happy-text"
-              >
-                HAPPY
-              </motion.span>
+                  {/* "Tears" text that moves down */}
+                  <motion.span
+                    style={{ display: "inline-block" }}
+                    initial={{ y: 0 }}
+                    animate={{ y: 50 }}
+                    transition={{ 
+                      delay: 3,
+                      duration: 1.5, 
+                      ease: "easeInOut",
+                    }}
+                  >
+                    Tears
+                  </motion.span>
+                  
+                  {/* "HAPPY" text that appears where "Tears" was */}
+                  <motion.span
+                    className="text-accent font-bold absolute left-0 right-0"
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ 
+                      opacity: 1, 
+                      scale: 1
+                    }}
+                    transition={{ 
+                      delay: 4.5, 
+                      duration: 0.8,
+                      onComplete: () => setAnimationComplete(true)
+                    }}
+                  >
+                    HAPPY
+                  </motion.span>
+                </motion.div>
+              </div>
             </AnimatePresence>
           </div>
           
