@@ -101,6 +101,7 @@ export interface IStorage {
   // Workflow step operations
   getWorkflowStep(id: number): Promise<WorkflowStep | undefined>;
   getWorkflowStepsByProject(projectId: number): Promise<WorkflowStep[]>;
+  getWorkflowStepsAssignedToUser(userId: number): Promise<WorkflowStep[]>;
   createWorkflowStep(step: InsertWorkflowStep): Promise<WorkflowStep>;
   updateWorkflowStep(id: number, step: Partial<InsertWorkflowStep>): Promise<WorkflowStep | undefined>;
   deleteWorkflowStep(id: number): Promise<boolean>;
@@ -1178,6 +1179,11 @@ export class MemStorage implements IStorage {
     return Array.from(this.workflowSteps.values())
       .filter(step => step.projectId === projectId)
       .sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+  
+  async getWorkflowStepsAssignedToUser(userId: number): Promise<WorkflowStep[]> {
+    return Array.from(this.workflowSteps.values())
+      .filter(step => step.assignedTo === userId);
   }
 
   async createWorkflowStep(step: InsertWorkflowStep): Promise<WorkflowStep> {
