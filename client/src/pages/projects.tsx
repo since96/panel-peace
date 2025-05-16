@@ -100,9 +100,9 @@ export default function Projects() {
             {filteredProjects && filteredProjects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProjects.map((project) => (
-                  <Link key={project.id} to={`/projects/${project.id}`}>
+                  <div key={project.id}>
                     <ProjectCard project={project} />
-                  </Link>
+                  </div>
                 ))}
               </div>
             ) : (

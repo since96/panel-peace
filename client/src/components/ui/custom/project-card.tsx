@@ -82,51 +82,49 @@ export function ProjectCard({ project }: ProjectCardProps) {
   };
   
   return (
-    <div className="h-full">
-      <Link to={`/projects/${id}`}>
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col h-full hover:shadow-md transition-shadow duration-200">
-          <div className="p-4 flex-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className={cn(
-                "text-xs font-medium px-2 py-0.5 rounded-full",
-                statusColors.text,
-                statusColors.bgLight
-              )}>
-                {formatStatusLabel(status)}
-              </span>
-              <span className="text-xs text-slate-500">{issue}</span>
-            </div>
-            <h3 className="font-bold text-slate-900 mb-1">{title}</h3>
-            <p className="text-sm text-slate-500 mb-4">{description}</p>
-            
-            <div className="mt-auto">
-              <div className="flex items-center mb-2">
-                {getScheduleBadge()}
-              </div>
-            </div>
+    <Link to={`/projects/${id}`} className="block h-full no-underline">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-col h-full hover:shadow-md transition-shadow duration-200">
+        <div className="p-4 flex-1">
+          <div className="flex items-center justify-between mb-2">
+            <span className={cn(
+              "text-xs font-medium px-2 py-0.5 rounded-full",
+              statusColors.text,
+              statusColors.bgLight
+            )}>
+              {formatStatusLabel(status)}
+            </span>
+            <span className="text-xs text-slate-500">{issue}</span>
           </div>
+          <h3 className="font-bold text-slate-900 mb-1">{title}</h3>
+          <p className="text-sm text-slate-500 mb-4">{description}</p>
           
-          <div className="border-t border-slate-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className={cn(
-                  "px-2 py-1 rounded-md text-xs",
-                  status === 'in_progress' ? "bg-blue-50 text-blue-600" : 
-                  status === 'needs_review' ? "bg-amber-50 text-amber-600" :
-                  status === 'completed' ? "bg-green-50 text-green-600" :
-                  status === 'delayed' ? "bg-red-50 text-red-600" : 
-                  "bg-slate-50 text-slate-600"
-                )}>
-                  {formatStatusLabel(status)}
-                </span>
-              </div>
-              <div className={cn("text-xs", isDueSoon ? "text-red-500" : "text-slate-500")}>
-                {dueString}
-              </div>
+          <div className="mt-auto">
+            <div className="flex items-center mb-2">
+              {getScheduleBadge()}
             </div>
           </div>
         </div>
-      </Link>
-    </div>
+        
+        <div className="border-t border-slate-200 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className={cn(
+                "px-2 py-1 rounded-md text-xs",
+                status === 'in_progress' ? "bg-blue-50 text-blue-600" : 
+                status === 'needs_review' ? "bg-amber-50 text-amber-600" :
+                status === 'completed' ? "bg-green-50 text-green-600" :
+                status === 'delayed' ? "bg-red-50 text-red-600" : 
+                "bg-slate-50 text-slate-600"
+              )}>
+                {formatStatusLabel(status)}
+              </span>
+            </div>
+            <div className={cn("text-xs", isDueSoon ? "text-red-500" : "text-slate-500")}>
+              {dueString}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

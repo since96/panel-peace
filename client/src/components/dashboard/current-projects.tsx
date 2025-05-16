@@ -34,9 +34,9 @@ export function CurrentProjects() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects?.map((project) => (
-            <Link key={project.id} href={`/projects/${project.id}`}>
+            <div key={project.id}>
               <ProjectCard project={project} />
-            </Link>
+            </div>
           ))}
           
           {projects?.length === 0 && (
