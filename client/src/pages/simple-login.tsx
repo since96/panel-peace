@@ -127,7 +127,7 @@ export function SimpleLogin() {
             </Button>
           </CardFooter>
         </form>
-        <CardFooter className="flex justify-center pt-0">
+        <CardFooter className="flex flex-col items-center gap-4 pt-0">
           <p className="text-sm text-center text-muted-foreground">
             Don't have an account?{" "}
             <a
@@ -137,6 +137,29 @@ export function SimpleLogin() {
               Sign up
             </a>
           </p>
+          
+          <Button 
+            variant="secondary"
+            className="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300"
+            onClick={() => {
+              // Auto-login as admin
+              fetch('/api/auto-login-demo', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: 'admin', password: 'admin123' }),
+              })
+              .then(response => {
+                if (response.ok) {
+                  // Redirect to dashboard after successful login
+                  window.location.href = "/dashboard";
+                }
+              });
+            }}
+          >
+            Take Me for a Test Drive
+          </Button>
         </CardFooter>
       </Card>
     </div>

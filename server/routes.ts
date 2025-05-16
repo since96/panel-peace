@@ -4,6 +4,13 @@ import { storage } from "./storage";
 import * as crypto from "crypto";
 import { setupDirectAuth, isAuthenticated, hasEditAccess } from "./direct-auth";
 import sgMail from '@sendgrid/mail';
+
+// Define the session data interface
+declare module 'express-session' {
+  interface SessionData {
+    userId: number | undefined;
+  }
+}
 import { 
   insertProjectSchema, 
   insertFeedbackItemSchema, 
@@ -36,6 +43,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/auth_with_repl_site_closer.html");
   });
   
+  // Auto-login for demo purposes
+  app.post("/api/auto-login-demo", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (username === 'admin' && password === 'admin123') {
+        // Get the admin user
+        const user = await storage.getUserByUsername('admin');
+        
+        if (!user) {
+          return res.status(404).json({ success: false, message: 'Admin user not found' });
+        }
+        
+        // Log the user in
+        if (req.session) {
+          req.session.userId = user.id;
+          return res.status(200).json({ success: true, user: user });
+        } else {
+          return res.status(500).json({ success: false, message: 'Session not available' });
+        }
+      } else {
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      }
+    } catch (error) {
+      console.error('Auto-login error:', error);
+      return res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+
   // Authentication status route
   app.get("/api/auth/user", async (req: any, res) => {
     try {
