@@ -120,9 +120,14 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('user');
       localStorage.removeItem('isAuthenticated');
       console.log('User removed from localStorage');
+      
+      // Hard redirect to landing page after logout
+      window.location.href = '/';
     } catch (err: any) {
       console.error('Logout error:', err);
       setError(err);
+      // Still redirect even on error
+      window.location.href = '/';
     } finally {
       setIsLoading(false);
     }
