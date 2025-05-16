@@ -9,11 +9,37 @@ const JWT_SECRET = process.env.JWT_SECRET || 'comic_editor_jwt_secret_key';
 // Authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
-    // Get the token from the cookie
-    const token = req.cookies?.auth_token;
+    // For development, auto-authenticate as admin
+    if (process.env.NODE_ENV === 'development') {
+      // Get user from database directly
+      const adminUser = await storage.getUserByUsername('admin');
+      
+      if (adminUser) {
+        // Set user in request
+        (req as any).user = adminUser;
+        return next();
+      }
+    }
+    
+    // Try to get token from multiple sources
+    // 1. Check Authorization header
+    const authHeader = req.headers.authorization;
+    let token = authHeader && authHeader.startsWith('Bearer ') 
+      ? authHeader.substring(7) // Remove 'Bearer ' prefix
+      : null;
+    
+    // 2. Check cookie if header token not found
+    if (!token) {
+      token = req.cookies?.auth_token;
+    }
+    
+    // 3. Check query parameter if still not found (not recommended for production)
+    if (!token && req.query.token) {
+      token = req.query.token as string;
+    }
     
     if (!token) {
-      console.log('No auth token, returning unauthorized');
+      console.log('No auth token found in request (header, cookie, or query), returning unauthorized');
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
     
@@ -103,6 +129,11 @@ export const isEditor: RequestHandler = async (req, res, next) => {
 
 // Check if user has edit access (not view-only)
 export const hasEditAccess: RequestHandler = async (req, res, next) => {
+  // For development, auto-grant edit access
+  if (process.env.NODE_ENV === 'development') {
+    return next();
+  }
+  
   const user = (req as any).user;
   
   if (!user) {
