@@ -356,11 +356,6 @@ export class MemStorage implements IStorage {
       return false;
     }
     
-    // Check if the user is an editor (don't allow deletion of editors from this method)
-    if (user.isEditor) {
-      return false; // Only allow deletion of talent, not editors
-    }
-    
     // Remove the user from all projects they're assigned to
     // Get all collaborator records for this user
     const userCollaborations = Array.from(this.collaborators.values())
@@ -369,6 +364,17 @@ export class MemStorage implements IStorage {
     // Delete each collaboration
     for (const collab of userCollaborations) {
       this.collaborators.delete(collab.id);
+    }
+    
+    // If this is an editor, remove them from projects they're editing
+    if (user.isEditor) {
+      // Remove from project editors
+      const projectEditors = Array.from(this.projectEditors.values())
+        .filter(pe => pe.userId === id);
+      
+      for (const pe of projectEditors) {
+        this.projectEditors.delete(pe.id);
+      }
     }
     
     // Delete the user
