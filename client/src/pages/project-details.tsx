@@ -714,7 +714,7 @@ export default function ProjectDetails() {
                                       rel="noopener noreferrer"
                                       className="text-blue-500 hover:underline text-sm font-medium"
                                     >
-                                      {link.url}
+                                      Click for attached file
                                     </a>
                                     <div className="text-xs text-slate-500">
                                       {/* Find the workflow step name for this link */}

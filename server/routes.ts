@@ -504,8 +504,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Editor-in-Chief can see all projects
-      if (dbUser.isEditor && dbUser.editorRole === "editor_in_chief") {
+      // Site admins and project creators can see all projects
+      if (dbUser.isSiteAdmin || project.createdBy === dbUser.id) {
         return res.json(project);
       }
       
@@ -802,10 +802,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if current user has permission to modify this project
-      // Project creator or higher-ranking editor can assign editors
+      // Project creator or site admin can assign editors
       const canAssignEditors = 
         project.createdBy === currentUserId || 
-        (currentUser.editorRole === 'senior_editor' || currentUser.editorRole === 'editor_in_chief');
+        currentUser.isSiteAdmin === true;
         
       if (!canAssignEditors) {
         return res.status(403).json({ 
