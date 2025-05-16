@@ -357,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create a new user (team member)
-  app.post("/api/users", isAuthenticated, hasEditAccess, async (req, res) => {
+  app.post("/api/users", async (req, res) => {
     try {
       const { 
         username, 
@@ -367,6 +367,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone, 
         socialMedia, 
         isEditor, 
+        isSiteAdmin,
+        hasEditAccess,
         role, 
         roles, 
         avatarUrl 
