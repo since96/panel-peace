@@ -1354,7 +1354,7 @@ export default function ProjectDetails() {
                     const formData = new FormData(e.currentTarget);
                     const data = {
                       id: parseInt(id as string),
-                      interiorPages: parseInt(formData.get('interiorPages') as string),
+                      interiorPageCount: parseInt(formData.get('interiorPageCount') as string),
                       coverCount: parseInt(formData.get('coverCount') as string),
                       fillerPageCount: parseInt(formData.get('fillerPageCount') as string),
                       issue: formData.get('issue') as string,
@@ -1474,7 +1474,8 @@ export default function ProjectDetails() {
                   totalCount={selectedStepForTracker.stepType.includes('pencil') || 
                               selectedStepForTracker.stepType.includes('ink') || 
                               selectedStepForTracker.stepType.includes('color') ||
-                              selectedStepForTracker.stepType.includes('letter') ? 22 : 1}
+                              selectedStepForTracker.stepType.includes('letter') ? 
+                              (project?.interiorPageCount || 22) : 1}
                   onProgressUpdate={handleStepProgressUpdate}
                 />
               ) : (
