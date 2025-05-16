@@ -101,6 +101,27 @@ export const isEditor: RequestHandler = async (req, res, next) => {
   return res.status(403).json({ success: false, message: 'Forbidden - Editor access required' });
 };
 
+// Check if user has edit access (not view-only)
+export const hasEditAccess: RequestHandler = async (req, res, next) => {
+  const user = (req as any).user;
+  
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  
+  // Site admins always have edit access
+  if (user.isSiteAdmin) {
+    return next();
+  }
+  
+  // If user is an editor but has view-only access
+  if (user.isEditor && user.hasEditAccess === false) {
+    return res.status(403).json({ success: false, message: 'View-only access - You cannot make changes' });
+  }
+  
+  return next();
+};
+
 // Check if user can access a specific studio
 export const canAccessStudio: (studioId: number) => RequestHandler = (studioId) => async (req, res, next) => {
   const user = (req as any).user;

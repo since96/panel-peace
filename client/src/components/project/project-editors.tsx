@@ -232,9 +232,16 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="font-medium">{editor.user?.fullName || editor.user?.username || 'Unknown'}</p>
-                        <Badge variant="outline" className="ml-2">
-                          {editor.assignmentRole?.replace('_', ' ') || 'Editor'}
-                        </Badge>
+                        <div className="flex gap-1">
+                          <Badge variant="outline">
+                            {editor.user?.isSiteAdmin ? 'Site Admin' : 'Editor'}
+                          </Badge>
+                          {editor.user?.hasEditAccess === false && 
+                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                              View Only
+                            </Badge>
+                          }
+                        </div>
                       </div>
                       <p className="text-xs text-slate-500">{editor.user?.email}</p>
                     </div>
