@@ -55,29 +55,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         </div>
       </div>
       
-      <div className="p-4 border-b border-slate-200">
-        <Button 
-          className="w-full flex items-center justify-center gap-2"
-          onClick={() => {
-            // Use direct navigation
-            window.location.href = '/projects/new?studioId=998';
-          }}
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Marvel Project</span>
-        </Button>
-        
-        <Button 
-          className="w-full flex items-center justify-center gap-2 mt-2"
-          onClick={() => {
-            // Use direct navigation
-            window.location.href = '/projects/new?studioId=999';
-          }}
-        >
-          <Plus className="h-4 w-4" />
-          <span>New DC Project</span>
-        </Button>
-      </div>
+      
       
       <ScrollArea className="flex-1">
         <nav className="p-4 space-y-1">
