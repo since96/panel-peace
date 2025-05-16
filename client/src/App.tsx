@@ -34,7 +34,10 @@ function Router() {
   return (
     <Switch>
       {/* Login pages and public pages - not protected, not using app layout */}
-      <Route path="/">
+      <Route path="/" exact>
+        <Landing />
+      </Route>
+      <Route path="/landing">
         <Landing />
       </Route>
       <Route path="/login">

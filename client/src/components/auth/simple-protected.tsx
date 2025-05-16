@@ -21,10 +21,10 @@ export function SimpleProtected({ children }: SimpleProtectedProps) {
       return;
     }
 
-    // If not authenticated from API check, redirect to login page
+    // If not authenticated from API check, redirect to landing page
     if (!isLoading && !isAuthenticated) {
-      console.log('Not authenticated in SimpleProtected, redirecting to login');
-      window.location.replace('/simple-login');
+      console.log('Not authenticated in SimpleProtected, redirecting to landing page');
+      window.location.replace('/');
     } else if (!isLoading && isAuthenticated) {
       console.log('Authenticated in SimpleProtected, user:', user);
     }
@@ -51,10 +51,10 @@ export function SimpleProtected({ children }: SimpleProtectedProps) {
             You need to be logged in to access this page.
           </p>
           <Button 
-            onClick={() => (window.location.href = '/simple-login')}
+            onClick={() => (window.location.href = '/')}
             variant="default"
           >
-            Login Now
+            Back to Home
           </Button>
         </div>
       </div>
