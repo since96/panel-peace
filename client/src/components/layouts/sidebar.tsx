@@ -52,7 +52,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
       <div className="p-4 border-b border-slate-200">
         <div className="flex items-center space-x-2">
           <BookOpen className="h-6 w-6 text-accent" />
-          <h1 className="text-xl font-bold text-slate-900">Comic Editor Pro</h1>
+          <h1 className="text-xl font-bold text-slate-900">Panel Peace</h1>
         </div>
       </div>
       
