@@ -16,7 +16,7 @@ export function AppLayout({ children, isOpen, toggleSidebar, closeSidebar }: App
       <Sidebar isOpen={isOpen} onClose={isOpen ? closeSidebar : undefined} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <SimpleNav />
+        <SimpleNav toggleSidebar={toggleSidebar} />
         
         <main className="flex-1 overflow-y-auto bg-slate-100 p-6">
           {children}

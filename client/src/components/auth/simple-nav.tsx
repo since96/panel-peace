@@ -1,10 +1,10 @@
 import { useDirectAuth } from '@/hooks/useDirectAuth';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
-import { UserCircle, LogOut } from 'lucide-react';
+import { UserCircle, LogOut, Menu } from 'lucide-react';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 
-export function SimpleNav() {
+export function SimpleNav({ toggleSidebar }: { toggleSidebar?: () => void }) {
   const { user, isAuthenticated, logout } = useDirectAuth();
 
   const handleLogout = async () => {
@@ -17,7 +17,17 @@ export function SimpleNav() {
   return (
     <div className="bg-white border-b border-gray-200 py-2 px-4">
       <div className="container mx-auto flex justify-between items-center">
-        <div>
+        <div className="flex items-center space-x-3">
+          {toggleSidebar && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleSidebar}
+              className="md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
           <a href="/" className="text-xl font-bold text-primary hover:text-primary/80">
             Panel Peace
           </a>
