@@ -63,8 +63,11 @@ export default function ProjectCreate() {
   const studioId = studioIdParam ? parseInt(studioIdParam) : null;
   
   useEffect(() => {
-    // If studios are loaded and there are none, redirect to create a bullpen first
+    // If studios are loaded and there are none, set session flag and redirect to create a bullpen first
     if (!isLoadingStudios && studios && studios.length === 0) {
+      // Set a session storage flag to help the 404 page determine we came from project creation
+      sessionStorage.setItem("attempted_project_creation", "true");
+      
       toast({
         title: "No Bullpens Available",
         description: "You need to create a bullpen before you can create comics.",
