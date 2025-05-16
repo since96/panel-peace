@@ -47,8 +47,9 @@ export default function Landing() {
           
           <div className="relative h-36 w-full max-w-2xl overflow-visible my-8">
             <AnimatePresence>
-              {/* First phase: Text layout in three lines */}
+              {/* First phase: Text layout */}
               <div className="flex flex-col items-center absolute left-0 right-0 text-center">
+                {/* First line: "Fueled by" */}
                 <motion.div
                   className="text-2xl md:text-4xl font-medium tracking-wide"
                   initial={{ opacity: 0, y: 10 }}
@@ -59,53 +60,46 @@ export default function Landing() {
                   Fueled by
                 </motion.div>
                 
-                <motion.div
-                  className="text-2xl md:text-4xl font-medium tracking-wide"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.3 }}
-                  key="line2"
-                >
-                  Comic Editor
-                </motion.div>
+                {/* Second line: "Comic Editor HAPPY" */}
+                <div className="flex items-center justify-center">
+                  <motion.div
+                    className="text-2xl md:text-4xl font-medium tracking-wide"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    key="line2"
+                  >
+                    Comic Editor
+                  </motion.div>
+                  
+                  {/* "HAPPY" text that appears to the right of "Comic Editor" */}
+                  <motion.div
+                    className="text-2xl md:text-4xl font-bold text-accent ml-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ 
+                      opacity: 1, 
+                      x: 0
+                    }}
+                    transition={{ 
+                      delay: 3, 
+                      duration: 0.8,
+                      onComplete: () => setAnimationComplete(true)
+                    }}
+                    key="happy-text"
+                  >
+                    HAPPY
+                  </motion.div>
+                </div>
                 
+                {/* Third line: "Tears" */}
                 <motion.div
-                  className="text-2xl md:text-4xl font-medium tracking-wide relative"
+                  className="text-2xl md:text-4xl font-medium tracking-wide mt-1"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.6 }}
                   key="line3"
                 >
-                  {/* "Tears" text that moves down */}
-                  <motion.span
-                    style={{ display: "inline-block" }}
-                    initial={{ y: 0 }}
-                    animate={{ y: 50 }}
-                    transition={{ 
-                      delay: 3,
-                      duration: 1.5, 
-                      ease: "easeInOut",
-                    }}
-                  >
-                    Tears
-                  </motion.span>
-                  
-                  {/* "HAPPY" text that appears where "Tears" was */}
-                  <motion.span
-                    className="text-accent font-bold absolute left-0 right-0 mx-auto text-center"
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ 
-                      opacity: 1, 
-                      scale: 1
-                    }}
-                    transition={{ 
-                      delay: 4.5, 
-                      duration: 0.8,
-                      onComplete: () => setAnimationComplete(true)
-                    }}
-                  >
-                    HAPPY
-                  </motion.span>
+                  Tears
                 </motion.div>
               </div>
             </AnimatePresence>
