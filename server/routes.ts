@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import * as crypto from "crypto";
-import { setupDirectAuth, isAuthenticated } from "./direct-auth";
+import { setupDirectAuth, isAuthenticated, hasEditAccess } from "./direct-auth";
 import sgMail from '@sendgrid/mail';
 import { 
   insertProjectSchema, 
@@ -357,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create a new user (team member)
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", isAuthenticated, hasEditAccess, async (req, res) => {
     try {
       const { 
         username, 
@@ -527,7 +527,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", async (req: any, res) => {
+  app.post("/api/projects", isAuthenticated, hasEditAccess, async (req: any, res) => {
     try {
       console.log("PROJECT CREATE: Request received with body:", JSON.stringify(req.body, null, 2));
       
@@ -1014,7 +1014,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/feedback", async (req, res) => {
+  app.post("/api/feedback", isAuthenticated, hasEditAccess, async (req, res) => {
     try {
       const parsedData = insertFeedbackItemSchema.safeParse(req.body);
       if (!parsedData.success) {
@@ -1068,7 +1068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/assets", async (req, res) => {
+  app.post("/api/assets", isAuthenticated, hasEditAccess, async (req, res) => {
     try {
       const parsedData = insertAssetSchema.safeParse(req.body);
       if (!parsedData.success) {
@@ -1189,7 +1189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/comments", async (req, res) => {
+  app.post("/api/comments", isAuthenticated, hasEditAccess, async (req, res) => {
     try {
       const parsedData = insertCommentSchema.safeParse(req.body);
       if (!parsedData.success) {
@@ -1255,7 +1255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/workflow-steps", async (req, res) => {
+  app.post("/api/workflow-steps", isAuthenticated, hasEditAccess, async (req, res) => {
     try {
       const parsedData = insertWorkflowStepSchema.safeParse(req.body);
       if (!parsedData.success) {
