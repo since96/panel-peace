@@ -44,11 +44,11 @@ export function CurrentProjects() {
               <div className="text-4xl text-slate-300 mb-3">
                 <i className="ri-file-list-line"></i>
               </div>
-              <h3 className="text-lg font-medium text-slate-600 mb-1">No projects yet</h3>
-              <p className="text-sm text-slate-500 mb-4">Create your first comic book project to get started</p>
+              <h3 className="text-lg font-medium text-slate-600 mb-1">No comics yet</h3>
+              <p className="text-sm text-slate-500 mb-4">Create your first comic book to get started</p>
               <Link href="/projects/new" className="inline-flex items-center text-sm font-medium text-primary">
                 <i className="ri-add-line mr-1"></i>
-                <span>Create a new project</span>
+                <span>Create a new comic</span>
               </Link>
             </div>
           )}

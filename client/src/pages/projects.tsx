@@ -122,7 +122,7 @@ export default function Projects() {
                 >
                   <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
                     <Plus className="h-4 w-4" />
-                    <span>Create New Project</span>
+                    <span>Create New Comic</span>
                   </Link>
                 </Button>
               </div>

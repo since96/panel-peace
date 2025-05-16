@@ -279,7 +279,7 @@ export default function ProjectCreate() {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Project Title</FormLabel>
+                        <FormLabel>Comic Title</FormLabel>
                         <FormControl>
                           <Input placeholder="e.g. Stellar Adventures" {...field} />
                         </FormControl>
