@@ -60,29 +60,38 @@ export default function Landing() {
                   Fueled by
                 </motion.div>
                 
-                {/* Second line: "Comic Editor HAPPY" */}
-                <div className="flex items-center justify-center">
+                {/* Second line: Comic Editor with typing HAPPY animation */}
+                <div className="relative w-full text-center">
+                  {/* Initial centered "Comic Editor" */}
                   <motion.div
-                    className="text-2xl md:text-4xl font-medium tracking-wide"
+                    className="text-2xl md:text-4xl font-medium tracking-wide mx-auto inline-block"
                     initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.3 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: 0,
+                      x: -70 // Move left to make room for HAPPY
+                    }}
+                    transition={{ 
+                      opacity: { duration: 0.8, delay: 0.3 },
+                      y: { duration: 0.8, delay: 0.3 },
+                      x: { duration: 1.2, delay: 3, ease: "easeInOut" }
+                    }}
                     key="line2"
                   >
                     Comic Editor
                   </motion.div>
                   
-                  {/* "HAPPY" text that appears to the right of "Comic Editor" */}
+                  {/* "HAPPY" text that typed out letter by letter */}
                   <motion.div
-                    className="text-2xl md:text-4xl font-bold text-accent ml-3"
-                    initial={{ opacity: 0, x: -20 }}
+                    className="text-2xl md:text-4xl font-bold text-accent inline-block ml-3"
+                    initial={{ opacity: 0, width: 0 }}
                     animate={{ 
-                      opacity: 1, 
-                      x: 0
+                      opacity: 1,
+                      width: 130 // Approximate width of "HAPPY" text
                     }}
                     transition={{ 
-                      delay: 3, 
-                      duration: 0.8,
+                      opacity: { duration: 0.3, delay: 3 },
+                      width: { duration: 1.2, delay: 3, ease: "easeInOut" },
                       onComplete: () => setAnimationComplete(true)
                     }}
                     key="happy-text"
