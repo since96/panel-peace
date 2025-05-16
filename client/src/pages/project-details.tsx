@@ -1438,16 +1438,14 @@ export default function ProjectDetails() {
                             })
                             .map(user => (
                               <SelectItem key={user.id} value={user.id.toString()}>
+                                {/* Format: Name (Role) */}
                                 {user.fullName || user.username || `User ${user.id}`}
+                                {' '}
                                 {user.roles && user.roles.length > 0 ? (
-                                  <span className="ml-1 text-xs text-slate-400">
-                                    ({user.roles.map(r => r.charAt(0).toUpperCase() + r.slice(1).replace(/_/g, ' ')).join(', ')})
-                                  </span>
+                                  `(${user.roles.map(r => r.charAt(0).toUpperCase() + r.slice(1).replace(/_/g, ' ')).join(', ')})`
                                 ) : user.role ? (
-                                  <span className="ml-1 text-xs text-slate-400">
-                                    ({user.role.charAt(0).toUpperCase() + user.role.slice(1).replace(/_/g, ' ')})
-                                  </span>
-                                ) : null}
+                                  `(${user.role.charAt(0).toUpperCase() + user.role.slice(1).replace(/_/g, ' ')})`
+                                ) : ''}
                               </SelectItem>
                             ))
                           }
