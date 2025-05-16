@@ -7,7 +7,6 @@ import { BuildingIcon, Users, PencilRuler, UsersRound, Trash2 } from 'lucide-rea
 import { CreateStudioDialog } from '@/components/studio/create-studio-dialog';
 import axios from 'axios';
 import { useDirectAuth } from '@/hooks/useDirectAuth';
-import { useHasEditAccess } from '@/hooks/useHasEditAccess';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
 import {
@@ -140,10 +139,12 @@ export default function StudiosPage() {
 
 function BullpenCard({ studio }: { studio: Bullpen }) {
   const { user } = useDirectAuth();
-  const hasEditAccess = useHasEditAccess();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
+  
+  // Determine if current user is a site admin
+  const isSiteAdmin = user?.isSiteAdmin === true;
   
   // Fetch studio editors (using React Query's defaults if data doesn't exist yet)
   const { data: editors = [] } = useQuery({
@@ -220,9 +221,8 @@ function BullpenCard({ studio }: { studio: Bullpen }) {
               </Badge>
             )}
             
-            {/* Delete Studio button - hidden for view-only editors */}
-            {hasEditAccess && (
-              <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+            {/* Delete Studio button - visible to everyone */}
+            <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
                 <AlertDialogTrigger asChild>
                   <Button 
                     variant="ghost" 
