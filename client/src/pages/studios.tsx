@@ -273,7 +273,7 @@ function BullpenCard({ studio }: { studio: Bullpen }) {
             </div>
             <div className="flex items-center space-x-2">
               <PencilRuler className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{projects.length} Projects</span>
+              <span className="text-sm text-muted-foreground">{projects.length} Comics</span>
             </div>
           </div>
           
@@ -298,7 +298,7 @@ function BullpenCard({ studio }: { studio: Bullpen }) {
       <CardFooter className="border-t pt-4">
         <div className="flex w-full space-x-2">
           <Button variant="outline" className="flex-1" asChild>
-            <Link to={`/projects?studioId=${studio.id}`}>View Projects</Link>
+            <Link to={`/projects?studioId=${studio.id}`}>View Comics</Link>
           </Button>
           
           <Button 
@@ -306,7 +306,7 @@ function BullpenCard({ studio }: { studio: Bullpen }) {
             asChild
           >
             <Link to={`/projects/new?studioId=${studio.id}`}>
-              New Project
+              New Comic
             </Link>
           </Button>
         </div>

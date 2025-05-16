@@ -40,16 +40,16 @@ export default function Projects() {
   return (
     <>
       <Helmet>
-        <title>My Projects - Comic Editor Pro</title>
-        <meta name="description" content="View and manage all your comic book projects. Create new projects, track progress, and collaborate with team members." />
+        <title>Studio Comics - Comic Editor Pro</title>
+        <meta name="description" content="View and manage all your comic books. Create new comics, track progress, and collaborate with your talent team." />
       </Helmet>
       
       <div className="max-w-7xl mx-auto">
         {/* Projects Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">My Projects</h1>
-            <p className="text-slate-500 mt-1">Manage your comic book projects</p>
+            <h1 className="text-2xl font-bold text-slate-900">Studio Comics</h1>
+            <p className="text-slate-500 mt-1">Manage your comic book titles and issues</p>
           </div>
           <div className="mt-4 md:mt-0">
             <Button 
@@ -58,7 +58,7 @@ export default function Projects() {
             >
               <Link to={studioId ? `/projects/new?studioId=${studioId}` : "/projects/new"}>
                 <Plus className="h-4 w-4" />
-                <span>New Project</span>
+                <span>New Comic</span>
               </Link>
             </Button>
           </div>
