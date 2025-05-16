@@ -74,25 +74,8 @@ export function setupStudioAuth(app: express.Express) {
   // Create a new studio with an Editor-in-Chief
   app.post("/api/studio/signup", async (req, res) => {
     try {
-      // TEMPORARY DEVELOPMENT MODE - Skip user check
-      // This is a temporary solution for development purposes
-      // In production, we would properly check user authentication and admin status
-      
-      // Instead of checking the user from the request, we'll directly check if the username
-      // matches our admin users - this is just for development
-      let isAllowedToCreateBullpen = true;
-      const currentUsername = (req as any)?.user?.username || '';
-      
-      console.log(`User attempting to create bullpen: ${currentUsername}`);
-      
-      // If the user is 'jenn' or another non-admin, block them
-      if (currentUsername === 'jenn') {
-        console.log(`User ${currentUsername} attempted to create a bullpen but isn't a site admin`);
-        isAllowedToCreateBullpen = false;
-        return res.status(403).json({ message: "Only site administrators can create bullpens" });
-      }
-      
-      console.log(`User ${currentUsername || 'Developer'} is creating a bullpen`);
+      // DEVELOPMENT MODE: Allow anyone to create bullpens
+      console.log("Creating a new bullpen - open access for all users");
       
       // Validate the request
       const validationResult = studioSignupSchema.safeParse(req.body);

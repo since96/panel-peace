@@ -1648,7 +1648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Delete a studio (only site admins can do this)
+  // Delete a studio (DEVELOPMENT MODE: allow anyone to delete studios)
   app.delete("/api/studios/:id", async (req: any, res) => {
     try {
       const studioId = parseInt(req.params.id);
@@ -1656,27 +1656,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid studio ID" });
       }
       
-      // Get the authenticated user
-      const userId = req.user?.id || 0;
-      const dbUser = await storage.getUser(userId);
-      
-      if (!dbUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Only site admins can delete studios
-      if (!dbUser.isSiteAdmin) {
-        console.log(`User ${userId} (${dbUser.username}) attempted to delete a studio but isn't a site admin`);
-        return res.status(403).json({ message: "Only site administrators can delete studios" });
-      }
-      
-      console.log(`Admin user ${userId} (${dbUser.username}) is deleting a studio`);
+      // DEVELOPMENT MODE: Skip all auth checks and allow deletion for everyone
+      console.log(`DEVELOPMENT MODE: Allowing deletion of studio ${studioId}`);
       
       // Check if studio exists
       const studio = await storage.getStudio(studioId);
       if (!studio) {
         return res.status(404).json({ message: "Studio not found" });
       }
+      
+      console.log(`Deleting studio: ${studio.name} (ID: ${studioId})`);
       
       // Delete the studio and all its projects
       const result = await storage.deleteStudio(studioId);
