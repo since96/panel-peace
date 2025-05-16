@@ -1238,16 +1238,32 @@ export default function ProjectDetails() {
           
           {selectedStepForTracker && (
             <div>
-              <CompletionTracker 
-                stepId={selectedStepForTracker.id}
-                stepType={selectedStepForTracker.stepType}
-                currentProgress={selectedStepForTracker.progress}
-                totalCount={selectedStepForTracker.stepType.includes('pencil') || 
-                            selectedStepForTracker.stepType.includes('ink') || 
-                            selectedStepForTracker.stepType.includes('color') ||
-                            selectedStepForTracker.stepType.includes('letter') ? 22 : 1}
-                onProgressUpdate={handleStepProgressUpdate}
-              />
+              {hasEditAccess ? (
+                <CompletionTracker 
+                  stepId={selectedStepForTracker.id}
+                  stepType={selectedStepForTracker.stepType}
+                  currentProgress={selectedStepForTracker.progress}
+                  totalCount={selectedStepForTracker.stepType.includes('pencil') || 
+                              selectedStepForTracker.stepType.includes('ink') || 
+                              selectedStepForTracker.stepType.includes('color') ||
+                              selectedStepForTracker.stepType.includes('letter') ? 22 : 1}
+                  onProgressUpdate={handleStepProgressUpdate}
+                />
+              ) : (
+                <div className="p-4 mb-4 bg-slate-100 rounded-md">
+                  <div className="flex items-center mb-2">
+                    <Info className="h-4 w-4 text-slate-600 mr-2" />
+                    <p className="text-sm text-slate-600 font-medium">View-only access</p>
+                  </div>
+                  <p className="text-sm text-slate-600">
+                    You can only view the current progress. Contact an editor with edit privileges to make changes.
+                  </p>
+                  <div className="mt-3">
+                    <p className="text-sm font-medium mb-1">Current progress: {selectedStepForTracker.progress}%</p>
+                    <Progress value={selectedStepForTracker.progress} className="h-3 w-full rounded-full" />
+                  </div>
+                </div>
+              )}
               <div className="flex justify-end space-x-2 mt-4">
                 <Button onClick={() => setShowTrackerDialog(false)} variant="outline">Close</Button>
               </div>
