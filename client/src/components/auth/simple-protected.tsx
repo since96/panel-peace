@@ -21,10 +21,10 @@ export function SimpleProtected({ children }: SimpleProtectedProps) {
       return;
     }
 
-    // If not authenticated from API check, redirect to landing page
+    // If not authenticated from API check, redirect to login page
     if (!isLoading && !isAuthenticated) {
-      console.log('Not authenticated in SimpleProtected, redirecting to landing page');
-      window.location.replace('/');
+      console.log('Not authenticated in SimpleProtected, redirecting to login page');
+      window.location.replace('/simple-login');
     } else if (!isLoading && isAuthenticated) {
       console.log('Authenticated in SimpleProtected, user:', user);
     }

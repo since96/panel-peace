@@ -9,7 +9,8 @@ export function SimpleNav() {
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/';
+    // After logout, force a page reload to the landing page
+    window.location.replace('/');
   };
 
   return (

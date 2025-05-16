@@ -45,8 +45,8 @@ export function SimpleLogin() {
           
           console.log("Successfully logged in, stored user data:", data.user);
           
-          // Force a complete page reload to reset all React state
-          window.location.href = "/";
+          // Redirect to dashboard after successful login
+          window.location.href = "/dashboard";
         } else {
           setError(data.message || "Login failed");
         }
