@@ -22,23 +22,37 @@ export function SimpleLogin() {
       console.log("Attempting login with:", username, password);
       
       console.log(`Attempting login with username: ${username}, password length: ${password.length}`);
-      const response = await fetch("/api/direct-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password }),
-        credentials: "include"
-      });
+      // Add more debugging to see what's happening
+      try {
+        const response = await fetch("/api/direct-login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password }),
+          credentials: "include"
+        });
 
-      const data = await response.json();
-      console.log("Login response:", data);
+        const data = await response.json();
+        console.log("Login response:", data);
 
-      if (data.success) {
-        // Force a complete page reload to reset all React state
-        window.location.href = "/";
-      } else {
-        setError(data.message || "Login failed");
+        if (data.success) {
+          // Store user data in localStorage for authenticated state
+          localStorage.setItem('user', JSON.stringify(data.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('fullName', data.user.fullName);
+          localStorage.setItem('username', data.user.username);
+          
+          console.log("Successfully logged in, stored user data:", data.user);
+          
+          // Force a complete page reload to reset all React state
+          window.location.href = "/";
+        } else {
+          setError(data.message || "Login failed");
+        }
+      } catch (fetchError) {
+        console.error("Fetch error:", fetchError);
+        setError("Connection error. Please try again.");
       }
     } catch (err) {
       console.error("Login error:", err);
