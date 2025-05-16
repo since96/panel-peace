@@ -235,6 +235,9 @@ export default function ProjectDetails() {
   // Add comment mutation
   const addCommentMutation = useMutation({
     mutationFn: async (data: { content: string; feedbackId: number; userId: number }) => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to add comments");
+      }
       const res = await apiRequest("POST", `/api/comments`, data);
       return res.json();
     },
@@ -380,6 +383,9 @@ export default function ProjectDetails() {
 
   const initializeWorkflowMutation = useMutation({
     mutationFn: async () => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to initialize workflow");
+      }
       const res = await apiRequest("POST", `/api/projects/${id}/initialize-workflow`, {});
       const data = await res.json();
       
@@ -1161,9 +1167,10 @@ export default function ProjectDetails() {
                       </p>
                       <Button 
                         onClick={() => initializeWorkflowMutation.mutate()}
-                        disabled={initializeWorkflowMutation.isPending}
+                        disabled={initializeWorkflowMutation.isPending || !hasEditAccess}
                       >
-                        {initializeWorkflowMutation.isPending ? 'Initializing...' : 'Initialize Workflow'}
+                        {!hasEditAccess ? 'No Edit Permission' : 
+                          (initializeWorkflowMutation.isPending ? 'Initializing...' : 'Initialize Workflow')}
                       </Button>
                     </div>
                   )}
