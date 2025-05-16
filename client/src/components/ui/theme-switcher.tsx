@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
-type Theme = 'default' | 'dark-comic' | 'vintage-press' | 'superhero' | 'manga-studio' | 'golden-age';
+type Theme = 'default' | 'dark-comic' | 'vintage-press' | 'superhero' | 'manga-studio' | 'golden-age' | 'midnight' | 'deep-space';
 
 const themes: { name: string; id: Theme; description: string }[] = [
   { 
@@ -43,6 +43,16 @@ const themes: { name: string; id: Theme; description: string }[] = [
     name: 'Golden Age', 
     id: 'golden-age',
     description: 'Rich, nostalgic colors from the golden age of comics'
+  },
+  { 
+    name: 'Midnight Editor', 
+    id: 'midnight',
+    description: 'Dark blue UI with cyan and magenta accents'
+  },
+  { 
+    name: 'Deep Space', 
+    id: 'deep-space',
+    description: 'Dark purple space theme with cool color highlights'
   }
 ];
 
