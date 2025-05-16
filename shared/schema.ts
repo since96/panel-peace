@@ -42,6 +42,7 @@ export const users = pgTable("users", {
   // Simplified role system
   isEditor: boolean("is_editor").default(false), // Flag to identify editors (editors have accounts with passwords)
   isSiteAdmin: boolean("is_site_admin").default(false), // Top-level site administrator
+  hasEditAccess: boolean("has_edit_access").default(true), // Whether editor can edit content (true) or only view (false)
   
   // Studio membership
   studioId: integer("studio_id"), // Which studio they belong to

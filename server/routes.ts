@@ -837,7 +837,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         projectId,
         assignedBy: currentUserId,
-        assignmentRole: req.body.editorRole || userToAssign.editorRole || 'editor'
+        assignmentRole: 'editor' // Simplified to just 'editor' role
       };
       
       // Create the assignment
@@ -890,10 +890,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if current user has permission to modify this project
-      // Project creator, higher-ranking editor, or self-removal can remove editors
+      // Project creator, site admin, or self-removal can remove editors
       const canRemoveEditors = 
         project.createdBy === currentUserId || 
-        (currentUser.editorRole === 'senior_editor' || currentUser.editorRole === 'editor_in_chief') ||
+        currentUser.isSiteAdmin ||
         (currentUserId === userId); // User can remove themselves
         
       if (!canRemoveEditors) {

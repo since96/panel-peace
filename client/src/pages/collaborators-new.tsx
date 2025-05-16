@@ -124,6 +124,7 @@ export default function Collaborators() {
     socialMedia: "",
     isEditor: false, // Always false - editor role has been removed
     isSiteAdmin: false, // Whether user is a site administrator
+    hasEditAccess: true, // Default to edit access for editors
     assignedProjects: [] as number[],
     role: "",
     roles: [] as string[],
@@ -230,7 +231,8 @@ export default function Collaborators() {
         phone: "",
         socialMedia: "",
         isEditor: false,
-        editorRole: "",
+        isSiteAdmin: false,
+        hasEditAccess: true,
         assignedProjects: [],
         role: "",
         roles: [],
@@ -275,6 +277,7 @@ export default function Collaborators() {
       socialMedia: user.socialMedia || "",
       isEditor: user.isEditor || false,
       isSiteAdmin: user.isSiteAdmin || false,
+      hasEditAccess: user.hasEditAccess !== false, // Default to true if not specified
       assignedProjects: user.assignedProjects || [],
       role: user.role || "",
       roles: user.roles || [],
@@ -945,21 +948,41 @@ export default function Collaborators() {
             
             <div className="grid gap-2">
               <Label>Editor Access Level</Label>
-              <div className="flex items-start space-x-2 p-2 rounded-md hover:bg-slate-50 border border-slate-200">
-                <input 
-                  type="checkbox" 
-                  id="is-site-admin"
-                  checked={newTeamMember.isSiteAdmin}
-                  onChange={(e) => setNewTeamMember({...newTeamMember, isSiteAdmin: e.target.checked})}
-                  className="mt-1"
-                />
-                <div className="grid gap-1">
-                  <Label htmlFor="is-site-admin" className="font-medium">
-                    Site Administrator
-                  </Label>
-                  <p className="text-sm text-slate-500">
-                    Full access to all bullpens and projects, can create new bullpens and manage all users
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-start space-x-2 p-2 rounded-md hover:bg-slate-50 border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="is-site-admin"
+                    checked={newTeamMember.isSiteAdmin}
+                    onChange={(e) => setNewTeamMember({...newTeamMember, isSiteAdmin: e.target.checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1">
+                    <Label htmlFor="is-site-admin" className="font-medium">
+                      Site Administrator
+                    </Label>
+                    <p className="text-sm text-slate-500">
+                      Full access to all bullpens and projects, can create new bullpens and manage all users
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-2 p-2 rounded-md hover:bg-slate-50 border border-slate-200">
+                  <input 
+                    type="checkbox" 
+                    id="has-edit-access"
+                    checked={newTeamMember.hasEditAccess}
+                    onChange={(e) => setNewTeamMember({...newTeamMember, hasEditAccess: e.target.checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1">
+                    <Label htmlFor="has-edit-access" className="font-medium">
+                      Allow Editing
+                    </Label>
+                    <p className="text-sm text-slate-500">
+                      When checked, editor can make changes to projects. Otherwise, they will have view-only access.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
