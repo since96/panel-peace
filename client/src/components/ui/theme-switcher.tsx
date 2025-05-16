@@ -62,11 +62,11 @@ export function ThemeSwitcher() {
   // Apply the theme to the document
   const applyTheme = (themeId: Theme) => {
     // First, remove any existing theme classes
-    document.documentElement.classList.remove(...themes.map(t => `theme-${t.id}`));
+    document.body.classList.remove(...themes.map(t => `theme-${t.id}`));
     
-    // Add the new theme class
+    // Add the new theme class to the body element
     if (themeId !== 'default') {
-      document.documentElement.classList.add(`theme-${themeId}`);
+      document.body.classList.add(`theme-${themeId}`);
     }
     
     // Save the theme preference
