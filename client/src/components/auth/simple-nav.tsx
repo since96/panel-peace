@@ -9,7 +9,7 @@ export function SimpleNav() {
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/simple-login';
+    window.location.href = '/';
   };
 
   return (
