@@ -445,17 +445,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let projects = [];
       
-      // If user is an editor with editor-in-chief role, they can see all projects
-      if (dbUser.isEditor && dbUser.editorRole === "editor_in_chief") {
-        projects = await storage.getProjects();
-      } 
-      // If user is a senior editor, they can see their own projects and editor projects
-      else if (dbUser.isEditor && dbUser.editorRole === "senior_editor") {
-        // Get all projects this editor has access to
-        const editorProjects = await storage.getEditableProjects(dbUser.id);
-        projects = editorProjects;
+      // If user is an editor, they can see all projects they have access to
+      if (dbUser.isEditor) {
+        // If they're a site admin, show all projects
+        if (dbUser.isSiteAdmin) {
+          projects = await storage.getProjects();
+        } else {
+          // Get all projects this editor has access to
+          const editorProjects = await storage.getEditableProjects(dbUser.id);
+          projects = editorProjects;
+        }
       }
-      // Regular editors or talent can only see their assigned projects
+      // Talent or non-editors can only see their assigned projects
       else {
         // Get projects directly assigned to the user
         projects = await storage.getProjectsByUser(dbUser.id);

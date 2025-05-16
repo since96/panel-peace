@@ -48,9 +48,16 @@ export function useAuth() {
       return await axios.post("/api/simple-logout");
     },
     onSuccess: () => {
+      // Clear localStorage to prevent access after logout
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+      
+      // Clear all queries and redirect to login
       queryClient.invalidateQueries({ queryKey: ["/api/simple-user"] });
       queryClient.clear();
-      setLocation("/login");
+      
+      // Force reload the page to prevent browser back button access
+      window.location.href = "/login";
     }
   });
 

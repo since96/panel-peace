@@ -39,9 +39,8 @@ export const users = pgTable("users", {
   phone: text("phone"),
   socialMedia: text("social_media"), // JSON string of social media links
   
-  // Role system
-  isEditor: boolean("is_editor").default(false), // Flag to separate editors from talent
-  editorRole: text("editor_role"), // Editor role type: editor, senior_editor, editor_in_chief
+  // Simplified role system
+  isEditor: boolean("is_editor").default(false), // Flag to identify editors (editors have accounts with passwords)
   isSiteAdmin: boolean("is_site_admin").default(false), // Top-level site administrator
   
   // Studio membership
@@ -65,7 +64,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
   phone: true,
   socialMedia: true,
   isEditor: true,
-  editorRole: true,
   isSiteAdmin: true,
   studioId: true,
   assignedProjects: true,
