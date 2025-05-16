@@ -1376,7 +1376,7 @@ export default function ProjectDetails() {
                         Select one or more team members to work on this step
                       </p>
                       
-                      {/* Legacy single assignee dropdown (keeping for compatibility) */}
+                      {/* Primary assignee dropdown */}
                       <Select 
                         defaultValue={editingStep.assignedTo?.toString() || "unassigned"}
                         onValueChange={(value) => {
@@ -1394,7 +1394,7 @@ export default function ProjectDetails() {
                           {users
                             .filter(user => {
                               // Filter users based on workflow step type
-                              const stepType = editingStep?.stepType?.toLowerCase();
+                              const stepType = editingStep?.stepType?.toLowerCase() || '';
                               
                               // Editors can be assigned to any step
                               if (user.isEditor) return true;
@@ -1403,7 +1403,7 @@ export default function ProjectDetails() {
                               const userRoles = user.roles || [user.role];
                               
                               // Match step type with appropriate roles
-                              if (stepType === 'final_assembled_reader_proof' || stepType === 'final_production') {
+                              if (stepType === 'final_assembled_reader_proof' || stepType === 'final_editorial_pages' || stepType === 'final_production') {
                                 // Only editors can be assigned to these steps
                                 return user.isEditor;
                               } else if (stepType === 'editorial_pages' || stepType === 'final_editorial_pages') {
