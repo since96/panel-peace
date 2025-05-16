@@ -11,7 +11,6 @@ const studioSignupSchema = z.object({
   userData: insertUserSchema.extend({
     password: z.string().min(6),
     isEditor: z.boolean().optional().default(true),
-    editorRole: z.string().optional().default("editor_in_chief"),
   }).nullable(), // Make userData optional to support bullpen creation without an EIC
 });
 
@@ -59,7 +58,7 @@ export const isEditorInChief: RequestHandler = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
     
-    if (!user.isEditor || user.editorRole !== "editor_in_chief") {
+    if (!user.isEditor || user.role !== "editor_in_chief") {
       return res.status(403).json({ message: "Editor-in-chief access required" });
     }
     
@@ -73,8 +72,24 @@ export const isEditorInChief: RequestHandler = async (req, res, next) => {
 // Studio signup endpoint
 export function setupStudioAuth(app: express.Express) {
   // Create a new studio with an Editor-in-Chief
-  app.post("/api/studio/signup", isSiteAdmin, async (req, res) => {
+  app.post("/api/studio/signup", async (req, res) => {
     try {
+      // Check if user is admin
+      const userId = (req as any)?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!user.isSiteAdmin) {
+        console.log(`User ${userId} (${user.username}) attempted to create a bullpen but isn't a site admin`);
+        return res.status(403).json({ message: "Only site administrators can create bullpens" });
+      }
+      
       // Validate the request
       const validationResult = studioSignupSchema.safeParse(req.body);
       if (!validationResult.success) {
@@ -119,11 +134,8 @@ export function setupStudioAuth(app: express.Express) {
           phone: userData.phone,
           socialMedia: userData.socialMedia,
           isEditor: true,
-          editorRole: 'editor_in_chief',
-          // Set defaults for remaining required fields
-          assignedProjects: userData.assignedProjects || [],
-          role: userData.role || "editor_in_chief",
-          roles: userData.roles || ["editor_in_chief"],
+          role: "editor_in_chief",
+          roles: ["editor_in_chief"],
           avatarUrl: userData.avatarUrl || null,
         });
         
