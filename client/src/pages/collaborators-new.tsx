@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Project, User, WorkflowStep } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus, Mail, Calendar, Users, AlertCircle, Phone, Link, Edit, X } from "lucide-react";
+import { Search, UserPlus, Mail, Calendar, Users, AlertCircle, Phone, Link, Edit, X, Trash2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
@@ -116,6 +116,47 @@ export default function Collaborators() {
   // Get toast function
   const { toast } = useToast();
   
+  // Setup talent deletion mutation
+  const deleteTalentMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete talent");
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Talent deleted",
+        description: "The talent has been removed from the system",
+        variant: "default"
+      });
+      
+      // Refetch the users list
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      
+      // Close the dialog
+      setShowDeleteDialog(false);
+      setUserToDelete(null);
+    },
+    onError: (error) => {
+      console.error("Error deleting talent:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete talent",
+        variant: "destructive"
+      });
+    }
+  });
+  
   // Form state for creating a new team member
   const [newTeamMember, setNewTeamMember] = useState({
     fullName: "",
@@ -138,6 +179,8 @@ export default function Collaborators() {
   const [addTeamMemberError, setAddTeamMemberError] = useState("");
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [editUserId, setEditUserId] = useState<number | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   
   // Role selection handling
   const toggleRole = (roleId: string) => {
@@ -376,12 +419,25 @@ export default function Collaborators() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
                                   <h3 className="font-medium text-slate-900 truncate">{user.fullName}</h3>
-                                  <button 
-                                    onClick={() => handleEditUser(user)}
-                                    className="text-slate-400 hover:text-primary transition-colors"
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </button>
+                                  <div className="flex items-center gap-2">
+                                    <button 
+                                      onClick={() => handleEditUser(user)}
+                                      className="text-slate-400 hover:text-primary transition-colors"
+                                      title="Edit talent"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </button>
+                                    <button 
+                                      onClick={() => {
+                                        setUserToDelete(user);
+                                        setShowDeleteDialog(true);
+                                      }}
+                                      className="text-slate-400 hover:text-destructive transition-colors"
+                                      title="Delete talent"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </button>
+                                  </div>
                                 </div>
                                 
                                 <div className="flex flex-wrap gap-1 mt-1">

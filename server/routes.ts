@@ -356,6 +356,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Delete a talent (non-editor user)
+  app.delete("/api/users/:id", isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id, 10);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      // Get the user to verify it's a talent (not an editor)
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Only allow deleting talent (non-editors)
+      if (user.isEditor) {
+        return res.status(403).json({ message: "Cannot delete editor users through this endpoint" });
+      }
+      
+      const success = await storage.deleteUser(userId);
+      
+      if (success) {
+        res.json({ message: "Talent deleted successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to delete talent" });
+      }
+    } catch (error) {
+      console.error("Error deleting talent:", error);
+      res.status(500).json({ message: "Server error deleting talent" });
+    }
+  });
+  
   // Create a new user (team member)
   app.post("/api/users", async (req, res) => {
     try {
