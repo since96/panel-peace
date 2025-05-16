@@ -869,6 +869,8 @@ export default function ProjectDetails() {
                             onClick={() => {
                               setEditing(true);
                             }}
+                            disabled={!hasEditAccess}
+                            title={!hasEditAccess ? "View-only access" : "Adjust the project due date"}
                           >
                             Adjust Project Due Date
                           </Button>
@@ -879,6 +881,8 @@ export default function ProjectDetails() {
                             onClick={() => {
                               initializeWorkflowMutation.mutate();
                             }}
+                            disabled={!hasEditAccess}
+                            title={!hasEditAccess ? "View-only access" : "Recalculate the project schedule"}
                           >
                             Recalculate Schedule
                           </Button>
@@ -1089,6 +1093,8 @@ export default function ProjectDetails() {
                                                   });
                                                   setShowTrackerDialog(true);
                                                 }}
+                                                disabled={!hasEditAccess}
+                                                title={!hasEditAccess ? "View-only access" : "Track progress for this step"}
                                               >
                                                 <CheckCircle className="h-4 w-4 mr-2" />
                                                 Track Progress
