@@ -45,63 +45,51 @@ export default function Landing() {
             Comic Editor Pro
           </h1>
           
-          <div className="h-40 w-full flex flex-col items-center justify-center my-8">
-            <div className="text-center flex flex-col items-center">
-              {/* First line */}
-              <motion.div
-                className="text-2xl md:text-4xl font-medium mb-1"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-              >
-                Fueled by
-              </motion.div>
-              
-              {/* Second line: Comic Editor that changes to Comic Editor HAPPY */}
-              <div className="flex justify-center h-12 relative">
-                {/* Initial "Comic Editor" text that disappears */}
-                {!animationComplete && (
-                  <motion.div
-                    className="text-2xl md:text-4xl font-medium absolute"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ 
-                      opacity: { duration: 0.8, delay: 0.3 }
-                    }}
-                    onAnimationComplete={() => {
-                      // Wait 2 seconds then set animationComplete to true
-                      setTimeout(() => setAnimationComplete(true), 2000);
-                    }}
-                  >
-                    Comic Editor
-                  </motion.div>
-                )}
-                
-                {/* Replacement "Comic Editor HAPPY" that appears */}
-                {animationComplete && (
-                  <motion.div
-                    className="flex items-center justify-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <span className="text-2xl md:text-4xl font-medium">Comic Editor</span>
-                    <span className="text-2xl md:text-4xl font-bold text-accent ml-4">HAPPY</span>
-                  </motion.div>
-                )}
-              </div>
-              
-              {/* Third line */}
-              <motion.div
-                className="text-2xl md:text-4xl font-medium mt-1"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-              >
-                Tears
-              </motion.div>
-            </div>
+          <div className="h-48 w-full flex flex-col items-center justify-center my-8">
+            <motion.div
+              className="text-2xl md:text-4xl font-medium mb-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              Fueled by
+            </motion.div>
+            
+            <motion.div
+              className="mb-4 flex flex-col items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              {!animationComplete ? (
+                <div className="text-2xl md:text-4xl font-medium text-center">
+                  Comic Editor
+                </div>
+              ) : (
+                <div className="text-center flex items-center">
+                  <span className="text-2xl md:text-4xl font-medium">Comic Editor</span>
+                  <span className="text-2xl md:text-4xl font-bold text-accent ml-4">HAPPY</span>
+                </div>
+              )}
+            </motion.div>
+            
+            <motion.div
+              className="text-2xl md:text-4xl font-medium"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+            >
+              Tears
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 1, delay: 2 }}
+              onAnimationComplete={() => {
+                setTimeout(() => setAnimationComplete(true), 500);
+              }}
+            />
           </div>
           
           <p className="text-lg md:text-xl max-w-xl mx-auto mt-12 mb-8 text-slate-700">
