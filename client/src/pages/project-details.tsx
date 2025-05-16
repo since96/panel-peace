@@ -999,7 +999,11 @@ export default function ProjectDetails() {
                                                 variant="outline"
                                                 className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:text-green-800"
                                                 onClick={() => {
-                                                  setSelectedStepForTracker(step);
+                                                  // Always ensure assignees is an array, not null
+                                                  setSelectedStepForTracker({
+                                                    ...step,
+                                                    assignees: step.assignees || []
+                                                  });
                                                   setShowTrackerDialog(true);
                                                 }}
                                               >

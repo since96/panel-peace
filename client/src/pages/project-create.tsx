@@ -139,8 +139,8 @@ export default function ProjectCreate() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       
-      // Use window.location instead of navigate for consistency
-      window.location.href = `/projects/${data.id}`;
+      // Use proper navigation
+      navigate(`/projects/${data.id}`);
     },
     onError: (error: any) => {
       console.error('Project creation error:', error);
@@ -148,12 +148,19 @@ export default function ProjectCreate() {
       // Extract error message if available
       let errorMessage = "Failed to create project. Please try again.";
       
-      // Attempt to extract validation errors from the response
+      // Better error handling for different error types
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Handle both error formats from the server
       if (error.response) {
+        // Format 1: error.response.message
         if (error.response.message) {
           errorMessage = error.response.message;
         }
         
+        // Format 2: error.response.errors (validation errors)
         if (error.response.errors) {
           console.error('Validation errors:', JSON.stringify(error.response.errors));
           
@@ -166,6 +173,11 @@ export default function ProjectCreate() {
             errorMessage = `Please check these fields: ${errorFields.join(', ')}`;
           }
         }
+      }
+      
+      // Special handling for studio ID issues (this is a common error)
+      if (errorMessage.includes("Studio") || errorMessage.toLowerCase().includes("studio id")) {
+        errorMessage = "Studio ID is required. Please try again or contact your administrator.";
       }
       
       toast({
