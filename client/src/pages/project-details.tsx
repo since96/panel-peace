@@ -586,8 +586,9 @@ export default function ProjectDetails() {
                 <h1 className="text-2xl font-bold text-slate-900">{project.title} {project.issue}</h1>
                 {!editing ? (
                   <Badge 
-                    className={`${statusColors.bgLight} ${statusColors.text} cursor-pointer`}
-                    onClick={() => setEditing(true)}
+                    className={`${statusColors.bgLight} ${statusColors.text} ${hasEditAccess ? 'cursor-pointer' : ''}`}
+                    onClick={() => hasEditAccess && setEditing(true)}
+                    title={!hasEditAccess ? "View-only access" : "Click to change status"}
                   >
                     {formatStatusLabel(project.status)}
                   </Badge>
@@ -786,6 +787,8 @@ export default function ProjectDetails() {
                                     variant="ghost"
                                     size="sm"
                                     className="p-1 h-auto text-slate-500 hover:text-red-600 rounded-md hover:bg-slate-100"
+                                    disabled={!hasEditAccess}
+                                    title={!hasEditAccess ? "View-only access" : "Delete link"}
                                     onClick={() => {
                                       // Delete file link
                                       fetch(`/api/file-links/${link.id}`, {
