@@ -39,8 +39,8 @@ export function SimpleProtected({ children }: SimpleProtectedProps) {
     );
   }
 
-  // EMERGENCY BYPASS - temporarily allow all access without authentication
-  const bypassAuth = true;
+  // Don't bypass authentication - this ensures view-only permissions work
+  const bypassAuth = false;
   
   if (!isAuthenticated && !bypassAuth) {
     return (

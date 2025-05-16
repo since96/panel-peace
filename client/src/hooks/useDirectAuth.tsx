@@ -1,29 +1,8 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import axios from 'axios';
 
-// EMERGENCY FIX: Ensure access to admin account
-if (typeof window !== 'undefined') {
-  console.log('EMERGENCY FIX: Setting hardcoded admin user');
-  
-  // Create fallback admin data - this ensures components show something
-  const fallbackUser = {
-    id: 1,
-    username: 'admin',
-    fullName: 'Comic Editor Admin',
-    email: 'admin@example.com',
-    role: 'Editor'
-  };
-  
-  // Set all localStorage values
-  localStorage.setItem('user', JSON.stringify(fallbackUser));
-  localStorage.setItem('isAuthenticated', 'true');
-  localStorage.setItem('fullName', fallbackUser.fullName);
-  localStorage.setItem('username', fallbackUser.username);
-  localStorage.setItem('email', fallbackUser.email);
-  localStorage.setItem('role', fallbackUser.role);
-  
-  console.log('Set emergency admin user data for development');
-}
+// No emergency fix - let users log in with their actual credentials
+// This ensures view-only editors have the correct permissions
 
 // Define user type
 interface User {
@@ -60,35 +39,12 @@ export const DirectAuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       
       try {
-        console.log('EMERGENCY FIX: Getting user from localStorage');
+        // Check for a stored user in localStorage, but don't create a fake one
         const storedUser = localStorage.getItem('user');
         
         if (storedUser) {
           const userData = JSON.parse(storedUser);
-          console.log('Using user from localStorage:', userData);
           setUser(userData);
-        } else {
-          console.log('No user in localStorage, creating fallback');
-          
-          // Create fallback admin data
-          const fallbackUser = {
-            id: 1,
-            username: 'admin',
-            fullName: 'Comic Editor Admin',
-            email: 'admin@example.com',
-            role: 'Editor',
-            isSiteAdmin: true,
-            isEditor: true,
-            editorRole: 'editor_in_chief'
-          };
-          
-          setUser(fallbackUser);
-          localStorage.setItem('user', JSON.stringify(fallbackUser));
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('fullName', fallbackUser.fullName);
-          localStorage.setItem('username', fallbackUser.username);
-          localStorage.setItem('email', fallbackUser.email);
-          localStorage.setItem('role', fallbackUser.role);
         }
       } catch (err) {
         console.log('Authentication error or not logged in');
