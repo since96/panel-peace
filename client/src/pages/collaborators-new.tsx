@@ -1056,18 +1056,17 @@ export default function Collaborators() {
               />
             </div>
             
-            {!isEditingUser && (
-              <div className="grid gap-2">
-                <Label htmlFor="editor-password">Password *</Label>
-                <Input
-                  id="editor-password"
-                  type="password"
-                  placeholder="Secure password"
-                  value={newTeamMember.password}
-                  onChange={(e) => setNewTeamMember({...newTeamMember, password: e.target.value})}
-                />
-              </div>
-            )}
+            {/* Always show password field for Chrome compatibility */}
+            <div className="grid gap-2" style={{display: isEditingUser ? 'none' : 'grid'}}>
+              <Label htmlFor="editor-password">Password *</Label>
+              <Input
+                id="editor-password"
+                type="password"
+                placeholder="Secure password"
+                value={newTeamMember.password}
+                onChange={(e) => setNewTeamMember({...newTeamMember, password: e.target.value})}
+              />
+            </div>
             
             <div className="grid gap-2">
               <Label>Editor Access Level</Label>

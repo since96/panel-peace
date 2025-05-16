@@ -237,29 +237,86 @@ export default function ProjectCreate() {
   const onSubmit = (data: CreateProjectFormValues) => {
     setIsSubmitting(true);
     
-    // Create a copy of the data for the mutation that we can safely modify
-    const submissionData = { ...data };
-    
-    // Ensure we have the studio ID (should be 998 if not provided)
-    console.log(`Final submission with studio ID: ${studioId}`);
-    
-    // Convert date fields to string format for API submission
-    // The server expects strings that it can parse into database timestamps
-    const apiData = {
-      ...submissionData,
-      // Always ensure the studioId is set as a number
-      studioId: Number(studioId),
-      // Convert date fields to ISO strings for the API
-      dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined,
-      plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
-      coverDeadline: submissionData.coverDeadline ? submissionData.coverDeadline.toISOString() : undefined
-    };
-    
-    // Debug the API data
-    console.log("API data being sent:", JSON.stringify(apiData, null, 2));
-    
-    console.log("Creating comic with data:", apiData);
-    createProjectMutation.mutateAsync(apiData);
+    try {
+      // Create a copy of the data for the mutation that we can safely modify
+      const submissionData = { ...data };
+      
+      // Ensure we have the studio ID (should be 998 if not provided)
+      console.log(`Final submission with studio ID: ${studioId}`);
+      
+      // Convert date fields to string format for API submission
+      // The server expects strings that it can parse into database timestamps
+      const apiData = {
+        ...submissionData,
+        // Always ensure the studioId is set as a number
+        studioId: Number(studioId || 0),
+        // Convert date fields to ISO strings for the API
+        dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined,
+        plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
+        coverDeadline: submissionData.coverDeadline ? submissionData.coverDeadline.toISOString() : undefined
+      };
+      
+      // Debug the API data
+      console.log("API data being sent:", JSON.stringify(apiData, null, 2));
+      
+      // Make the request directly to ensure cross-browser compatibility
+      fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
+        },
+        credentials: 'include',
+        body: JSON.stringify(apiData)
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(data => {
+            throw new Error(data.message || `Error creating project (${response.status})`);
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Success handler
+        console.log("Project created successfully:", data);
+        toast({
+          title: "Project created",
+          description: "Your project has been created successfully",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+        navigate(`/projects/${data.id}`);
+      })
+      .catch(error => {
+        // Error handler
+        console.error('Project creation error:', error);
+        
+        // Extract error message if available
+        let errorMessage = "Failed to create project. Please try again.";
+        
+        // Better error handling for different error types
+        if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        toast({
+          title: "Error creating project",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast({
+        title: "Error creating project",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
   };
   
   const handleCancel = () => {
