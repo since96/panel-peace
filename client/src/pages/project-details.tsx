@@ -1329,7 +1329,122 @@ export default function ProjectDetails() {
           </div>
           
           {/* Right sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
+            {/* Comic Book Details */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-medium">Comic Details</CardTitle>
+                  {hasEditAccess && (
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-slate-500"
+                      onClick={() => setEditingMetrics(!editingMetrics)}
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {editingMetrics ? (
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const data = {
+                      id: parseInt(id as string),
+                      interiorPageCount: parseInt(formData.get('interiorPageCount') as string),
+                      coverCount: parseInt(formData.get('coverCount') as string),
+                      fillerPageCount: parseInt(formData.get('fillerPageCount') as string),
+                      issue: formData.get('issue') as string,
+                    };
+                    
+                    // Update project
+                    updateProjectMutation.mutate(data);
+                    setEditingMetrics(false);
+                  }}>
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="interiorPageCount">Interior Pages</Label>
+                        <Input
+                          id="interiorPageCount"
+                          name="interiorPageCount"
+                          type="number"
+                          defaultValue={project?.interiorPageCount || 0}
+                          min={0}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="coverCount">Cover Count</Label>
+                        <Input
+                          id="coverCount"
+                          name="coverCount"
+                          type="number"
+                          defaultValue={project?.coverCount || 0}
+                          min={0}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="fillerPageCount">Filler Pages</Label>
+                        <Input
+                          id="fillerPageCount"
+                          name="fillerPageCount"
+                          type="number"
+                          defaultValue={project?.fillerPageCount || 0}
+                          min={0}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="issue">Issue Number</Label>
+                        <Input
+                          id="issue"
+                          name="issue"
+                          defaultValue={project?.issue || ""}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2 pt-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setEditingMetrics(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit" size="sm">Save</Button>
+                      </div>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                      <div className="text-muted-foreground">Interior Pages:</div>
+                      <div className="font-medium">{project?.interiorPageCount || 0}</div>
+                      
+                      <div className="text-muted-foreground">Cover Count:</div>
+                      <div className="font-medium">{project?.coverCount || 0}</div>
+                      
+                      <div className="text-muted-foreground">Filler Pages:</div>
+                      <div className="font-medium">{project?.fillerPageCount || 0}</div>
+                      
+                      <div className="text-muted-foreground">Total Pages:</div>
+                      <div className="font-medium">
+                        {(project?.interiorPageCount || 0) + (project?.fillerPageCount || 0)}
+                      </div>
+                      
+                      {project?.issue && (
+                        <>
+                          <div className="text-muted-foreground">Issue Number:</div>
+                          <div className="font-medium">{project?.issue}</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
             <ProjectEditors 
               projectId={Number(id)} 
               currentUserId={DEFAULT_USER_ID}
