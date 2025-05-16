@@ -22,7 +22,7 @@ export function SimpleNav() {
         </div>
 
         <div className="flex items-center space-x-4">
-          {isAuthenticated && <ThemeSwitcher />}
+          {/* Theme switcher removed */}
           
           {isAuthenticated ? (
             <>
