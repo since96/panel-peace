@@ -1337,7 +1337,23 @@ export default function ProjectDetails() {
                     max={100} 
                     step={5}
                     className="w-full"
-                    onValueChange={(values) => setEditingStep({...editingStep, progress: values[0]})}
+                    onValueChange={(values) => {
+                      const newProgress = values[0];
+                      let newStatus = editingStep.status;
+                      
+                      // Automatically update status based on progress
+                      if (newProgress > 0 && (editingStep.status === 'not_started' || !editingStep.status)) {
+                        newStatus = 'in_progress';
+                      } else if (newProgress >= 100) {
+                        newStatus = 'completed';
+                      }
+                      
+                      setEditingStep({
+                        ...editingStep, 
+                        progress: newProgress,
+                        status: newStatus
+                      });
+                    }}
                   />
                   <span className="w-12 text-sm">{editingStep.progress}%</span>
                 </div>

@@ -93,10 +93,24 @@ export function getPriorityColor(priority: string): {
 
 export function formatStatusLabel(status: string): string {
   if (!status) return '';
-  return status
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  
+  // Custom labels for specific statuses
+  switch(status) {
+    case 'needs_review':
+      return 'Needs Review';
+    case 'in_progress':
+      return 'In Progress';
+    case 'completed':
+      return 'Completed';
+    case 'delayed':
+      return 'Delayed';
+    default:
+      // Default formatting for other statuses
+      return status
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+  }
 }
 
 export const DEFAULT_USER_ID = 1;
