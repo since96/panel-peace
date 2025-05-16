@@ -598,8 +598,8 @@ export default function ProjectDetails() {
   return (
     <>
       <Helmet>
-        <title>{`${project.title} ${project.issue} - Comic Editor Pro`}</title>
-        <meta name="description" content={`Manage and collaborate on ${project.title} ${project.issue}. View progress, feedback, and assets for this comic book project.`} />
+        <title>{`${editingTitle ? editedTitle : project.title} ${project.issue} - Panel Peace`}</title>
+        <meta name="description" content={`Manage and collaborate on ${editingTitle ? editedTitle : project.title} ${project.issue}. View progress, feedback, and assets for this comic book project.`} />
       </Helmet>
       
       {!hasEditAccess && (
@@ -624,13 +624,69 @@ export default function ProjectDetails() {
               <span className="text-primary text-sm">Projects</span>
             </Button>
             <span className="text-slate-400">/</span>
-            <span className="text-sm">{project.title} {project.issue}</span>
+            <span className="text-sm">{editingTitle ? editedTitle : project.title} {project.issue}</span>
           </div>
           
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-slate-900">{project.title} {project.issue}</h1>
+                {!editingTitle ? (
+                  <h1 
+                    className={`text-2xl font-bold text-slate-900 ${hasEditAccess ? 'cursor-pointer' : ''}`}
+                    onClick={() => {
+                      if (hasEditAccess) {
+                        setEditingTitle(true);
+                        setEditedTitle(project.title);
+                      }
+                    }}
+                    title={hasEditAccess ? "Click to edit title" : "View-only access"}
+                  >
+                    {project.title} {project.issue}
+                  </h1>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="text-xl font-bold h-10 w-[300px]"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          updateProjectMutation.mutate({
+                            id: project.id,
+                            title: editedTitle
+                          });
+                          setEditingTitle(false);
+                        } else if (e.key === 'Escape') {
+                          setEditingTitle(false);
+                          setEditedTitle(project.title);
+                        }
+                      }}
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={() => {
+                        updateProjectMutation.mutate({
+                          id: project.id,
+                          title: editedTitle
+                        });
+                        setEditingTitle(false);
+                      }}
+                    >
+                      Save
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        setEditingTitle(false);
+                        setEditedTitle(project.title);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
                 {!editing ? (
                   <Badge 
                     className={`${statusColors.bgLight} ${statusColors.text} ${hasEditAccess ? 'cursor-pointer' : ''}`}
