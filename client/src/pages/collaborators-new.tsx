@@ -274,7 +274,7 @@ export default function Collaborators() {
       phone: user.phone || "",
       socialMedia: user.socialMedia || "",
       isEditor: user.isEditor || false,
-      editorRole: user.editorRole || "",
+      isSiteAdmin: user.isSiteAdmin || false,
       assignedProjects: user.assignedProjects || [],
       role: user.role || "",
       roles: user.roles || [],

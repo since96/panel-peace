@@ -173,8 +173,8 @@ async function createDefaultAdmin() {
         fullName: "Admin User",
         email: "admin@example.com",
         isEditor: true,
-        role: "editor",
-        editorRole: "editor_in_chief"
+        isSiteAdmin: true,
+        role: "editor"
       });
       
       console.log(`Default admin user created with ID: ${admin.id}`);
