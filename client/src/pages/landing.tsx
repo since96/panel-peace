@@ -83,7 +83,8 @@ export default function Landing() {
                   
                   {/* "HAPPY" text that typed out letter by letter */}
                   <motion.div
-                    className="text-2xl md:text-4xl font-bold text-accent inline-block ml-1"
+                    className="text-2xl md:text-4xl font-bold text-accent inline-block ml-0"
+                    style={{ marginLeft: '4px' }}
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ 
                       opacity: 1,
