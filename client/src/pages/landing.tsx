@@ -56,7 +56,7 @@ export default function Landing() {
                   transition={{ duration: 0.8 }}
                   key="line1"
                 >
-                  Fueled by Comic Book
+                  Fueled by
                 </motion.div>
                 
                 <motion.div
@@ -66,7 +66,7 @@ export default function Landing() {
                   transition={{ duration: 0.8, delay: 0.3 }}
                   key="line2"
                 >
-                  Editor
+                  Comic Editor
                 </motion.div>
                 
                 <motion.div
@@ -92,7 +92,7 @@ export default function Landing() {
                   
                   {/* "HAPPY" text that appears where "Tears" was */}
                   <motion.span
-                    className="text-accent font-bold absolute left-0 right-0"
+                    className="text-accent font-bold absolute left-0 right-0 mx-auto text-center"
                     initial={{ opacity: 0, scale: 0.7 }}
                     animate={{ 
                       opacity: 1, 
