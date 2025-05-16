@@ -311,6 +311,8 @@ export const insertWorkflowStepSchema = createInsertSchema(workflowSteps).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  pageCount: z.number().optional(),
 });
 
 export type WorkflowStep = typeof workflowSteps.$inferSelect;

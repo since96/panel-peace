@@ -1251,20 +1251,22 @@ export class MemStorage implements IStorage {
     // Calculate due dates for each stage based on project metrics and user-defined deadlines
     const today = new Date();
     
-    // Get metrics with defaults if null
-    // Use explicit null check to ensure 0 is treated as a valid value
-    const coverCount = project.coverCount !== null ? project.coverCount : 1;
-    const interiorPageCount = project.interiorPageCount !== null ? project.interiorPageCount : 22; // Default to 22 pages only if null
-    const fillerPageCount = project.fillerPageCount !== null ? project.fillerPageCount : 0;
-    const pencilerPagesPerWeek = project.pencilerPagesPerWeek !== null ? project.pencilerPagesPerWeek : 5;
-    const inkerPagesPerWeek = project.inkerPagesPerWeek !== null ? project.inkerPagesPerWeek : 7;
-    const coloristPagesPerWeek = project.coloristPagesPerWeek !== null ? project.coloristPagesPerWeek : 10;
-    const lettererPagesPerWeek = project.lettererPagesPerWeek !== null ? project.lettererPagesPerWeek : 15;
-    const pencilBatchSize = project.pencilBatchSize !== null ? project.pencilBatchSize : 5;
-    const inkBatchSize = project.inkBatchSize !== null ? project.inkBatchSize : 5;
-    const approvalDays = project.approvalDays !== null ? project.approvalDays : 2;
+    // Get metrics with defaults if null - safe handling with proper type checking
+    const coverCount = (project.coverCount === null || project.coverCount === undefined) ? 1 : project.coverCount;
+    const interiorPageCount = (project.interiorPageCount === null || project.interiorPageCount === undefined) ? 22 : project.interiorPageCount;
+    const fillerPageCount = (project.fillerPageCount === null || project.fillerPageCount === undefined) ? 0 : project.fillerPageCount;
+    const pencilerPagesPerWeek = (project.pencilerPagesPerWeek === null || project.pencilerPagesPerWeek === undefined) ? 5 : project.pencilerPagesPerWeek;
+    const inkerPagesPerWeek = (project.inkerPagesPerWeek === null || project.inkerPagesPerWeek === undefined) ? 7 : project.inkerPagesPerWeek;
+    const coloristPagesPerWeek = (project.coloristPagesPerWeek === null || project.coloristPagesPerWeek === undefined) ? 10 : project.coloristPagesPerWeek;
+    const lettererPagesPerWeek = (project.lettererPagesPerWeek === null || project.lettererPagesPerWeek === undefined) ? 15 : project.lettererPagesPerWeek;
+    const pencilBatchSize = (project.pencilBatchSize === null || project.pencilBatchSize === undefined) ? 5 : project.pencilBatchSize;
+    const inkBatchSize = (project.inkBatchSize === null || project.inkBatchSize === undefined) ? 5 : project.inkBatchSize;
+    const approvalDays = (project.approvalDays === null || project.approvalDays === undefined) ? 2 : project.approvalDays;
     
-    console.log("Project interior page count:", project.interiorPageCount, "Using:", interiorPageCount);
+    console.log("Project values:");
+    console.log("- Interior page count:", project.interiorPageCount, "Using:", interiorPageCount);
+    console.log("- Cover count:", project.coverCount, "Using:", coverCount);
+    console.log("- Filler page count:", project.fillerPageCount, "Using:", fillerPageCount);
     
     // Create a helper function to add days to a date
     const addDays = (date: Date, days: number): Date => {
@@ -1291,6 +1293,14 @@ export class MemStorage implements IStorage {
     const letterTotalDays = Math.ceil(interiorPageCount / (lettererPagesPerWeek / 7));
     const editorialDuration = Math.ceil(fillerPageCount / 5) * 7; // Assuming 5 filler pages per week
     const productionDuration = 7; // Final assembly typically takes a week
+    
+    console.log("Calculated durations:");
+    console.log("- Interior page count:", interiorPageCount);
+    console.log("- Pencil total days:", pencilTotalDays, "at", pencilerPagesPerWeek, "pages per week");
+    console.log("- Ink total days:", inkTotalDays, "at", inkerPagesPerWeek, "pages per week");
+    console.log("- Color total days:", colorTotalDays, "at", coloristPagesPerWeek, "pages per week");
+    console.log("- Letter total days:", letterTotalDays, "at", lettererPagesPerWeek, "pages per week");
+    console.log("- Editorial duration (days):", editorialDuration, "for", fillerPageCount, "filler pages");
     
     // Calculate time needed for first batch
     const daysForFirstPencilBatch = Math.ceil(pencilBatchSize / (pencilerPagesPerWeek / 7));
