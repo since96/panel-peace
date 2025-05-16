@@ -46,23 +46,72 @@ export default function Landing() {
           </h1>
           
           <div className="h-40 w-full flex flex-col items-center justify-center my-8">
-            <div className="text-center flex flex-col items-center space-y-1">
-              {/* First line */}
-              <div className="text-2xl md:text-4xl font-medium pb-1">
-                Fueled by
+            <AnimatePresence>
+              <div className="text-center flex flex-col items-center">
+                {/* First line */}
+                <motion.div
+                  className="text-2xl md:text-4xl font-medium mb-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  key="line1"
+                >
+                  Fueled by
+                </motion.div>
+                
+                {/* Second line: Container for Comic Editor + HAPPY */}
+                <div className="flex items-center justify-center h-12 relative">
+                  {/* Comic Editor text */}
+                  <motion.div
+                    className="text-2xl md:text-4xl font-medium"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: 0,
+                      x: animationComplete ? -10 : 0 // Subtle shift left when HAPPY appears
+                    }}
+                    transition={{ 
+                      opacity: { duration: 0.8, delay: 0.3 },
+                      y: { duration: 0.8, delay: 0.3 },
+                      x: { duration: 0.8, delay: 2.5, ease: "easeInOut" }
+                    }}
+                    key="comic-editor"
+                  >
+                    Comic Editor
+                  </motion.div>
+                  
+                  {/* HAPPY text with animation */}
+                  <motion.div
+                    className="text-2xl md:text-4xl font-bold text-accent ml-3"
+                    initial={{ opacity: 0, width: 0, scaleX: 0 }}
+                    animate={{ 
+                      opacity: 1,
+                      width: "auto",
+                      scaleX: 1
+                    }}
+                    transition={{ 
+                      opacity: { duration: 0.5, delay: 2.7 },
+                      scaleX: { duration: 0.8, delay: 2.5, ease: "easeOut" },
+                      onComplete: () => setAnimationComplete(true)
+                    }}
+                    key="happy-text"
+                  >
+                    HAPPY
+                  </motion.div>
+                </div>
+                
+                {/* Third line */}
+                <motion.div
+                  className="text-2xl md:text-4xl font-medium mt-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.6 }}
+                  key="line3"
+                >
+                  Tears
+                </motion.div>
               </div>
-              
-              {/* Second line */}
-              <div className="flex items-center justify-center">
-                <div className="text-2xl md:text-4xl font-medium">Comic Editor</div>
-                <div className="text-2xl md:text-4xl font-bold text-accent ml-4">HAPPY</div>
-              </div>
-              
-              {/* Third line */}
-              <div className="text-2xl md:text-4xl font-medium pt-1">
-                Tears
-              </div>
-            </div>
+            </AnimatePresence>
           </div>
           
           <p className="text-lg md:text-xl max-w-xl mx-auto mt-12 mb-8 text-slate-700">
