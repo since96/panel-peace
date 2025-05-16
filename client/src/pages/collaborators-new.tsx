@@ -1019,7 +1019,8 @@ export default function Collaborators() {
                     fullName: "",
                     email: "",
                     isEditor: false,
-                    editorRole: "",
+                    isSiteAdmin: false,
+                    hasEditAccess: true,
                     assignedProjects: [],
                     username: "talent_" + Date.now(),
                     password: ""

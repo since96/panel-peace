@@ -172,7 +172,8 @@ export default function ProjectEditors({ projectId, currentUserId, userRole }: P
                       {availableEditors.map((user) => (
                         <SelectItem key={user.id} value={user.id.toString()}>
                           {user.fullName || user.username}
-                          {user.editorRole && ` (${user.editorRole.replace('_', ' ')})`}
+                          {user.isSiteAdmin && ` (Site Admin)`}
+                          {user.hasEditAccess === false && ` (View Only)`}
                         </SelectItem>
                       ))}
                       {availableEditors.length === 0 && (
