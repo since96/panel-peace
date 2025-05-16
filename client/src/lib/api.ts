@@ -2,25 +2,46 @@
  * API utility functions for making authenticated requests
  */
 
+// Function to get the current JWT token from cookies
+function getJwtFromCookies() {
+  const cookies = document.cookie.split(';');
+  const tokenCookie = cookies.find(cookie => cookie.trim().startsWith('jwt='));
+  
+  if (tokenCookie) {
+    return tokenCookie.split('=')[1].trim();
+  }
+  
+  // Try to get session token if JWT is not in cookies
+  const sessionCookie = cookies.find(cookie => cookie.trim().startsWith('connect.sid='));
+  if (sessionCookie) {
+    return sessionCookie.split('=')[1].trim();
+  }
+  
+  return null;
+}
+
 /**
  * Make an authenticated API request with proper error handling
  */
 export async function apiRequest(url: string, options: RequestInit = {}) {
   try {
-    // Always include credentials for cookies
+    // Add default headers and ensure credentials are included
     const fetchOptions: RequestInit = {
       ...options,
-      credentials: 'include',
+      credentials: 'include',  // This is critical for sending cookies with the request
       headers: {
         ...options.headers,
         'Content-Type': 'application/json',
       }
     };
     
-    // Add authorization header if we have a token in localStorage
-    const user = localStorage.getItem('user');
-    const token = localStorage.getItem('auth_token');
+    // Get JWT token from cookies
+    const jwtToken = getJwtFromCookies();
     
+    // Explicitly check for authentication token in localStorage
+    const token = localStorage.getItem('auth_token') || jwtToken;
+    
+    // Add Authorization header if token exists
     if (token) {
       fetchOptions.headers = {
         ...fetchOptions.headers,

@@ -75,37 +75,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication status route
   app.get("/api/auth/user", async (req: any, res) => {
     try {
-      console.log("Fetching authenticated user - bypassed auth");
-      
-      // TEMP: No authentication - use admin user
-      const userId = 1;
-      
-      console.log("Using admin user ID:", userId);
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        console.error("User not found in database");
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // TEMPORARY FIX: Ensure admin is site admin for development
-      if (user.id === 1 && !user.isSiteAdmin) {
-        await storage.updateUser(1, {
-          isSiteAdmin: true
-        });
-        // Fetch updated user
-        const updatedUser = await storage.getUser(1);
-        if (updatedUser) {
-          return res.json(updatedUser);
+      // Check if user is logged in via session
+      if (req.session && req.session.userId) {
+        const userId = req.session.userId;
+        console.log("Found userId in session:", userId);
+        const user = await storage.getUser(userId);
+        
+        if (!user) {
+          console.error("User not found in database");
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        // TEMPORARY FIX: Ensure admin is site admin for development
+        if (user.id === 1 && !user.isSiteAdmin) {
+          await storage.updateUser(1, {
+            isSiteAdmin: true
+          });
+          // Fetch updated user
+          const updatedUser = await storage.getUser(1);
+          if (updatedUser) {
+            const safeUser = { ...updatedUser } as any;
+            if (safeUser.password) delete safeUser.password;
+            return res.json(safeUser);
+          }
+        }
+        
+        // Create a safe user object without password
+        const safeUser = { ...user } as any;
+        if (safeUser.password) delete safeUser.password;
+        
+        console.log("User found:", user.username, "isSiteAdmin:", user.isSiteAdmin);
+        return res.json(safeUser);
+      } else {
+        // For development, auto-login as admin if no session exists
+        console.log("No user in session - auto-logging in as admin for development");
+        const user = await storage.getUserByUsername('admin');
+        if (user) {
+          // Set session
+          if (req.session) {
+            req.session.userId = user.id;
+          }
+          
+          // Create a safe user object without password
+          const safeUser = { ...user } as any;
+          if (safeUser.password) delete safeUser.password;
+          
+          return res.json(safeUser);
+        } else {
+          return res.status(401).json({ message: "Not authenticated" });
         }
       }
-      
-      // Create a safe user object without password
-      const safeUser = { ...user } as any;
-      if (safeUser.password) delete safeUser.password;
-      
-      console.log("User found:", user.username, "isSiteAdmin:", user.isSiteAdmin);
-      res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
