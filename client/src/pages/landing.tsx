@@ -48,45 +48,67 @@ export default function Landing() {
           <div className="relative h-24 w-full max-w-2xl overflow-hidden my-8">
             <AnimatePresence>
               {/* First phase: "Fueled by Comic Book Editor Tears" */}
-              <motion.h2 
-                className="text-2xl md:text-4xl font-medium tracking-wide absolute left-0 right-0"
+              <motion.div
+                className="text-2xl md:text-4xl font-medium tracking-wide absolute left-0 right-0 flex justify-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
                 exit={{ opacity: 0 }}
                 key="initial-text"
               >
-                Fueled
-                <motion.span 
-                  style={{ display: "inline" }}
-                >
-                  {" by "}
-                </motion.span>
-                <motion.span 
+                <motion.span
                   style={{ display: "inline-block" }}
-                  initial={{ margin: "0 0.25rem" }}
-                  animate={{ margin: "0 2.5rem" }}
+                  initial={{ x: 0 }}
+                  animate={{ x: -70 }}
                   transition={{ 
                     delay: 3,
-                    duration: 2, 
+                    duration: 1.5, 
                     ease: "easeInOut",
                   }}
                 >
-                  Comic Book Editor
+                  Fueled by Comic Book Editor
                 </motion.span>
-                Tears
-              </motion.h2>
+
+                {/* Middle space for HAPPY to appear */}
+                <motion.span 
+                  style={{ 
+                    visibility: "hidden", 
+                    width: "0px",
+                    display: "inline-block" 
+                  }}
+                  animate={{ width: "140px" }}
+                  transition={{ 
+                    delay: 3,
+                    duration: 1.5, 
+                    ease: "easeInOut",
+                  }}
+                >
+                </motion.span>
+
+                <motion.span
+                  style={{ display: "inline-block" }}
+                  initial={{ x: 0 }}
+                  animate={{ x: 70 }}
+                  transition={{ 
+                    delay: 3,
+                    duration: 1.5, 
+                    ease: "easeInOut",
+                  }}
+                >
+                  Tears
+                </motion.span>
+              </motion.div>
 
               {/* Second phase: Add "HAPPY" */}
               <motion.span
                 className="text-2xl md:text-4xl font-bold text-accent absolute left-[50%] transform -translate-x-[50%]"
-                initial={{ opacity: 0, y: 0 }}
+                initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ 
                   opacity: 1, 
-                  y: 0,
+                  scale: 1
                 }}
                 transition={{ 
-                  delay: 6, 
+                  delay: 5, 
                   duration: 0.8,
                   onComplete: () => setAnimationComplete(true)
                 }}
