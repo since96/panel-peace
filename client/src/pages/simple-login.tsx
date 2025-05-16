@@ -108,10 +108,13 @@ export function SimpleLogin() {
               />
             </div>
             
-            <div className="text-sm text-gray-500">
-              Default admin login:<br />
-              Username: admin<br />
-              Password: admin123
+            <div className="my-4 p-4 border-2 border-amber-300 rounded-md bg-amber-50 text-center">
+              <p className="text-base font-bold text-amber-800 mb-2">USE THIS LOGIN INFO FOR YOUR TEST DRIVE</p>
+              <p className="text-lg font-medium text-gray-700">
+                Default admin login:<br />
+                Username: <span className="font-bold">admin</span><br />
+                Password: <span className="font-bold">admin123</span>
+              </p>
             </div>
           </CardContent>
           
