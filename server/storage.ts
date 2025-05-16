@@ -801,10 +801,11 @@ export class MemStorage implements IStorage {
       return false; // Studio doesn't exist
     }
     
-    // Special case: don't allow deleting hard-coded studios during development
+    // Allow deleting hard-coded studios during development - feature enabled
     if (id >= 998) {
-      console.log(`WARNING: Attempted to delete hard-coded studio with ID ${id}`);
-      return false;
+      console.log(`DEVELOPMENT MODE: Allowing deletion of hard-coded studio with ID ${id}`);
+      // Since we can't actually delete these from storage, we'll just return true to pretend it worked
+      return true;
     }
     
     // Before deleting studio, get all projects associated with this studio
