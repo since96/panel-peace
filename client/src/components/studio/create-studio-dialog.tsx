@@ -104,7 +104,7 @@ export function CreateStudioDialog() {
       }
     },
     onSuccess: (data) => {
-      console.log('Studio created successfully:', data);
+      console.log('Bullpen created successfully:', data);
       
       // Reset form and close dialog
       form.reset();
@@ -113,8 +113,8 @@ export function CreateStudioDialog() {
       
       // Show success toast
       toast({
-        title: "Studio created",
-        description: "The studio has been created successfully.",
+        title: "Bullpen created",
+        description: "The bullpen has been created successfully.",
       });
       
       // Force invalidate studios query to refresh the list
@@ -128,7 +128,7 @@ export function CreateStudioDialog() {
       // Show detailed error toast
       toast({
         variant: "destructive",
-        title: "Failed to create studio",
+        title: "Failed to create bullpen",
         description: error.response?.data?.message || error.message || "Please try again later.",
       });
     },
@@ -154,7 +154,7 @@ export function CreateStudioDialog() {
       <DialogTrigger asChild>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Create Studio
+          Create Bullpen
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
@@ -210,7 +210,7 @@ export function CreateStudioDialog() {
                         />
                       </FormControl>
                       <FormDescription>
-                        A brief description of the studio and its focus.
+                        A brief description of the bullpen and its focus.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -227,7 +227,7 @@ export function CreateStudioDialog() {
                         <Input placeholder="https://example.com/logo.png" {...field} />
                       </FormControl>
                       <FormDescription>
-                        A URL to your studio's logo image.
+                        A URL to your bullpen's logo image.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -344,7 +344,7 @@ export function CreateStudioDialog() {
                     {mutation.isPending && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
-                    Create Studio
+                    Create Bullpen
                   </Button>
                 </div>
               </TabsContent>

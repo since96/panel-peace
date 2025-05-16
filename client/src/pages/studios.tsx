@@ -56,7 +56,7 @@ export default function StudiosPage() {
             {
               id: 999,
               name: "Placeholder Bullpen",
-              description: "This studio is a placeholder for development",
+              description: "This bullpen is a placeholder for development",
               active: true,
               createdAt: new Date().toISOString(),
               createdBy: 1
@@ -108,11 +108,11 @@ export default function StudiosPage() {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-          <p>Loading studios...</p>
+          <p>Loading bullpens...</p>
         </div>
       ) : error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          <p>Error loading studios. Please try again.</p>
+          <p>Error loading bullpens. Please try again.</p>
         </div>
       ) : studios.length === 0 ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-10 text-center">
