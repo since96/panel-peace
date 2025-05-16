@@ -944,23 +944,24 @@ export default function Collaborators() {
             )}
             
             <div className="grid gap-2">
-              <Label>Editor Role *</Label>
-              <RadioGroup 
-                value={newTeamMember.editorRole} 
-                onValueChange={(value) => setNewTeamMember({...newTeamMember, editorRole: value})}
-              >
-                {editorRoles.map(role => (
-                  <div key={role.id} className="flex items-start space-x-2 p-2 rounded-md hover:bg-slate-50">
-                    <RadioGroupItem value={role.id} id={`editor-role-${role.id}`} className="mt-1" />
-                    <div className="grid gap-1">
-                      <Label htmlFor={`editor-role-${role.id}`} className="font-medium">
-                        {role.label}
-                      </Label>
-                      <p className="text-sm text-slate-500">{role.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </RadioGroup>
+              <Label>Editor Access Level</Label>
+              <div className="flex items-start space-x-2 p-2 rounded-md hover:bg-slate-50 border border-slate-200">
+                <input 
+                  type="checkbox" 
+                  id="is-site-admin"
+                  checked={newTeamMember.isSiteAdmin}
+                  onChange={(e) => setNewTeamMember({...newTeamMember, isSiteAdmin: e.target.checked})}
+                  className="mt-1"
+                />
+                <div className="grid gap-1">
+                  <Label htmlFor="is-site-admin" className="font-medium">
+                    Site Administrator
+                  </Label>
+                  <p className="text-sm text-slate-500">
+                    Full access to all bullpens and projects, can create new bullpens and manage all users
+                  </p>
+                </div>
+              </div>
             </div>
             
             {/* Project assignment section removed - editors will be assigned to projects later */}
