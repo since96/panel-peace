@@ -1317,6 +1317,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
       }
+      
+      // If progress is being updated, automatically update status based on progress value
+      if (requestData.progress !== undefined) {
+        // Only modify status if it's not explicitly set in the request or if it's currently "not_started"
+        if (!requestData.status || workflowStep.status === 'not_started') {
+          // Automatically set appropriate status based on progress
+          if (requestData.progress > 0 && requestData.progress < 100) {
+            requestData.status = 'in_progress';
+          } else if (requestData.progress >= 100) {
+            requestData.status = 'completed';
+          }
+        }
+      }
 
       const updateSchema = insertWorkflowStepSchema.partial();
       const parsedData = updateSchema.safeParse(requestData);
