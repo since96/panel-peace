@@ -1760,7 +1760,7 @@ export default function ProjectDetails() {
                   <SelectValue placeholder="Select a workflow step (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  {workflowSteps?.map((step) => (
+                  {workflowSteps && workflowSteps.map((step) => (
                     <SelectItem key={step.id} value={step.id.toString()}>
                       {step.title}
                     </SelectItem>
@@ -1792,7 +1792,7 @@ export default function ProjectDetails() {
                   return;
                 }
                 
-                // Must have a workflow step ID
+                // Check if workflow step is selected
                 if (!selectedWorkflowStepForLink) {
                   if (workflowSteps && workflowSteps.length > 0) {
                     // Auto-select first step if none selected
@@ -1807,7 +1807,7 @@ export default function ProjectDetails() {
                     addFileLinkMutation.mutate({
                       stepId: firstStepId,
                       url: newFileLink,
-                      description: null
+                      description: ""
                     });
                     
                     // Close the dialog
@@ -1828,7 +1828,7 @@ export default function ProjectDetails() {
                 addFileLinkMutation.mutate({
                   stepId: selectedWorkflowStepForLink,
                   url: newFileLink,
-                  description: null
+                  description: ""
                 });
                 
                 // Close dialog
