@@ -33,6 +33,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>; // Delete a user/talent
   upsertUser(userData: Partial<InsertUser> & { id: string | number }): Promise<User>;
   getUsersByStudio(studioId: number): Promise<User[]>; // Get all users in a studio
   getUsersByRole(role: string, studioId?: number): Promise<User[]>; // Get users by role, optionally filtered by studio
@@ -339,6 +340,38 @@ export class MemStorage implements IStorage {
     
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    const user = await this.getUser(id);
+    
+    // Check if user exists
+    if (!user) {
+      return false;
+    }
+    
+    // Don't allow deletion of the admin user (ID 1)
+    if (id === 1) {
+      return false;
+    }
+    
+    // Check if the user is an editor (don't allow deletion of editors from this method)
+    if (user.isEditor) {
+      return false; // Only allow deletion of talent, not editors
+    }
+    
+    // Remove the user from all projects they're assigned to
+    // Get all collaborator records for this user
+    const userCollaborations = Array.from(this.collaborators.values())
+      .filter(collab => collab.userId === id);
+    
+    // Delete each collaboration
+    for (const collab of userCollaborations) {
+      this.collaborators.delete(collab.id);
+    }
+    
+    // Delete the user
+    return this.users.delete(id);
   }
   
   // Check if user is a site admin
