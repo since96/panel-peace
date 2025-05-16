@@ -259,7 +259,57 @@ export default function ProjectCreate() {
       // Debug the API data
       console.log("API data being sent:", JSON.stringify(apiData, null, 2));
       
-      // Make the request directly to ensure cross-browser compatibility
+      // Check if we're in Chrome
+      if (window.navigator.userAgent.indexOf("Chrome") > -1) {
+        console.log("[CHROME FALLBACK] Using XMLHttpRequest for Chrome compatibility");
+        
+        // Use XHR for Chrome
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/projects', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.withCredentials = true;
+        
+        // Handle response
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            // Success
+            const data = JSON.parse(xhr.responseText);
+            console.log("Project created successfully:", data);
+            toast({
+              title: "Project created",
+              description: "Your project has been created successfully",
+            });
+            queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+            navigate(`/projects/${data.id}`);
+          } else {
+            // Error
+            console.error(`Error creating project: ${xhr.status}`);
+            toast({
+              title: "Error creating project",
+              description: "Failed to create project. Please try again.",
+              variant: "destructive",
+            });
+          }
+          setIsSubmitting(false);
+        };
+        
+        // Handle network errors
+        xhr.onerror = function() {
+          console.error("Network error during project creation");
+          toast({
+            title: "Error creating project",
+            description: "Network error. Please check your connection and try again.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+        };
+        
+        // Send the request
+        xhr.send(JSON.stringify(apiData));
+        return; // Don't continue to fetch for Chrome
+      }
+      
+      // For Safari, continue with fetch
       fetch('/api/projects', {
         method: 'POST',
         headers: {

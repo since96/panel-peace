@@ -117,33 +117,93 @@ export default function Collaborators() {
   // Get toast function
   const { toast } = useToast();
   
-  // Setup talent deletion mutation
+  // A direct deletion function that doesn't use mutation
+  const deleteTalentDirectly = async (userId: number): Promise<void> => {
+    try {
+      console.log(`[CHROME DEBUG] Starting direct deletion of talent with ID: ${userId}`);
+      
+      // Use XHR for maximum compatibility
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('DELETE', `/api/users/${userId}`, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        
+        // Add authorization if available
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        }
+        
+        xhr.withCredentials = true;
+        
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            console.log(`[CHROME DEBUG] Delete successful: ${xhr.responseText}`);
+            toast({
+              title: "Talent deleted",
+              description: "The talent has been removed from the system",
+              variant: "default"
+            });
+            
+            // Refetch the users list
+            queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+            
+            // Close the dialog
+            setShowDeleteDialog(false);
+            setUserToDelete(null);
+            
+            resolve();
+          } else {
+            console.error(`[CHROME DEBUG] Delete failed with status ${xhr.status}: ${xhr.responseText}`);
+            let errorMessage = "Failed to delete talent";
+            try {
+              const errorData = JSON.parse(xhr.responseText);
+              if (errorData.message) {
+                errorMessage = errorData.message;
+              }
+            } catch (e) {
+              // If parsing fails, use default message
+            }
+            
+            toast({
+              title: "Error",
+              description: errorMessage,
+              variant: "destructive"
+            });
+            
+            reject(new Error(errorMessage));
+          }
+        };
+        
+        xhr.onerror = function() {
+          console.error("[CHROME DEBUG] Network error during talent deletion");
+          toast({
+            title: "Error",
+            description: "Network error while deleting talent",
+            variant: "destructive"
+          });
+          reject(new Error("Network error"));
+        };
+        
+        xhr.send();
+      });
+    } catch (error) {
+      console.error("[CHROME DEBUG] Unexpected error in talent deletion:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  // Setup talent deletion mutation (keeping for compatibility with other code)
   const deleteTalentMutation = useMutation({
     mutationFn: async (userId: number) => {
-      console.log("Deleting talent with ID:", userId);
-      
-      // Use direct fetch to avoid potential browser-specific dynamic import issues
-      const token = localStorage.getItem('auth_token') || '';
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ''
-        },
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (e) {
-          throw new Error(`Failed to delete talent (${response.status})`);
-        }
-        throw new Error(errorData.message || `Failed to delete talent (${response.status})`);
-      }
-      
-      return await response.json();
+      // We'll use our direct function instead
+      await deleteTalentDirectly(userId);
+      return { success: true };
     },
     onSuccess: () => {
       toast({
@@ -1194,7 +1254,20 @@ export default function Collaborators() {
               variant="destructive"
               onClick={() => {
                 if (userToDelete) {
+                  // Safari will use this mutation path
                   deleteTalentMutation.mutate(userToDelete.id);
+                  
+                  // Chrome compatibility fallback
+                  if (window.navigator.userAgent.indexOf("Chrome") > -1) {
+                    // Create a simple XMLHttpRequest for Chrome
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('DELETE', `/api/users/${userToDelete.id}`, true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.withCredentials = true;
+                    
+                    // Just send the request - the mutation will handle the UI updates
+                    xhr.send();
+                  }
                 }
               }}
               disabled={deleteTalentMutation.isPending}
