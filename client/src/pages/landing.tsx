@@ -45,74 +45,19 @@ export default function Landing() {
             Comic Editor Pro
           </h1>
           
-          <div className="relative h-36 w-full max-w-2xl overflow-visible my-8">
-            <AnimatePresence>
-              {/* First phase: Text layout */}
-              <div className="flex flex-col items-center absolute left-0 right-0 text-center">
-                {/* First line: "Fueled by" */}
-                <motion.div
-                  className="text-2xl md:text-4xl font-medium tracking-wide"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  key="line1"
-                >
-                  Fueled by
-                </motion.div>
-                
-                {/* Second line: Comic Editor with typing HAPPY animation */}
-                <div className="relative w-full text-center">
-                  {/* Initial centered "Comic Editor" */}
-                  <motion.div
-                    className="text-2xl md:text-4xl font-medium tracking-wide mx-auto inline-block"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ 
-                      opacity: 1, 
-                      y: 0,
-                      x: -70 // Move left to make room for HAPPY
-                    }}
-                    transition={{ 
-                      opacity: { duration: 0.8, delay: 0.3 },
-                      y: { duration: 0.8, delay: 0.3 },
-                      x: { duration: 1.2, delay: 3, ease: "easeInOut" }
-                    }}
-                    key="line2"
-                  >
-                    Comic Editor
-                  </motion.div>
-                  
-                  {/* "HAPPY" text that typed out letter by letter */}
-                  <motion.div
-                    className="text-2xl md:text-4xl font-bold text-accent inline-block ml-0"
-                    style={{ marginLeft: '4px' }}
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ 
-                      opacity: 1,
-                      width: 130 // Approximate width of "HAPPY" text
-                    }}
-                    transition={{ 
-                      opacity: { duration: 0.3, delay: 3 },
-                      width: { duration: 1.2, delay: 3, ease: "easeInOut" },
-                      onComplete: () => setAnimationComplete(true)
-                    }}
-                    key="happy-text"
-                  >
-                    HAPPY
-                  </motion.div>
-                </div>
-                
-                {/* Third line: "Tears" */}
-                <motion.div
-                  className="text-2xl md:text-4xl font-medium tracking-wide mt-1"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
-                  key="line3"
-                >
-                  Tears
-                </motion.div>
-              </div>
-            </AnimatePresence>
+          <div className="text-center my-8 h-40 flex flex-col items-center justify-center">
+            <div className="text-2xl md:text-4xl font-medium mb-2">
+              Fueled by
+            </div>
+            
+            <div className="flex items-center justify-center">
+              <div className="text-2xl md:text-4xl font-medium">Comic Editor</div>
+              <div className="text-2xl md:text-4xl font-bold text-accent ml-1">HAPPY</div>
+            </div>
+            
+            <div className="text-2xl md:text-4xl font-medium mt-2">
+              Tears
+            </div>
           </div>
           
           <p className="text-lg md:text-xl max-w-xl mx-auto mt-12 mb-8 text-slate-700">
