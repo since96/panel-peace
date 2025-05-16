@@ -88,6 +88,7 @@ export default function ProjectCreate() {
       status: "in_progress",
       progress: 0,
       createdBy: 1, // Default user ID
+      studioId: studioId, // Use the studio ID from URL or default value
       
       // Comic book metrics
       coverCount: 1,
@@ -202,8 +203,8 @@ export default function ProjectCreate() {
     // The server expects strings that it can parse into database timestamps
     const apiData = {
       ...submissionData,
-      // Always include studio ID (should be 998 at this point if not explicitly set)
-      studioId: studioId,
+      // Always ensure the studioId is set as a number
+      studioId: Number(studioId),
       // Convert date fields to ISO strings for the API
       dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined,
       plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
