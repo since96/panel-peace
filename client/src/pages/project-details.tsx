@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link as LinkIcon, CheckCircle, UserPlus, Check, Info } from 'lucide-react';
+import { Pencil, Pencil as PencilIcon, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link as LinkIcon, CheckCircle, UserPlus, Check, Info } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { CompletionTracker } from '@/components/ui/custom/completion-tracker';
@@ -1354,7 +1354,7 @@ export default function ProjectDetails() {
                     const formData = new FormData(e.currentTarget);
                     const data = {
                       id: parseInt(id as string),
-                      interiorPageCount: parseInt(formData.get('interiorPageCount') as string),
+                      interiorPages: parseInt(formData.get('interiorPages') as string),
                       coverCount: parseInt(formData.get('coverCount') as string),
                       fillerPageCount: parseInt(formData.get('fillerPageCount') as string),
                       issue: formData.get('issue') as string,
