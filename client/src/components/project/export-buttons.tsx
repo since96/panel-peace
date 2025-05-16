@@ -53,123 +53,129 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
   const generatePDF = () => {
     try {
       const doc = new jsPDF();
+      let yPosition = 20;
       
-      // Add title
-      doc.setFontSize(20);
+      // Create the simple formatted PDF similar to email format
+      // PROJECT DETAILS
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text(`${project.title} ${project.issue || ""}`, 14, 22);
+      doc.text("----- PROJECT DETAILS -----", 14, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(14);
+      doc.text(`PROJECT: ${project.title} ${project.issue || ""}`, 14, yPosition);
+      yPosition += 8;
       
-      // Add project info
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Status: ${project.status}`, 14, 32);
-      doc.text(`Created: ${formatDate(project.createdAt)}`, 14, 38);
-      if (project.dueDate) {
-        doc.text(`Due: ${formatDate(project.dueDate)}`, 14, 44);
+      // Description
+      if (project.description) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const descriptionLines = doc.splitTextToSize(project.description, 180);
+        doc.text(descriptionLines, 14, yPosition);
+        yPosition += (descriptionLines.length * 6) + 6;
       }
       
-      // Project description
+      // WORKFLOW SCHEDULE
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text(`Description:`, 14, 54);
-      doc.setFont('helvetica', 'normal');
-      const descriptionLines = doc.splitTextToSize(project.description || "No description provided.", 180);
-      doc.text(descriptionLines, 14, 60);
+      doc.text("----- WORKFLOW SCHEDULE -----", 14, yPosition);
+      yPosition += 10;
       
-      let yPosition = 60 + (descriptionLines.length * 6);
-      
-      // Workflow steps with deadlines
-      // First, check if we have workflow steps data
+      // Add each workflow step
       const workflowSteps = project.workflowSteps || [];
       if (workflowSteps.length > 0) {
-        yPosition += 10;
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text("Workflow Schedule", 14, yPosition);
-        yPosition += 8;
-
-        // For each step, add bold title and regular text for deadline
-        doc.setFontSize(12);
+        doc.setFontSize(14);
         for (const step of workflowSteps) {
+          // Step title in bold
           doc.setFont('helvetica', 'bold');
-          doc.text(step.title, 14, yPosition);
+          doc.text(step.title.toUpperCase(), 14, yPosition);
+          yPosition += 7;
           
+          // Deadline and status
+          doc.setFontSize(12);
           doc.setFont('helvetica', 'normal');
-          const deadlineText = step.dueDate 
-            ? `Deadline: ${formatDate(step.dueDate)}` 
-            : 'No deadline set';
-          doc.text(deadlineText, 40, yPosition);
+          if (step.dueDate) {
+            doc.text(`Deadline: ${formatDate(step.dueDate)}`, 14, yPosition);
+            yPosition += 6;
+          }
           
           const statusText = `Status: ${step.status} (${step.progress}% complete)`;
-          doc.text(statusText, 120, yPosition);
-          
-          yPosition += 8;
+          doc.text(statusText, 14, yPosition);
+          yPosition += 10;
         }
-        
+      } else {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text("No workflow steps defined.", 14, yPosition);
         yPosition += 10;
       }
       
-      // Add talent roster section
-      if (collaborators && collaborators.length > 0) {
-        doc.setFontSize(16);
-        doc.setFont('helvetica', 'bold');
-        doc.text("Talent Roster", 14, yPosition);
+      // TALENT ROSTER
+      yPosition += 5;
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text("----- TALENT ROSTER -----", 14, yPosition);
+      yPosition += 10;
+      
+      // Separate editors from talents
+      const editors = collaborators.filter(c => 
+        c.assignmentRole?.toLowerCase().includes('editor'));
+      const talents = collaborators.filter(c => 
+        !c.assignmentRole?.toLowerCase().includes('editor'));
+      
+      // Editorial team
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text("EDITORIAL TEAM:", 14, yPosition);
+      yPosition += 8;
+      
+      if (editors.length > 0) {
+        doc.setFontSize(12);
+        for (const editor of editors) {
+          const fullName = editor.user?.fullName || "Unknown";
+          const role = editor.assignmentRole || "Editor";
+          const email = editor.user?.email || "No email";
+          
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${fullName} - ${role}`, 14, yPosition);
+          yPosition += 6;
+          
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Contact: ${email}`, 14, yPosition);
+          yPosition += 10;
+        }
+      } else {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text("No editorial team assigned.", 14, yPosition);
         yPosition += 10;
-        
-        // Separate editors from other talent
-        const editors = collaborators.filter(c => 
-          c.assignmentRole?.toLowerCase().includes('editor'));
-        const talents = collaborators.filter(c => 
-          !c.assignmentRole?.toLowerCase().includes('editor'));
-        
-        // First add editors table
-        if (editors.length > 0) {
-          doc.setFontSize(12);
+      }
+      
+      // Creative team
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text("CREATIVE TEAM:", 14, yPosition);
+      yPosition += 8;
+      
+      if (talents.length > 0) {
+        doc.setFontSize(12);
+        for (const talent of talents) {
+          const fullName = talent.user?.fullName || "Unknown";
+          const role = talent.assignmentRole || "Contributor";
+          const email = talent.user?.email || "No email";
+          
           doc.setFont('helvetica', 'bold');
-          doc.text("Editorial Team", 14, yPosition);
+          doc.text(`${fullName} - ${role}`, 14, yPosition);
           yPosition += 6;
           
-          const editorData = editors.map(e => {
-            const fullName = e.user?.fullName || "Unknown";
-            const email = e.user?.email || "No email";
-            const role = e.assignmentRole || "Editor";
-            return [fullName, role, email];
-          });
-          
-          (doc as any).autoTable({
-            startY: yPosition,
-            head: [['Name', 'Role', 'Contact Email']],
-            body: editorData,
-            theme: 'grid',
-            headStyles: { fillColor: [41, 72, 128], textColor: 255, fontStyle: 'bold' },
-            styles: { fontSize: 10 }
-          });
-          
-          yPosition = (doc as any).lastAutoTable.finalY + 10;
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Contact: ${email}`, 14, yPosition);
+          yPosition += 10;
         }
-        
-        // Then add talent table
-        if (talents.length > 0) {
-          doc.setFontSize(12);
-          doc.setFont('helvetica', 'bold');
-          doc.text("Creative Team", 14, yPosition);
-          yPosition += 6;
-          
-          const talentData = talents.map(t => {
-            const fullName = t.user?.fullName || "Unknown";
-            const email = t.user?.email || "No email";
-            const role = t.assignmentRole || "Contributor";
-            return [fullName, role, email];
-          });
-          
-          (doc as any).autoTable({
-            startY: yPosition,
-            head: [['Name', 'Role', 'Contact Email']],
-            body: talentData,
-            theme: 'grid',
-            headStyles: { fillColor: [75, 123, 189], textColor: 255, fontStyle: 'bold' },
-            styles: { fontSize: 10 }
-          });
-        }
+      } else {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text("No creative team assigned.", 14, yPosition);
       }
       
       // Save the PDF
@@ -209,17 +215,15 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
       const talents = collaborators.filter(c => 
         !c.assignmentRole?.toLowerCase().includes('editor'));
       
-      // Create email body with HTML formatting
-      let body = `
------ PROJECT DETAILS -----
+      // Create email body formatted as shown in the example screenshot
+      let body = `----- PROJECT DETAILS -----
 
 PROJECT: ${project.title} ${project.issue || ""}
-STATUS: ${project.status}
-${project.dueDate ? `PROJECT DEADLINE: ${formatDate(project.dueDate)}\n` : ''}
 
 ${project.description || "No description provided."}
 
 ----- WORKFLOW SCHEDULE -----
+
 ${project.workflowSteps && project.workflowSteps.length > 0
   ? project.workflowSteps.map((step: any) => 
       `${step.title.toUpperCase()}
