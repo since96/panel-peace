@@ -947,7 +947,11 @@ export default function ProjectDetails() {
                                                 variant="outline"
                                                 className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 hover:text-purple-800"
                                                 onClick={() => {
-                                                  setEditingStep(step);
+                                                  // Always ensure assignees is an array, not null
+                                                  setEditingStep({
+                                                    ...step,
+                                                    assignees: step.assignees || []
+                                                  });
                                                   setShowAssignDialog(true);
                                                 }}
                                               >
@@ -969,7 +973,11 @@ export default function ProjectDetails() {
                                                 variant="outline"
                                                 className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
                                                 onClick={() => {
-                                                  setEditingStep(step);
+                                                  // Always ensure assignees is an array, not null
+                                                  setEditingStep({
+                                                    ...step,
+                                                    assignees: step.assignees || []
+                                                  });
                                                   setShowDeadlineDialog(true);
                                                 }}
                                               >
@@ -1562,8 +1570,8 @@ export default function ProjectDetails() {
             <Button 
               onClick={() => {
                 if (editingStep) {
-                  // Convert assignees from string[] | null to string[] | undefined for the API
-                  const assignees = editingStep.assignees === null ? undefined : editingStep.assignees;
+                  // Make sure we have a valid assignees array (never null)
+                  const assignees = editingStep.assignees || [];
                   updateWorkflowStepMutation.mutate({
                     stepId: editingStep.id,
                     assignedTo: editingStep.assignedTo,

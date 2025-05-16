@@ -113,42 +113,21 @@ export default function ProjectCreate() {
   const createProjectMutation = useMutation({
     mutationFn: async (data: any) => {
       try {
+        // Add mandatory studioId if not present (this is a fallback for safety)
+        if (!data.studioId) {
+          data.studioId = 998; // Default to Marvel Comics
+        }
+        
         console.log("Making POST request to /api/projects with data:", data);
         
-        // Use raw fetch with better error handling
-        const response = await fetch('/api/projects', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
+        // Use the apiRequest helper for consistency
+        const response = await apiRequest("POST", "/api/projects", data);
+        const result = await response.json();
         
-        console.log("API response status:", response.status);
-        
-        // Get the response text first
-        const responseText = await response.text();
-        console.log("API raw response:", responseText);
-        
-        // Then try to parse it as JSON if possible
-        let jsonResponse;
-        try {
-          jsonResponse = JSON.parse(responseText);
-        } catch (e) {
-          console.error("Failed to parse response as JSON:", e);
-          throw new Error(`Server returned non-JSON response: ${responseText}`);
-        }
-        
-        console.log("API response data:", jsonResponse);
-        
-        // Check if response was successful
-        if (!response.ok) {
-          throw jsonResponse;
-        }
-        
-        return jsonResponse;
+        console.log("Project created successfully:", result);
+        return result;
       } catch (error) {
-        console.error("API request error:", error);
+        console.error("Project creation error:", error);
         throw error;
       }
     },
