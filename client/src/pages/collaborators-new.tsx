@@ -604,7 +604,7 @@ export default function Collaborators() {
                             hasEditAccess: true,
                             assignedProjects: [],
                             username: "editor_" + Date.now(),
-                            password: Math.random().toString(36).slice(-8)
+                            password: "" // Empty password that needs to be filled in
                           });
                           setIsAddingEditor(true);
                         }}
