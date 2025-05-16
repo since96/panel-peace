@@ -56,9 +56,14 @@ export default function Landing() {
                 exit={{ opacity: 0 }}
                 key="initial-text"
               >
-                Fueled by
+                Fueled
                 <motion.span 
-                  className="mx-1"
+                  style={{ display: "inline" }}
+                >
+                  {" by "}
+                </motion.span>
+                <motion.span 
+                  style={{ display: "inline-block" }}
                   initial={{ margin: "0 0.25rem" }}
                   animate={{ margin: "0 2.5rem" }}
                   transition={{ 
