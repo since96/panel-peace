@@ -120,10 +120,30 @@ export default function Collaborators() {
   // Setup talent deletion mutation
   const deleteTalentMutation = useMutation({
     mutationFn: async (userId: number) => {
-      // Use our API utility to handle authentication and errors
-      return import('../lib/api').then(api => 
-        api.apiDelete(`/api/users/${userId}`)
-      );
+      console.log("Deleting talent with ID:", userId);
+      
+      // Use direct fetch to avoid potential browser-specific dynamic import issues
+      const token = localStorage.getItem('auth_token') || '';
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          throw new Error(`Failed to delete talent (${response.status})`);
+        }
+        throw new Error(errorData.message || `Failed to delete talent (${response.status})`);
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       toast({
