@@ -55,18 +55,12 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
       const doc = new jsPDF();
       let yPosition = 20;
       
-      // Add bullpen information
+      // Set up header information
       const logoX = 140; // Right side of the page
       const logoY = 15;  // Top of the page
       
-      // Get bullpen name from the project if available
-      const studioName = project.studioName || "Bullpen";
-      
-      // Add bullpen name to header
+      // Set text colors for header
       doc.setTextColor(0, 0, 0); // Black
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Bullpen: ${studioName}`, logoX, logoY);
       
       // Find the assigned editor if available
       const assignedEditor = collaborators.find(collab => 
