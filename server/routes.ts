@@ -1315,6 +1315,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create comment" });
     }
   });
+  
+  app.delete("/api/comments/:id", isAuthenticated, hasEditAccess, async (req, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      if (isNaN(commentId)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+      
+      const success = await storage.deleteComment(commentId);
+      if (!success) {
+        return res.status(404).json({ message: "Comment not found or could not be deleted" });
+      }
+      
+      res.status(200).json({ message: "Comment deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).json({ message: "Failed to delete comment" });
+    }
+  });
 
   // Workflow steps routes
   app.get("/api/workflow-steps", async (_req, res) => {

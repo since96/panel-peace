@@ -272,6 +272,37 @@ export default function ProjectDetails() {
       });
     }
   });
+  
+  // Delete comment mutation
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (commentId: number) => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to delete comments");
+      }
+      const res = await apiRequest("DELETE", `/api/comments/${commentId}`);
+      return true;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Comment deleted",
+        description: "The comment has been removed successfully"
+      });
+      // Comments will be refetched in onSettled
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete comment",
+        description: error.message || "An error occurred while deleting the comment",
+        variant: "destructive"
+      });
+    },
+    onSettled: () => {
+      // Refetch comments after deletion attempt (success or failure)
+      if (selectedStep) {
+        fetchComments(selectedStep.id);
+      }
+    }
+  });
 
   const updateProjectMutation = useMutation({
     mutationFn: async (updateData: { id: number; dueDate?: Date; progress?: number; status?: string }) => {
@@ -1793,26 +1824,49 @@ export default function ProjectDetails() {
                 </div>
               </div>
               
-              {comments.map(comment => (
-                <div key={comment.id} className="p-3 bg-white border border-slate-200 rounded-lg">
-                  <div className="flex justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback>{comment.userId}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-sm">
-                        User {comment.userId}
-                      </span>
+              {comments.map(comment => {
+                // Get current user from local storage to check if user can delete this comment
+                const currentUser = localStorage.getItem('user') 
+                  ? JSON.parse(localStorage.getItem('user') || '{}')
+                  : null;
+                
+                // Check if comment belongs to current user or if user has edit access
+                const canDeleteComment = hasEditAccess || (currentUser && currentUser.id === comment.userId);
+                
+                return (
+                  <div key={comment.id} className="p-3 bg-white border border-slate-200 rounded-lg">
+                    <div className="flex justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback>{comment.userId}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-sm">
+                          {users?.find(u => u.id === comment.userId)?.username || `User ${comment.userId}`}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs text-slate-500">
+                          {formatDateRelative(comment.createdAt)}
+                        </div>
+                        {canDeleteComment && (
+                          <Button
+                            variant="ghost" 
+                            size="icon"
+                            className="h-6 w-6 rounded-full hover:bg-red-50 hover:text-red-500"
+                            onClick={() => deleteCommentMutation.mutate(comment.id)}
+                            disabled={deleteCommentMutation.isPending}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs text-slate-500">
-                      {formatDateRelative(comment.createdAt)}
-                    </div>
+                    <p className="text-sm">
+                      {comment.content}
+                    </p>
                   </div>
-                  <p className="text-sm">
-                    {comment.content}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </DialogContent>
