@@ -31,18 +31,12 @@ import { HelmetProvider } from "react-helmet-async";
 function Router() {
   const { isMobileSidebarOpen, toggleMobileSidebar, closeMobileSidebar } = useMobileSidebar();
 
-  // Force landing page to show by directly checking the current path
-  const currentPath = window.location.pathname;
-  
-  // If we're at the root path or /landing, directly show the landing page
-  if (currentPath === '/' || currentPath === '/landing') {
-    return <Landing />;
-  }
-  
-  // Otherwise, use the regular routing
   return (
     <Switch>
       {/* Login pages and public pages - not protected, not using app layout */}
+      <Route path="/">
+        <Landing />
+      </Route>
       <Route path="/landing">
         <Landing />
       </Route>
