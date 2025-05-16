@@ -12,7 +12,7 @@ const studioSignupSchema = z.object({
     password: z.string().min(6),
     isEditor: z.boolean().optional().default(true),
     editorRole: z.string().optional().default("editor_in_chief"),
-  }),
+  }).nullable(), // Make userData optional to support bullpen creation without an EIC
 });
 
 // Hash password function
@@ -87,84 +87,110 @@ export function setupStudioAuth(app: express.Express) {
       
       const { studioData, userData } = validationResult.data;
       
-      // Check if username already exists for the EIC
-      const existingUser = await storage.getUserByUsername(userData.username);
-      if (existingUser) {
-        return res.status(400).json({
-          success: false,
-          message: "Username already exists"
-        });
-      }
-      
-      // Create the studio
+      // Create the studio first
       const studio = await storage.createStudio({
         name: studioData.name,
         description: studioData.description || '',
         logoUrl: studioData.logoUrl || null,
-        // By default, use admin as creator (1), will be updated after EIC is created
+        // By default, use admin as creator (1)
         createdBy: studioData.createdBy || 1, 
-        active: true, // Set to true for development (was: false to require site admin approval)
+        active: true, // Set to true for development
       });
       
-      // Create Editor-in-Chief user with proper type handling
-      const newUser = await storage.createUser({
-        username: userData.username,
-        password: hashPassword(userData.password || ''),
-        fullName: userData.fullName,
-        email: userData.email,
-        phone: userData.phone,
-        socialMedia: userData.socialMedia,
-        isEditor: true,
-        editorRole: 'editor_in_chief',
-        // Set defaults for remaining required fields
-        assignedProjects: userData.assignedProjects || [],
-        role: userData.role || "editor_in_chief",
-        roles: userData.roles || ["editor_in_chief"],
-        avatarUrl: userData.avatarUrl || null,
-      });
+      let newUser = null;
       
-      // Update user with studioId using a different approach
-      try {
-        // For now, just log what we would update instead of attempting the update
-        console.log(`Would update user ${newUser.id} with studioId ${studio.id}`);
+      // Handle case for bullpen creation with or without an EIC user
+      if (userData) {
+        // Check if username already exists for the EIC
+        const existingUser = await storage.getUserByUsername(userData.username);
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            message: "Username already exists"
+          });
+        }
         
-        // Manually add the studioId and isSiteAdmin properties to our user object
-        // even though we can't update in storage due to type issues
-        (newUser as any).studioId = studio.id;
-        (newUser as any).isSiteAdmin = false;
-      } catch (error) {
-        console.error("Failed to update user with studioId:", error);
+        // Create Editor-in-Chief user with proper type handling
+        newUser = await storage.createUser({
+          username: userData.username,
+          password: hashPassword(userData.password || ''),
+          fullName: userData.fullName,
+          email: userData.email,
+          phone: userData.phone,
+          socialMedia: userData.socialMedia,
+          isEditor: true,
+          editorRole: 'editor_in_chief',
+          // Set defaults for remaining required fields
+          assignedProjects: userData.assignedProjects || [],
+          role: userData.role || "editor_in_chief",
+          roles: userData.roles || ["editor_in_chief"],
+          avatarUrl: userData.avatarUrl || null,
+        });
+        
+        // Update user with studioId using a different approach
+        try {
+          // For now, just log what we would update instead of attempting the update
+          console.log(`Would update user ${newUser.id} with studioId ${studio.id}`);
+          
+          // Manually add the studioId and isSiteAdmin properties to our user object
+          // even though we can't update in storage due to type issues
+          (newUser as any).studioId = studio.id;
+          (newUser as any).isSiteAdmin = false;
+        } catch (error) {
+          console.error("Failed to update user with studioId:", error);
+        }
+        
+        // Update the studio with the actual creator
+        await storage.updateStudio(studio.id, {
+          createdBy: newUser.id
+        });
+        
+        console.log(`New studio '${studioData.name}' created with EIC ${userData.username}`);
+      } else {
+        // No EIC was created, just log the bullpen creation
+        console.log(`New bullpen '${studioData.name}' created without an EIC`);
       }
       
-      // Update the studio with the actual creator
-      await storage.updateStudio(studio.id, {
-        createdBy: newUser.id
-      });
-      
-      console.log(`New studio '${studioData.name}' created with EIC ${userData.username}`);
-      
-      // Return success
+      // Return success based on whether a user was created or not
       try {
-        return res.status(201).json({
-          success: true,
-          message: "Studio and Editor-in-Chief created successfully",
-          studio: {
-            id: studio.id,
-            name: studio.name,
-            description: studio.description,
-            active: studio.active,
-            logoUrl: studio.logoUrl,
-            createdAt: studio.createdAt,
-            createdBy: studio.createdBy
-          },
-          user: {
-            id: newUser.id,
-            username: newUser.username,
-            fullName: newUser.fullName,
-            email: newUser.email
-            // Don't send password back
-          }
-        });
+        // Different response if a user was created vs. just a bullpen
+        if (newUser) {
+          return res.status(201).json({
+            success: true,
+            message: "Studio and Editor-in-Chief created successfully",
+            studio: {
+              id: studio.id,
+              name: studio.name,
+              description: studio.description,
+              active: studio.active,
+              logoUrl: studio.logoUrl,
+              createdAt: studio.createdAt,
+              createdBy: studio.createdBy
+            },
+            user: {
+              id: newUser.id,
+              username: newUser.username,
+              fullName: newUser.fullName,
+              email: newUser.email
+              // Don't send password back
+            }
+          });
+        } else {
+          // Just created a bullpen without an EIC
+          return res.status(201).json({
+            success: true,
+            message: "Bullpen created successfully",
+            studio: {
+              id: studio.id,
+              name: studio.name,
+              description: studio.description,
+              active: studio.active,
+              logoUrl: studio.logoUrl,
+              createdAt: studio.createdAt,
+              createdBy: studio.createdBy
+            }
+          });
+        }
       } catch (serializeError) {
         console.error("Error serializing response:", serializeError);
         return res.status(201).json({
