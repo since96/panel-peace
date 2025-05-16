@@ -11,10 +11,10 @@ export default function Landing() {
   return (
     <>
       <Helmet>
-        <title>Comic Editor Pro - Your Comic Book Creation Tool</title>
+        <title>Panel Peace - No Chaos. Just Comics.</title>
         <meta 
           name="description" 
-          content="Streamline your comic book editing process with Comic Editor Pro. Manage talent, track progress, and deliver your comics faster." 
+          content="Streamline your comic book editing process with Panel Peace. Manage talent, track progress, and deliver your comics faster." 
         />
       </Helmet>
       
@@ -23,7 +23,7 @@ export default function Landing() {
         <div className="container mx-auto flex justify-between items-center">
           <div>
             <span className="text-xl font-bold text-primary">
-              Comic Editor Pro
+              Panel Peace
             </span>
           </div>
 
@@ -41,9 +41,12 @@ export default function Landing() {
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-slate-50">
         {/* Hero section with animation */}
         <div className="flex-1 flex flex-col items-center justify-center px-4 text-center py-24">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-primary mb-6">
-            Comic Editor Pro
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-primary mb-3">
+            Panel Peace
           </h1>
+          <p className="text-xl md:text-2xl text-slate-600 mb-6">
+            No Chaos. Just Comics.
+          </p>
           
           <div className="h-48 w-full flex flex-col items-center justify-center my-8">
             <motion.div
