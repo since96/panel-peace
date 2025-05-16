@@ -72,7 +72,7 @@ export function SimpleLogin() {
           </CardDescription>
           <div className="mt-4 bg-amber-50 p-4 rounded-md border border-amber-100 text-amber-800">
             <p className="text-sm">
-              Welcome to the Sneak Preview of Panel Peace! Use the admin code provided to log in and poke around. And get ready to shed a few editorial happy tears.
+              <span className="uppercase font-semibold">Welcome to the Sneak Preview of Panel Peace!</span> Use the admin code provided to log in and poke around. And get ready to shed a few editorial happy tears.
             </p>
           </div>
         </CardHeader>
