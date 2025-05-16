@@ -82,6 +82,9 @@ export default function StudiosPage() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Bullpens</h1>
+          <p className="text-gray-600 mt-2 mb-3">
+            Bullpens are where you assign your projects. A Bullpen is an oldschool term we picked for fun, and can be named after a comic book, your studio, internal editorial crew - whatever you want.
+          </p>
           <Breadcrumb className="mt-2">
             <BreadcrumbList>
               <BreadcrumbItem>
