@@ -1812,47 +1812,59 @@ export default function ProjectDetails() {
       <Dialog open={showFileLinkDialog} onOpenChange={setShowFileLinkDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add File Reference</DialogTitle>
+            <DialogTitle>{hasEditAccess ? "Add File Reference" : "File References"}</DialogTitle>
             <DialogDescription>
-              Add a link to an external file for reference
+              {hasEditAccess ? "Add a link to an external file for reference" : "View file reference links"}
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="file-link" className="text-right">
-                File URL
-              </Label>
-              <Input
-                id="file-link"
-                placeholder="https://dropbox.com/your-file or similar"
-                value={newFileLink}
-                onChange={(e) => setNewFileLink(e.target.value)}
-                className="col-span-3"
-              />
+          {hasEditAccess ? (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="file-link" className="text-right">
+                  File URL
+                </Label>
+                <Input
+                  id="file-link"
+                  placeholder="https://dropbox.com/your-file or similar"
+                  value={newFileLink}
+                  onChange={(e) => setNewFileLink(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="workflow-step" className="text-right">
+                  Related Step
+                </Label>
+                <Select
+                  value={selectedWorkflowStepForLink?.toString() || ""}
+                  onValueChange={(value) => setSelectedWorkflowStepForLink(parseInt(value))}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a workflow step (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workflowSteps && workflowSteps.map((step) => (
+                      <SelectItem key={step.id} value={step.id.toString()}>
+                        {step.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="workflow-step" className="text-right">
-                Related Step
-              </Label>
-              <Select
-                value={selectedWorkflowStepForLink?.toString() || ""}
-                onValueChange={(value) => setSelectedWorkflowStepForLink(parseInt(value))}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a workflow step (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {workflowSteps && workflowSteps.map((step) => (
-                    <SelectItem key={step.id} value={step.id.toString()}>
-                      {step.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          ) : (
+            <div className="p-4 mb-4 bg-slate-100 rounded-md">
+              <div className="flex items-center mb-2">
+                <Info className="h-4 w-4 text-slate-600 mr-2" />
+                <p className="text-sm text-slate-600 font-medium">View-only access</p>
+              </div>
+              <p className="text-sm text-slate-600">
+                You can only view file links. Contact an editor with edit privileges to add new links.
+              </p>
             </div>
-          </div>
+          )}
           
           <DialogFooter>
             <Button
@@ -1865,65 +1877,67 @@ export default function ProjectDetails() {
             >
               Cancel
             </Button>
-            <Button
-              onClick={() => {
-                if (!newFileLink.trim()) {
-                  toast({
-                    title: "Error",
-                    description: "Please enter a valid URL",
-                    variant: "destructive"
-                  });
-                  return;
-                }
-                
-                // Check if workflow step is selected
-                if (!selectedWorkflowStepForLink) {
-                  if (workflowSteps && workflowSteps.length > 0) {
-                    // Auto-select first step if none selected
-                    toast({
-                      title: "Info",
-                      description: "Auto-selecting first workflow step"
-                    });
-                    // Use the first step
-                    const firstStepId = workflowSteps[0].id;
-                    
-                    // Call the existing mutation
-                    addFileLinkMutation.mutate({
-                      stepId: firstStepId,
-                      url: newFileLink,
-                      description: ""
-                    });
-                    
-                    // Close the dialog
-                    setShowFileLinkDialog(false);
-                    setNewFileLink('');
-                    setSelectedWorkflowStepForLink(null);
-                  } else {
+            {hasEditAccess && (
+              <Button
+                onClick={() => {
+                  if (!newFileLink.trim()) {
                     toast({
                       title: "Error",
-                      description: "No workflow steps available. Please initialize workflow first.",
+                      description: "Please enter a valid URL",
                       variant: "destructive"
                     });
+                    return;
                   }
-                  return;
-                }
-                
-                // Use our mutation to add the link
-                addFileLinkMutation.mutate({
-                  stepId: selectedWorkflowStepForLink,
-                  url: newFileLink,
-                  description: ""
-                });
-                
-                // Close dialog
-                setShowFileLinkDialog(false);
-                setNewFileLink('');
-                setSelectedWorkflowStepForLink(null);
-              }}
-              disabled={!newFileLink.trim()}
-            >
-              Add Link
-            </Button>
+                  
+                  // Check if workflow step is selected
+                  if (!selectedWorkflowStepForLink) {
+                    if (workflowSteps && workflowSteps.length > 0) {
+                      // Auto-select first step if none selected
+                      toast({
+                        title: "Info",
+                        description: "Auto-selecting first workflow step"
+                      });
+                      // Use the first step
+                      const firstStepId = workflowSteps[0].id;
+                      
+                      // Call the existing mutation
+                      addFileLinkMutation.mutate({
+                        stepId: firstStepId,
+                        url: newFileLink,
+                        description: ""
+                      });
+                      
+                      // Close the dialog
+                      setShowFileLinkDialog(false);
+                      setNewFileLink('');
+                      setSelectedWorkflowStepForLink(null);
+                    } else {
+                      toast({
+                        title: "Error",
+                        description: "No workflow steps available. Please initialize workflow first.",
+                        variant: "destructive"
+                      });
+                    }
+                    return;
+                  }
+                  
+                  // Use our mutation to add the link
+                  addFileLinkMutation.mutate({
+                    stepId: selectedWorkflowStepForLink,
+                    url: newFileLink,
+                    description: ""
+                  });
+                  
+                  // Close dialog
+                  setShowFileLinkDialog(false);
+                  setNewFileLink('');
+                  setSelectedWorkflowStepForLink(null);
+                }}
+                disabled={!newFileLink.trim()}
+              >
+                Add Link
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
