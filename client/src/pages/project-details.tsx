@@ -76,6 +76,7 @@ export default function ProjectDetails() {
   const [projectProgress, setProjectProgress] = useState<number>(0);
   const [editing, setEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
+  const [editingMetrics, setEditingMetrics] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const hasEditAccess = useHasEditAccess();
   // Adding assignees array to the editingStep

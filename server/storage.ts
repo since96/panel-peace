@@ -1402,8 +1402,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 40,
-        dueDate: pencilEndDate,
-        pageCount: interiorPageCount, // Add explicit page count field
+        dueDate: pencilEndDate
       },
       {
         projectId,
@@ -1413,8 +1412,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 50,
-        dueDate: inkEndDate,
-        pageCount: interiorPageCount, // Add explicit page count field
+        dueDate: inkEndDate
       },
       {
         projectId,
@@ -1424,8 +1422,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 60,
-        dueDate: colorEndDate,
-        pageCount: interiorPageCount, // Add explicit page count field
+        dueDate: colorEndDate
       },
       {
         projectId,
@@ -1435,8 +1432,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 70,
-        dueDate: letterEndDate,
-        pageCount: interiorPageCount, // Add explicit page count field
+        dueDate: letterEndDate
       },
       {
         projectId,
@@ -1446,8 +1442,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 75,
-        dueDate: addDays(letterEndDate, 7), // Due one week after letters
-        pageCount: interiorPageCount, // Add explicit page count field
+        dueDate: addDays(letterEndDate, 7) // Due one week after letters
       },
       {
         projectId,
@@ -1457,8 +1452,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 80,
-        dueDate: colorEndDate, // Due same day as colors
-        pageCount: fillerPageCount, // For editorial pages, use filler page count
+        dueDate: colorEndDate // Due same day as colors
       },
       {
         projectId,
@@ -1468,8 +1462,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 85,
-        dueDate: addDays(colorEndDate, 7), // Due one week after colors
-        pageCount: interiorPageCount + fillerPageCount, // Total page count
+        dueDate: addDays(colorEndDate, 7) // Due one week after colors
       },
       {
         projectId,
@@ -1479,8 +1472,7 @@ export class MemStorage implements IStorage {
         status: "not_started",
         progress: 0,
         sortOrder: 90,
-        dueDate: addDays(colorEndDate, 14), // Due two weeks after colors (one week after final editorial)
-        pageCount: interiorPageCount + fillerPageCount, // Total page count
+        dueDate: addDays(colorEndDate, 14) // Due two weeks after colors (one week after final editorial)
       }
     ];
     
