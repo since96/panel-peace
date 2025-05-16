@@ -11,9 +11,9 @@ export function CurrentProjects() {
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-slate-900">Current Projects</h2>
+        <h2 className="text-xl font-bold text-slate-900">Current Comics</h2>
         <Link href="/projects" className="text-primary text-sm font-medium flex items-center">
-          <span>View all projects</span>
+          <span>View all comics</span>
           <i className="ri-arrow-right-s-line ml-1"></i>
         </Link>
       </div>

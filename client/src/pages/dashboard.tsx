@@ -15,11 +15,11 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-            <p className="text-slate-500 mt-1">Manage your projects, talent, and editorial workflow</p>
+            <p className="text-slate-500 mt-1">Manage your comics, creators, and editorial workflow</p>
           </div>
           <div className="mt-4 md:mt-0 flex items-center space-x-2">
             <select className="appearance-none bg-white border border-slate-300 rounded-lg px-3 py-1.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-              <option>All Projects</option>
+              <option>All Comics</option>
               <option>In Progress</option>
               <option>Needs Review</option>
               <option>Completed</option>

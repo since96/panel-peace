@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProjectSchema } from "@shared/schema";
+import { insertProjectSchema, Studio } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
@@ -51,33 +51,59 @@ export default function ProjectCreate() {
   const [_, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Query for available bullpens
+  const { data: studios, isLoading: isLoadingStudios } = useQuery<Studio[]>({
+    queryKey: ['/api/studios'],
+  });
+  
   // Parse URL parameters for studioId
   const searchParams = new URLSearchParams(window.location.search);
   const studioIdParam = searchParams.get('studioId');
-  // Default to Marvel Comics (998) if no studio ID is provided
-  const studioId = studioIdParam ? parseInt(studioIdParam) : 998;
-  
-  // Debug logs
-  console.log("URL search:", window.location.search);
-  console.log("Studio ID from URL:", studioIdParam);
-  console.log("Using studio ID:", studioId);
+  // Check if we have a valid studioId and if not, redirect to studios page
+  const studioId = studioIdParam ? parseInt(studioIdParam) : null;
   
   useEffect(() => {
-    // Display studio selection info
-    if (studioIdParam) {
-      console.log(`Creating project for studio ID: ${studioId}`);
+    // If studios are loaded and there are none, redirect to create a bullpen first
+    if (!isLoadingStudios && studios && studios.length === 0) {
       toast({
-        title: "Studio Selected",
-        description: `Creating project for studio ID: ${studioId}`,
+        title: "No Bullpens Available",
+        description: "You need to create a bullpen before you can create comics.",
+        variant: "destructive"
       });
-    } else {
-      console.log("No studio ID provided in URL. Using Marvel Comics (998) as default");
+      navigate("/studios/new");
+      return;
+    }
+    
+    // If studios are loaded but no studioId is provided in URL, redirect to projects page
+    if (!isLoadingStudios && studios && studios.length > 0 && !studioId) {
       toast({
-        title: "Default Studio",
-        description: "Using Marvel Comics as the default studio for this project.",
+        title: "Bullpen Required",
+        description: "Please select a bullpen for your new comic.",
+        variant: "destructive"
+      });
+      navigate("/projects");
+      return;
+    }
+    
+    // If studioId is provided, validate it exists
+    if (!isLoadingStudios && studios && studioId) {
+      const selectedStudio = studios.find(studio => studio.id === studioId);
+      if (!selectedStudio) {
+        toast({
+          title: "Invalid Bullpen",
+          description: "The selected bullpen does not exist. Please choose a valid bullpen.",
+          variant: "destructive"
+        });
+        navigate("/projects");
+        return;
+      }
+      
+      toast({
+        title: "Bullpen Selected",
+        description: `Creating comic for bullpen: ${selectedStudio.name}`,
       });
     }
-  }, [studioId, studioIdParam, toast]);
+  }, [studioId, studios, isLoadingStudios, toast, navigate]);
   
   const form = useForm<CreateProjectFormValues>({
     resolver: zodResolver(createProjectSchema),
@@ -232,16 +258,16 @@ export default function ProjectCreate() {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Create New Project</h1>
-            <p className="text-slate-500 mt-1">Set up your new comic book project</p>
+            <h1 className="text-2xl font-bold text-slate-900">Create New Comic</h1>
+            <p className="text-slate-500 mt-1">Set up your new comic book series</p>
           </div>
         </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>Project Details</CardTitle>
+            <CardTitle>Comic Details</CardTitle>
             <CardDescription>
-              Enter the basic information for your new comic project
+              Enter the basic information for your new comic book
             </CardDescription>
           </CardHeader>
           <CardContent>
