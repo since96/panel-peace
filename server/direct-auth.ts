@@ -421,7 +421,7 @@ async function createDefaultAdmin() {
         email: "admin@comicsmanagement.com",
         isEditor: true,
         role: "Editor",
-        editorRole: "editor_in_chief",
+        hasEditAccess: true, // Ensure admin can edit
         isSiteAdmin: true // Make this user a site admin
       });
       

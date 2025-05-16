@@ -422,6 +422,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: phone || undefined,
         socialMedia: socialMedia || undefined,
         isEditor: isEditor || false,
+        isSiteAdmin: isSiteAdmin || false,
+        hasEditAccess: hasEditAccess !== false, // Default to true if not specified
         role: role || (roles && roles.length > 0 ? roles[0] : undefined),
         roles: roles || [],
         avatarUrl: avatarUrl || undefined
