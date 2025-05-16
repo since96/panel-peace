@@ -123,7 +123,7 @@ export default function Collaborators() {
     phone: "",
     socialMedia: "",
     isEditor: false, // Always false - editor role has been removed
-    editorRole: "", // Editor, Senior Editor, Editor-in-Chief
+    isSiteAdmin: false, // Whether user is a site administrator
     assignedProjects: [] as number[],
     role: "",
     roles: [] as string[],
@@ -170,12 +170,8 @@ export default function Collaborators() {
     try {
       // Validation logic based on user type
       if (newTeamMember.isEditor) {
-        // Editor validation
-        if (!newTeamMember.editorRole) {
-          setAddTeamMemberError("Please select an editor role");
-          setIsAddingTeamMember(false);
-          return;
-        }
+        // No validation needed for editor role as we simplified the system
+        // We just need to ensure isEditor is true
         
         // Project assignment validation has been removed - editors will be assigned to projects later
         
