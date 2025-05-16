@@ -25,6 +25,7 @@ import ProfilePage from "./pages/profile";
 import StudiosPage from "./pages/studios";
 import DeadlineHelper from "./pages/deadline-helper";
 import RouteTest from "./pages/route-test";
+import Home from "./pages/home";
 import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
@@ -32,7 +33,10 @@ function Router() {
 
   return (
     <Switch>
-      {/* Login pages - not protected, not using app layout */}
+      {/* Login pages and public pages - not protected, not using app layout */}
+      <Route path="/">
+        <Home />
+      </Route>
       <Route path="/login">
         <SimpleLogin />
       </Route>
