@@ -34,7 +34,7 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 // Form validation schema
 const studioFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Studio name must be at least 2 characters.",
+    message: "Bullpen name must be at least 2 characters.",
   }),
   description: z.string().optional(),
   logoUrl: z.string().optional(),
@@ -159,9 +159,9 @@ export function CreateStudioDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create a new studio</DialogTitle>
+          <DialogTitle>Create a new bullpen</DialogTitle>
           <DialogDescription>
-            Create a new studio for your comic book and set up the Editor-in-Chief account.
+            Create a new bullpen for your comic book and set up the Editor-in-Chief account.
           </DialogDescription>
         </DialogHeader>
         
@@ -169,7 +169,7 @@ export function CreateStudioDialog() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Tabs value={activeTab} onValueChange={handleTabChange}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="studio">Studio Details</TabsTrigger>
+                <TabsTrigger value="studio">Bullpen Details</TabsTrigger>
                 <TabsTrigger 
                   value="eic" 
                   disabled={!form.formState.dirtyFields.studioData || 
@@ -184,12 +184,12 @@ export function CreateStudioDialog() {
                   name="studioData.name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Studio Name*</FormLabel>
+                      <FormLabel>Bullpen Name*</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter the studio name" {...field} />
+                        <Input placeholder="Enter the bullpen name" {...field} />
                       </FormControl>
                       <FormDescription>
-                        The name of your publishing studio.
+                        The name of your publishing bullpen.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -204,7 +204,7 @@ export function CreateStudioDialog() {
                       <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Enter a description for the studio" 
+                          placeholder="Enter a description for the bullpen" 
                           className="resize-none"
                           {...field} 
                         />

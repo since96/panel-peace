@@ -55,7 +55,7 @@ export default function StudiosPage() {
           return [
             {
               id: 999,
-              name: "Placeholder Studio",
+              name: "Placeholder Bullpen",
               description: "This studio is a placeholder for development",
               active: true,
               createdAt: new Date().toISOString(),
