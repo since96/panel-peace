@@ -285,7 +285,18 @@ export class MemStorage implements IStorage {
 
   async createUser(user: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const newUser: User = { id, ...user };
+    
+    // Ensure the hasEditAccess property is properly set
+    // Default to true if not specified for backwards compatibility
+    const hasEditAccess = user.hasEditAccess !== false;
+    
+    const newUser: User = { 
+      id,
+      ...user,
+      // Explicitly set hasEditAccess property
+      hasEditAccess
+    };
+    
     this.users.set(id, newUser);
     return newUser;
   }
@@ -296,9 +307,15 @@ export class MemStorage implements IStorage {
       return undefined;
     }
     
+    // Handle hasEditAccess explicitly - if it's being set to false, preserve that setting
+    // Otherwise keep whatever value it already has or default to true
+    const hasEditAccess = userData.hasEditAccess === false ? false : 
+                         (userData.hasEditAccess === true || existingUser.hasEditAccess === true);
+    
     const updatedUser: User = {
       ...existingUser,
       ...userData,
+      hasEditAccess, // Explicitly set hasEditAccess property
       id: existingUser.id // Keep the original ID
     };
     
