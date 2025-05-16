@@ -567,12 +567,10 @@ export default function ProjectDetails() {
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="not_started">Not Started</SelectItem>
                       <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="on_hold">On Hold</SelectItem>
-                      <SelectItem value="at_risk">At Risk</SelectItem>
+                      <SelectItem value="needs_review">Needs Review</SelectItem>
+                      <SelectItem value="delayed">Delayed</SelectItem>
                       <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="canceled">Canceled</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

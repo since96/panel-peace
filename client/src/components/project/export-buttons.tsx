@@ -131,7 +131,11 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
             yPosition += 6;
           }
           
-          const statusText = `Status: ${step.status} (${step.progress}% complete)`;
+          const formattedStatus = step.status
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+          const statusText = `Status: ${formattedStatus}`;
           doc.text(statusText, 14, yPosition);
           yPosition += 10;
         }
