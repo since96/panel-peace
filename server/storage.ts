@@ -1252,16 +1252,19 @@ export class MemStorage implements IStorage {
     const today = new Date();
     
     // Get metrics with defaults if null
-    const coverCount = project.coverCount || 1;
-    const interiorPageCount = project.interiorPageCount || 22; // Default to 22 pages (standard comic)
-    const fillerPageCount = project.fillerPageCount || 0;
-    const pencilerPagesPerWeek = project.pencilerPagesPerWeek || 5;
-    const inkerPagesPerWeek = project.inkerPagesPerWeek || 7;
-    const coloristPagesPerWeek = project.coloristPagesPerWeek || 10;
-    const lettererPagesPerWeek = project.lettererPagesPerWeek || 15;
-    const pencilBatchSize = project.pencilBatchSize || 5;
-    const inkBatchSize = project.inkBatchSize || 5;
-    const approvalDays = project.approvalDays || 2;
+    // Use explicit null check to ensure 0 is treated as a valid value
+    const coverCount = project.coverCount !== null ? project.coverCount : 1;
+    const interiorPageCount = project.interiorPageCount !== null ? project.interiorPageCount : 22; // Default to 22 pages only if null
+    const fillerPageCount = project.fillerPageCount !== null ? project.fillerPageCount : 0;
+    const pencilerPagesPerWeek = project.pencilerPagesPerWeek !== null ? project.pencilerPagesPerWeek : 5;
+    const inkerPagesPerWeek = project.inkerPagesPerWeek !== null ? project.inkerPagesPerWeek : 7;
+    const coloristPagesPerWeek = project.coloristPagesPerWeek !== null ? project.coloristPagesPerWeek : 10;
+    const lettererPagesPerWeek = project.lettererPagesPerWeek !== null ? project.lettererPagesPerWeek : 15;
+    const pencilBatchSize = project.pencilBatchSize !== null ? project.pencilBatchSize : 5;
+    const inkBatchSize = project.inkBatchSize !== null ? project.inkBatchSize : 5;
+    const approvalDays = project.approvalDays !== null ? project.approvalDays : 2;
+    
+    console.log("Project interior page count:", project.interiorPageCount, "Using:", interiorPageCount);
     
     // Create a helper function to add days to a date
     const addDays = (date: Date, days: number): Date => {
@@ -1390,46 +1393,51 @@ export class MemStorage implements IStorage {
         progress: 0,
         sortOrder: 40,
         dueDate: pencilEndDate,
+        pageCount: interiorPageCount, // Add explicit page count field
       },
       {
         projectId,
         stepType: "inks",
         title: "Inks/Finishes",
-        description: `Final line work over the pencils (${inkerPagesPerWeek} pages/week)`,
+        description: `Final line work over the pencils for ${interiorPageCount} pages (${inkerPagesPerWeek} pages/week)`,
         status: "not_started",
         progress: 0,
         sortOrder: 50,
         dueDate: inkEndDate,
+        pageCount: interiorPageCount, // Add explicit page count field
       },
       {
         projectId,
         stepType: "colors",
         title: "Colors",
-        description: `Coloring the interior pages (${coloristPagesPerWeek} pages/week)`,
+        description: `Coloring ${interiorPageCount} interior pages (${coloristPagesPerWeek} pages/week)`,
         status: "not_started",
         progress: 0,
         sortOrder: 60,
         dueDate: colorEndDate,
+        pageCount: interiorPageCount, // Add explicit page count field
       },
       {
         projectId,
         stepType: "letters",
         title: "Letters",
-        description: `Adding text, speech bubbles, and sound effects (${lettererPagesPerWeek} pages/week)`,
+        description: `Adding text, speech bubbles, and sound effects to ${interiorPageCount} pages (${lettererPagesPerWeek} pages/week)`,
         status: "not_started",
         progress: 0,
         sortOrder: 70,
         dueDate: letterEndDate,
+        pageCount: interiorPageCount, // Add explicit page count field
       },
       {
         projectId,
         stepType: "proofs",
         title: "Final Assembled Reader Proof",
-        description: "Editorial review of colored pages before final approval",
+        description: `Editorial review of ${interiorPageCount} colored pages before final approval`,
         status: "not_started",
         progress: 0,
         sortOrder: 75,
         dueDate: addDays(letterEndDate, 7), // Due one week after letters
+        pageCount: interiorPageCount, // Add explicit page count field
       },
       {
         projectId,
@@ -1440,26 +1448,29 @@ export class MemStorage implements IStorage {
         progress: 0,
         sortOrder: 80,
         dueDate: colorEndDate, // Due same day as colors
+        pageCount: fillerPageCount, // For editorial pages, use filler page count
       },
       {
         projectId,
         stepType: "final_editorial",
         title: "Final Editorial Pages",
-        description: "Final editorial review and approval of all pages",
+        description: `Final editorial review and approval of all ${interiorPageCount + fillerPageCount} pages`,
         status: "not_started",
         progress: 0,
         sortOrder: 85,
         dueDate: addDays(colorEndDate, 7), // Due one week after colors
+        pageCount: interiorPageCount + fillerPageCount, // Total page count
       },
       {
         projectId,
         stepType: "production",
         title: "Final Production",
-        description: "Final assembly, file preparation and prepress",
+        description: `Final assembly, file preparation and prepress for ${interiorPageCount + fillerPageCount} total pages`,
         status: "not_started",
         progress: 0,
         sortOrder: 90,
         dueDate: addDays(colorEndDate, 14), // Due two weeks after colors (one week after final editorial)
+        pageCount: interiorPageCount + fillerPageCount, // Total page count
       }
     ];
     

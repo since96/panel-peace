@@ -292,6 +292,7 @@ export const workflowSteps = pgTable("workflow_steps", {
   prevStepId: integer("prev_step_id"),
   nextStepId: integer("next_step_id"),
   comments: text("comments"), // Internal comments for editorial team
+  pageCount: integer("page_count"), // Number of pages for this workflow step
   
   // Talent rating metrics (1-10 scale)
   qualityRating: integer("quality_rating"), // Overall quality of work
