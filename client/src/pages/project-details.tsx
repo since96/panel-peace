@@ -546,9 +546,36 @@ export default function ProjectDetails() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold text-slate-900">{project.title} {project.issue}</h1>
-                <Badge className={`${statusColors.bgLight} ${statusColors.text}`}>
-                  {formatStatusLabel(project.status)}
-                </Badge>
+                {!editing ? (
+                  <Badge 
+                    className={`${statusColors.bgLight} ${statusColors.text} cursor-pointer`}
+                    onClick={() => setEditing(true)}
+                  >
+                    {formatStatusLabel(project.status)}
+                  </Badge>
+                ) : (
+                  <Select
+                    defaultValue={project.status}
+                    onValueChange={(value) => {
+                      updateProjectMutation.mutate({
+                        id: project.id,
+                        status: value
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_started">Not Started</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="on_hold">On Hold</SelectItem>
+                      <SelectItem value="at_risk">At Risk</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="canceled">Canceled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <p className="text-slate-500 mt-1">{project.description}</p>
             </div>
