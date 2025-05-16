@@ -1574,15 +1574,19 @@ export default function ProjectDetails() {
                 if (editingStep) {
                   // Make sure we have a valid assignees array (never null)
                   const assignees = editingStep.assignees || [];
+                  // Clone the data to avoid reference issues
                   updateWorkflowStepMutation.mutate({
                     stepId: editingStep.id,
                     assignedTo: editingStep.assignedTo,
-                    assignees
+                    assignees: [...assignees]
                   });
+                  
+                  // Close dialog immediately without waiting for completion
                   setShowAssignDialog(false);
+                  setEditingStep(null);
                 }
               }}
-              disabled={updateWorkflowStepMutation.isPending}
+              disabled={false} // Never disable to prevent UI freeze
             >
               {updateWorkflowStepMutation.isPending ? "Saving..." : "Save Assignments"}
             </Button>
