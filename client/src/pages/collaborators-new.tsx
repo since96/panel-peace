@@ -343,7 +343,7 @@ export default function Collaborators() {
   return (
     <>
       <Helmet>
-        <title>Talent Management - Comic Editor Pro</title>
+        <title>Talent Management - Panel Peace</title>
         <meta name="description" content="Manage your creative team of artists, writers, and other talent. Track assignments, deadlines, and communication for your comic book projects." />
       </Helmet>
       

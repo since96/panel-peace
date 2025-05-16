@@ -20,10 +20,10 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>Comic Editor Pro - Your Comic Book Creation Tool</title>
+        <title>Panel Peace - No Chaos. Just Comics.</title>
         <meta 
           name="description" 
-          content="Streamline your comic book editing process with Comic Editor Pro. Manage talent, track progress, and deliver your comics faster." 
+          content="Streamline your comic book editing process with Panel Peace. Manage talent, track progress, and deliver your comics faster." 
         />
       </Helmet>
       
@@ -107,7 +107,7 @@ export default function Home() {
         
         {/* Footer */}
         <footer className="py-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Comic Editor Pro. All rights reserved.
+          © {new Date().getFullYear()} Purveyor Creative. All rights reserved.
         </footer>
       </div>
     </>

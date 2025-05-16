@@ -33,8 +33,8 @@ export default function NewDashboard() {
   return (
     <>
       <Helmet>
-        <title>Dashboard - Comic Editor Pro</title>
-        <meta name="description" content="Manage your comic book projects, creative talent, and editorial workflow with Comic Editor Pro's comprehensive dashboard." />
+        <title>Dashboard - Panel Peace</title>
+        <meta name="description" content="Manage your comic book projects, creative talent, and editorial workflow with Panel Peace's comprehensive dashboard." />
       </Helmet>
       
       <div className="max-w-7xl mx-auto">
