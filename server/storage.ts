@@ -922,53 +922,10 @@ export class MemStorage implements IStorage {
       project => project.studioId === studioId
     );
     
-    console.log(`Found ${realProjects.length} real projects for studio ${studioId}`);
+    console.log(`Found ${realProjects.length} projects for studio ${studioId}`);
     
-    // If we have real projects for this studio or if it's a user-created studio, return them
-    if (realProjects.length > 0 || (studioId !== 998 && studioId !== 999)) {
-      return realProjects;
-    }
-    
-    // For our hardcoded studios with no real projects, return some sample projects
-    if (studioId === 998 || studioId === 999) {
-      const studioName = studioId === 998 ? "Marvel Comics" : "DC Comics";
-      const sampleProjects = [];
-      
-      // Add a sample project for this studio
-      for (let i = 1; i <= 3; i++) {
-        sampleProjects.push({
-          id: 1000 + i + (studioId === 999 ? 10 : 0), // Different IDs for each studio
-          studioId: studioId,
-          title: `${studioName} Project ${i}`,
-          issue: `Issue #${i}`,
-          description: `Sample ${studioName} project ${i}`,
-          status: i % 2 === 0 ? 'in_progress' : 'not_started',
-          coverImage: null,
-          progress: Math.floor(Math.random() * 100),
-          isPrivate: false,
-          plotDeadline: new Date(new Date().setDate(new Date().getDate() + 30)),
-          scriptDeadline: new Date(new Date().setDate(new Date().getDate() + 45)),
-          artDeadline: new Date(new Date().setDate(new Date().getDate() + 60)),
-          colorDeadline: new Date(new Date().setDate(new Date().getDate() + 75)),
-          letteringDeadline: new Date(new Date().setDate(new Date().getDate() + 90)),
-          proofDeadline: new Date(new Date().setDate(new Date().getDate() + 100)),
-          printDeadline: new Date(new Date().setDate(new Date().getDate() + 120)),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          createdBy: 1,
-          genre: "Superhero",
-          targetAudience: "All Ages",
-          format: "Comic Book",
-          pageCount: 22,
-          dueDate: new Date(new Date().setDate(new Date().getDate() + 120)),
-        });
-      }
-      
-      console.log(`Returning ${sampleProjects.length} sample projects for hardcoded studio ${studioId}`);
-      return sampleProjects;
-    }
-    
-    return [];
+    // Return real projects for this studio
+    return realProjects;
   }
   
   // Feedback operations
