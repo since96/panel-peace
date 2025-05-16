@@ -207,10 +207,10 @@ export default function Landing() {
         <footer className="py-8 bg-slate-900 text-white">
           <div className="container mx-auto px-4">
             <div className="text-center">
-              <h3 className="text-xl font-bold mb-4">Comic Editor Pro</h3>
+              <h3 className="text-xl font-bold mb-4">Panel Peace</h3>
               <p className="text-slate-300 mb-4">The premier tool for comic book editors</p>
               <p className="text-sm text-slate-400">
-                © {new Date().getFullYear()} Comic Editor Pro. All rights reserved.
+                © {new Date().getFullYear()} Purveyor Creative. All rights reserved.
               </p>
             </div>
           </div>
