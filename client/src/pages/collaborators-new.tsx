@@ -311,6 +311,47 @@ export default function Collaborators() {
     }
   };
   
+  // Confirm deleting a user
+  const confirmDeleteUser = (user: User) => {
+    setUserToDelete(user);
+    setShowDeleteDialog(true);
+  };
+
+  // Handle deleting a user
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      const response = await fetch(`/api/users/${userToDelete.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      
+      toast({
+        title: "User deleted",
+        description: `${userToDelete.fullName || userToDelete.username} has been removed`,
+        variant: "default"
+      });
+      
+      // Close the dialog
+      setShowDeleteDialog(false);
+      setUserToDelete(null);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Failed to delete user",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive"
+      });
+    }
+  };
+  
   // Handle editing an existing user
   const handleEditUser = (user: User) => {
     setNewTeamMember({
@@ -698,12 +739,22 @@ export default function Collaborators() {
                                   <div className="flex-1">
                                     <div className="flex justify-between items-start">
                                       <p className="font-medium">{editor.fullName || editor.username}</p>
-                                      <button 
-                                        onClick={() => handleEditUser(editor)}
-                                        className="text-slate-400 hover:text-primary transition-colors"
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </button>
+                                      <div className="flex space-x-2">
+                                        <button 
+                                          onClick={() => handleEditUser(editor)}
+                                          className="text-slate-400 hover:text-primary transition-colors"
+                                          title="Edit editor"
+                                        >
+                                          <Edit className="h-4 w-4" />
+                                        </button>
+                                        <button 
+                                          onClick={() => confirmDeleteUser(editor)}
+                                          className="text-slate-400 hover:text-red-500 transition-colors"
+                                          title="Delete editor"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </button>
+                                      </div>
                                     </div>
                                     <p className="text-xs text-slate-500">
                                       <a 
