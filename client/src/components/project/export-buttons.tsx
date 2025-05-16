@@ -131,17 +131,16 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
             yPosition += 6;
           }
           
-          // Format status - replace "Not Started" with percentage complete
+          // Always show percentage completion for all statuses
           let statusText = '';
-          if (step.status === 'not_started') {
-            statusText = `Status: ${step.progress || 0}% Complete`;
-          } else {
-            const formattedStatus = step.status
-              .split('_')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(' ');
-            statusText = `Status: ${formattedStatus}`;
-          }
+          // Format the status text (e.g., "in_progress" → "In Progress")
+          const formattedStatus = step.status
+            .split('_')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+            
+          // Show both status and percentage for all steps
+          statusText = `Status: ${formattedStatus} (${step.progress || 0}% Complete)`;
           doc.text(statusText, 14, yPosition);
           yPosition += 10;
         }
@@ -267,13 +266,17 @@ ${project.description || "No description provided."}
 ----- WORKFLOW SCHEDULE -----
 
 ${project.workflowSteps && project.workflowSteps.length > 0
-  ? project.workflowSteps.map((step: any) => 
-      `${step.title.toUpperCase()}
+  ? project.workflowSteps.map((step: any) => {
+      // Format the status text (e.g., "in_progress" → "In Progress")
+      const formattedStatus = step.status
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+        
+      return `${step.title.toUpperCase()}
 Deadline: ${step.dueDate ? formatDate(step.dueDate) : 'No deadline set'}
-Status: ${step.status === 'not_started' 
-  ? `${step.progress || 0}% Complete` 
-  : step.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}`
-    ).join('\n\n')
+Status: ${formattedStatus} (${step.progress || 0}% Complete)`;
+    }).join('\n\n')
   : "No workflow steps defined."}
 
 ----- TALENT ROSTER -----
