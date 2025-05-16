@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link as LinkIcon, CheckCircle, UserPlus, Check } from 'lucide-react';
+import { Pencil, Trash2, Clock, Users, FileText, Book, Plus, Calendar as CalendarIcon, MessageCircle, MessageSquare, CheckCircle2, AlertCircle, ArrowRight, AlertTriangle, X, ExternalLink, Upload, Link as LinkIcon, CheckCircle, UserPlus, Check, Info } from 'lucide-react';
 import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { CompletionTracker } from '@/components/ui/custom/completion-tracker';
@@ -840,7 +840,7 @@ export default function ProjectDetails() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-medium">Comic Workflow</h3>
                     
-                    {workflowSteps && workflowSteps.length === 0 && (
+                    {workflowSteps && workflowSteps.length === 0 && hasEditAccess && (
                       <Button 
                         size="sm"
                         onClick={() => initializeWorkflowMutation.mutate()}
@@ -1194,13 +1194,19 @@ export default function ProjectDetails() {
                       <p className="text-slate-500 mb-4">
                         Initialize the comic workflow to track the production process.
                       </p>
-                      <Button 
-                        onClick={() => initializeWorkflowMutation.mutate()}
-                        disabled={initializeWorkflowMutation.isPending || !hasEditAccess}
-                      >
-                        {!hasEditAccess ? 'No Edit Permission' : 
-                          (initializeWorkflowMutation.isPending ? 'Initializing...' : 'Initialize Workflow')}
-                      </Button>
+                      {hasEditAccess ? (
+                        <Button 
+                          onClick={() => initializeWorkflowMutation.mutate()}
+                          disabled={initializeWorkflowMutation.isPending}
+                        >
+                          {initializeWorkflowMutation.isPending ? 'Initializing...' : 'Initialize Workflow'}
+                        </Button>
+                      ) : (
+                        <div className="px-4 py-3 rounded-md bg-slate-100 text-slate-600 text-sm max-w-md mx-auto">
+                          <Info className="h-4 w-4 inline mr-2" />
+                          You have view-only access to this project. Contact an editor with edit privileges to initialize the workflow.
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1448,9 +1454,10 @@ export default function ProjectDetails() {
                   setShowUpdateStatusDialog(false);
                 }
               }}
-              disabled={updateWorkflowStepMutation.isPending}
+              disabled={updateWorkflowStepMutation.isPending || !hasEditAccess}
             >
-              {updateWorkflowStepMutation.isPending ? "Updating..." : "Update Status"}
+              {!hasEditAccess ? "View-only Access" : 
+                (updateWorkflowStepMutation.isPending ? "Updating..." : "Update Status")}
             </Button>
           </DialogFooter>
         </DialogContent>
