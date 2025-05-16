@@ -255,7 +255,7 @@ export default function ProjectDetails() {
   });
 
   const updateProjectMutation = useMutation({
-    mutationFn: async (updateData: { id: number; dueDate?: Date; progress?: number }) => {
+    mutationFn: async (updateData: { id: number; dueDate?: Date; progress?: number; status?: string }) => {
       const res = await apiRequest("PATCH", `/api/projects/${updateData.id}`, updateData);
       return res.json();
     },

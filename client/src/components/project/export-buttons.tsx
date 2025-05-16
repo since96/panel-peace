@@ -264,7 +264,7 @@ ${project.workflowSteps && project.workflowSteps.length > 0
   ? project.workflowSteps.map((step: any) => 
       `${step.title.toUpperCase()}
 Deadline: ${step.dueDate ? formatDate(step.dueDate) : 'No deadline set'}
-Status: ${step.status} (${step.progress}% complete)`
+Status: ${step.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}`
     ).join('\n\n')
   : "No workflow steps defined."}
 
