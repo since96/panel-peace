@@ -2,6 +2,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
 import { Project, FeedbackItem, Deadline, Collaborator, Asset, WorkflowStep, User, Comment } from '@shared/schema';
+import { useHasEditAccess } from '@/hooks/useHasEditAccess';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useState, useCallback, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -74,6 +75,7 @@ export default function ProjectDetails() {
   const [_, navigate] = useLocation();
   const [projectProgress, setProjectProgress] = useState<number>(0);
   const [editing, setEditing] = useState(false);
+  const hasEditAccess = useHasEditAccess();
   // Adding assignees array to the editingStep
   const [editingStep, setEditingStep] = useState<(WorkflowStep & { assignees?: string[] }) | null>(null);
   const [selectedStep, setSelectedStep] = useState<WorkflowStep | null>(null);
@@ -578,30 +580,41 @@ export default function ProjectDetails() {
               <p className="text-slate-500 mt-1">{project.description}</p>
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setEditing(!editing)}
-              >
-                {editing ? 'Cancel Edit' : 'Edit Project'}
-              </Button>
+              {hasEditAccess && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setEditing(!editing)}
+                >
+                  {editing ? 'Cancel Edit' : 'Edit Project'}
+                </Button>
+              )}
               {project && !isProjectEditorsLoading && workflowSteps && (
                 <ExportButtons 
                   project={{...project, workflowSteps}} 
                   collaborators={projectEditors || []} 
                 />
               )}
-              <Button 
-                variant="destructive" 
-                size="sm" 
+              {hasEditAccess && (
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
                 onClick={() => setShowDeleteConfirm(true)}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
                 Delete Project
               </Button>
+              )}
             </div>
           </div>
         </div>
+
+        {!hasEditAccess && (
+          <div className="bg-amber-100 text-amber-700 p-3 rounded-md mt-4 mb-2 text-sm flex items-center">
+            <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
+            <p>You have view-only access to this project. You can see all information but cannot make changes.</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           <div className="lg:col-span-3">
