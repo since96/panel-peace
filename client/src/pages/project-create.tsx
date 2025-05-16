@@ -240,7 +240,7 @@ export default function ProjectCreate() {
     // Debug the API data
     console.log("API data being sent:", JSON.stringify(apiData, null, 2));
     
-    console.log("Creating project with data:", apiData);
+    console.log("Creating comic with data:", apiData);
     createProjectMutation.mutateAsync(apiData);
   };
   
@@ -251,8 +251,8 @@ export default function ProjectCreate() {
   return (
     <>
       <Helmet>
-        <title>Create New Project - Comic Editor Pro</title>
-        <meta name="description" content="Create a new comic book project. Set up project details, timeline, and initial parameters." />
+        <title>Create New Comic - Comic Editor Pro</title>
+        <meta name="description" content="Create a new comic book. Set up comic details, timeline, and initial parameters." />
       </Helmet>
       
       <div className="max-w-4xl mx-auto">
