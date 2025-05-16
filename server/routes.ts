@@ -585,6 +585,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         progress: requestData.progress || 0,
       });
       
+      // Handle date fields
+      let dueDate = null;
+      if (requestData.dueDate) {
+        try {
+          dueDate = new Date(requestData.dueDate);
+          console.log("PROJECT CREATE: Parsed due date:", dueDate);
+        } catch (e) {
+          console.error("PROJECT CREATE: Invalid due date format:", requestData.dueDate);
+        }
+      }
+      
       // Create the project
       const newProject = await storage.createProject({
         title: requestData.title || "Untitled Project",
@@ -594,7 +605,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         progress: requestData.progress || 0,
         description: requestData.description || null,
         issue: requestData.issue || null,
-        coverImage: null
+        coverImage: null,
+        dueDate: dueDate
       });
       
       console.log(`PROJECT CREATE: Successfully created project "${newProject.title}" (ID: ${newProject.id}) for studio ${newProject.studioId}`);
