@@ -34,7 +34,7 @@ function Router() {
   return (
     <Switch>
       {/* Login pages and public pages - not protected, not using app layout */}
-      <Route path="/">
+      <Route path="/" exact>
         <Landing />
       </Route>
       <Route path="/login">
@@ -55,7 +55,7 @@ function Router() {
           closeSidebar={closeMobileSidebar}
         >
           <Switch>
-            <Route path="/">
+            <Route path="/dashboard">
               <SimpleProtected>
                 <Dashboard />
               </SimpleProtected>
