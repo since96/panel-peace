@@ -1656,8 +1656,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid studio ID" });
       }
       
-      // TEMP: No authentication - use admin user
-      const dbUser = await storage.getUser(1);
+      // Get the authenticated user
+      const userId = req.user?.id || 0;
+      const dbUser = await storage.getUser(userId);
       
       if (!dbUser) {
         return res.status(404).json({ message: "User not found" });
@@ -1665,8 +1666,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Only site admins can delete studios
       if (!dbUser.isSiteAdmin) {
+        console.log(`User ${userId} (${dbUser.username}) attempted to delete a studio but isn't a site admin`);
         return res.status(403).json({ message: "Only site administrators can delete studios" });
       }
+      
+      console.log(`Admin user ${userId} (${dbUser.username}) is deleting a studio`);
       
       // Check if studio exists
       const studio = await storage.getStudio(studioId);
