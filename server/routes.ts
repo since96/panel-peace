@@ -971,10 +971,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return true;
       }
       
-      // If the project was created by a regular editor, Senior Editor can delete it
+      // If the project was created by a regular editor, Site Admin can delete it
       if (project.createdBy) {
         const creatorUser = await storage.getUser(project.createdBy);
-        if (creatorUser && creatorUser.isEditor && creatorUser.editorRole === 'editor') {
+        if (creatorUser && creatorUser.isEditor && !creatorUser.isSiteAdmin) {
           return true;
         }
       }
@@ -983,7 +983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Regular Editor can only delete projects they created
-    if (user.editorRole === 'editor') {
+    if (user.isEditor && !user.isSiteAdmin) {
       return project.createdBy === user.id;
     }
     

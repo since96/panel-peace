@@ -600,7 +600,8 @@ export default function Collaborators() {
                             fullName: "",
                             email: "",
                             isEditor: true,
-                            editorRole: "editor",
+                            isSiteAdmin: false,
+                            hasEditAccess: true,
                             assignedProjects: [],
                             username: "editor_" + Date.now(),
                             password: Math.random().toString(36).slice(-8)
@@ -656,10 +657,16 @@ export default function Collaborators() {
                                         {editor.email}
                                       </a>
                                     </p>
-                                    <Badge className="mt-1" variant="outline">
-                                      {editor.editorRole === 'editor_in_chief' ? 'Editor-in-Chief' :
-                                       editor.editorRole === 'senior_editor' ? 'Senior Editor' : 'Editor'}
-                                    </Badge>
+                                    <div className="flex gap-1 mt-1">
+                                      <Badge variant="outline">
+                                        {editor.isSiteAdmin ? 'Site Admin' : 'Editor'}
+                                      </Badge>
+                                      {editor.hasEditAccess === false && 
+                                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                          View Only
+                                        </Badge>
+                                      }
+                                    </div>
                                     
                                     <div className="mt-3 text-xs text-slate-500">
                                       {userAssignments.has(editor.id) ? (
