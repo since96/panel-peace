@@ -60,33 +60,21 @@ const eicFormSchema = z.object({
   path: ["confirmPassword"],
 });
 
-// Combined schema for full form
-const formSchema = z.object({
-  studioData: studioFormSchema,
-  userData: eicFormSchema,
-});
+// Simplified schema for bullpen creation only
+const formSchema = studioFormSchema;
 
 export function CreateStudioDialog() {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('studio');
   const { toast } = useToast();
   
-  // Create form
+  // Create form - simplified for bullpen creation only
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      studioData: {
-        name: '',
-        description: '',
-        logoUrl: '',
-      },
-      userData: {
-        username: '',
-        email: '',
-        fullName: '',
-        password: '',
-        confirmPassword: '',
-      }
+      name: '',
+      description: '',
+      logoUrl: '',
     },
   });
   
