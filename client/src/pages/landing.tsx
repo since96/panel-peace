@@ -56,7 +56,7 @@ export default function Landing() {
                     ease: "easeInOut",
                   }}
                 >
-                  Editor
+                  Comic Book Editor
                 </motion.span>
                 Tears
               </motion.h2>
