@@ -611,20 +611,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log the processed request data
       console.log("PROJECT CREATE: Processed request data:", JSON.stringify(requestData, null, 2));
       
-      // TEMP: No authentication - use admin user
-      const dbUser = await storage.getUser(1);
+      // Use authenticated user from session
+      const dbUser = req.user;
       
       if (!dbUser) {
-        console.error("PROJECT CREATE: User with ID 1 not found");
-        return res.status(404).json({ message: "User not found" });
+        console.error("PROJECT CREATE: Authenticated user not found in request");
+        return res.status(401).json({ message: "Unauthorized. User not authenticated" });
       }
       
-      console.log("PROJECT CREATE: Found user:", JSON.stringify(dbUser, null, 2));
+      console.log("PROJECT CREATE: Using authenticated user:", JSON.stringify(dbUser, null, 2));
       
-      // Temporarily disable editor check for development
-      // if (!dbUser.isEditor) {
-      //   return res.status(403).json({ message: "Only editors can create projects" });
-      // }
+      // Verify the user is authorized to create projects
+      if (!dbUser.isEditor && !dbUser.isSiteAdmin) {
+        console.error("PROJECT CREATE: User is not an editor or site admin", dbUser);
+        return res.status(403).json({ message: "Only editors can create projects" });
+      }
+      
+      // If the user doesn't have edit access, they can't create projects
+      if (dbUser.hasEditAccess === false && !dbUser.isSiteAdmin) {
+        console.error("PROJECT CREATE: User has view-only access", dbUser);
+        return res.status(403).json({ message: "View-only users cannot create projects" });
+      }
       
       // Store the creator's user ID
       requestData.createdBy = dbUser.id;
