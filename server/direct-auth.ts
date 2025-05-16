@@ -255,8 +255,8 @@ export function setupDirectAuth(app: express.Express) {
         fullName,
         email,
         isEditor: isEditor || false,
-        editorRole: editorRole || "editor",
         role: role || "Editor",
+        hasEditAccess: req.body.hasEditAccess !== false, // Respect view-only flag
         roles: ["editor"]
       });
       
