@@ -111,6 +111,11 @@ function Router() {
                 <StudiosPage />
               </SimpleProtected>
             </Route>
+            <Route path="/deadline-helper">
+              <SimpleProtected>
+                <DeadlineHelper />
+              </SimpleProtected>
+            </Route>
             <Route path="/route-test">
               <SimpleProtected>
                 <RouteTest />
