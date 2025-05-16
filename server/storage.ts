@@ -272,11 +272,15 @@ export class MemStorage implements IStorage {
       phone: newUserData.phone || null,
       socialMedia: newUserData.socialMedia || null,
       isEditor: newUserData.isEditor || null,
-      editorRole: newUserData.editorRole || null,
+      isSiteAdmin: newUserData.isSiteAdmin || false,
+      hasEditAccess: newUserData.hasEditAccess !== undefined ? newUserData.hasEditAccess : true, // Default to true if not specified
+      studioId: newUserData.studioId || null,
       assignedProjects: newUserData.assignedProjects || null,
       role: newUserData.role || null,
       roles: newUserData.roles || null,
       avatarUrl: newUserData.avatarUrl || null,
+      createdAt: newUserData.createdAt || new Date(),
+      updatedAt: newUserData.updatedAt || new Date(),
     };
     
     this.users.set(id, newUser);
@@ -292,9 +296,22 @@ export class MemStorage implements IStorage {
     
     const newUser: User = { 
       id,
-      ...user,
-      // Explicitly set hasEditAccess property
-      hasEditAccess
+      username: user.username,
+      password: user.password || null,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone || null,
+      socialMedia: user.socialMedia || null,
+      isEditor: user.isEditor || false,
+      isSiteAdmin: user.isSiteAdmin || false,
+      hasEditAccess,
+      studioId: user.studioId || null,
+      assignedProjects: user.assignedProjects || [],
+      role: user.role || null,
+      roles: user.roles || [],
+      avatarUrl: user.avatarUrl || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     this.users.set(id, newUser);
