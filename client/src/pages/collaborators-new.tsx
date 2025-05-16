@@ -386,7 +386,7 @@ export default function Collaborators() {
           <div className="lg:col-span-2">
             <Tabs defaultValue="talent" className="mb-6">
               <TabsList className="grid w-full max-w-md grid-cols-3">
-                <TabsTrigger value="talent">Talent Roster</TabsTrigger>
+                <TabsTrigger value="talent">Creator Pool</TabsTrigger>
                 <TabsTrigger value="assignments">Project Assignments</TabsTrigger>
                 <TabsTrigger value="editors">Editorial Team</TabsTrigger>
               </TabsList>
