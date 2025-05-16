@@ -2,15 +2,29 @@ import { Badge } from '@/components/ui/badge';
 import { cn, formatStatusLabel, getStatusColor } from '@/lib/utils';
 import { Link } from 'wouter';
 import { Project } from '@shared/schema';
-import { AlertCircle, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { AlertCircle, AlertTriangle, BuildingIcon, CheckCircle, Clock } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface ProjectCardProps {
   project: Project;
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const { id, title, issue, description, status, progress, dueDate } = project;
+  const { id, title, issue, description, status, progress, dueDate, studioId } = project;
   const statusColors = getStatusColor(status);
+  
+  // Fetch the bullpen (studio) information
+  const { data: studio } = useQuery({
+    queryKey: ['/api/studios', studioId],
+    queryFn: async () => {
+      const response = await fetch(`/api/studios/${studioId}`);
+      if (!response.ok) {
+        return null;
+      }
+      return response.json();
+    },
+    enabled: !!studioId,
+  });
   
   // Calculate days remaining
   const getDueString = () => {
@@ -123,6 +137,14 @@ export function ProjectCard({ project }: ProjectCardProps) {
               {dueString}
             </div>
           </div>
+          
+          {/* Show bullpen name */}
+          {studio && (
+            <div className="mt-2 flex items-center text-xs text-slate-500">
+              <BuildingIcon className="h-3 w-3 mr-1" />
+              <span>Bullpen: {studio.name}</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>
