@@ -26,8 +26,8 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   
   const navigation = [
     { name: 'Dashboard', href: '/', icon: 'ri-dashboard-line' },
-    { name: 'My Projects', href: '/projects', icon: 'ri-file-list-line' },
-    { name: 'Talent Management', href: '/collaborators', icon: 'ri-team-line' },
+    { name: 'Comic Books', href: '/projects', icon: 'ri-file-list-line' },
+    { name: 'Creators & Editors', href: '/collaborators', icon: 'ri-team-line' },
     { name: 'Bullpens', href: '/studios', icon: 'ri-building-line' },
   ];
   
@@ -101,7 +101,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
           ))}
           
           <div className="pt-4 mt-4 border-t border-slate-200">
-            <p className="px-3 text-xs text-slate-500 uppercase font-medium">Recent Projects</p>
+            <p className="px-3 text-xs text-slate-500 uppercase font-medium">Recent Comics</p>
             <div className="mt-2 space-y-1">
               {recentProjects.map((project) => (
                 <div
@@ -118,7 +118,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               ))}
               
               {recentProjects.length === 0 && (
-                <p className="text-xs text-slate-400 px-3 py-2">No recent projects</p>
+                <p className="text-xs text-slate-400 px-3 py-2">No recent comics</p>
               )}
             </div>
           </div>

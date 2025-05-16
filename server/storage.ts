@@ -203,8 +203,9 @@ export class MemStorage implements IStorage {
   }
   
   private async initializeSampleData() {
-    // Create a sample project for export testing
-    await this.createSampleProject();
+    // Intentionally empty - no sample data will be created
+    // Users must create their own bullpens and comics
+    return;
   }
 
   // User operations
