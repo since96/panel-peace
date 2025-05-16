@@ -150,10 +150,22 @@ export default function ProjectCreate() {
         
         console.log("Making POST request to /api/projects with data:", data);
         
-        // Use the apiRequest helper for consistency
-        const response = await apiRequest("POST", "/api/projects", data);
-        const result = await response.json();
+        // Use fetch directly with proper content type header for cross-browser compatibility
+        const response = await fetch('/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+          credentials: 'same-origin'
+        });
         
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw errorData;
+        }
+        
+        const result = await response.json();
         console.log("Project created successfully:", result);
         return result;
       } catch (error) {
