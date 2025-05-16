@@ -101,6 +101,27 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               )}
             </div>
           </div>
+          
+          {/* Signup Promotion Banner */}
+          <div className="mt-8 pt-6 border-t border-slate-200">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 shadow-sm">
+              <h3 className="text-xl font-bold text-amber-900 mb-2">Wishing you had this already?</h3>
+              <p className="text-sm text-amber-800 mb-3">Sign up to be notified upon launch</p>
+              
+              <Button 
+                className="w-full bg-amber-500 hover:bg-amber-600 mb-3"
+                onClick={() => {
+                  window.location.href = "mailto:panelpeacesignup@gmail.com?subject=I%20NEED%20THIS%20IN%20MY%20LIFE!";
+                }}
+              >
+                Sign Up
+              </Button>
+              
+              <p className="text-xs text-amber-700">
+                Shoot us your email and let us know your specific role in the comic book world.
+              </p>
+            </div>
+          </div>
         </nav>
       </ScrollArea>
       
