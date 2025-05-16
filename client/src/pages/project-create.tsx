@@ -150,10 +150,25 @@ export default function ProjectCreate() {
         
         console.log("Making POST request to /api/projects with data:", data);
         
-        // Use our API utility to handle authentication and errors
-        const result = await import('../lib/api').then(module => {
-          return module.apiPost('/api/projects', data);
+        // Import the API module synchronously to avoid browser-specific dynamic import issues
+        const api = await import('../lib/api');
+        // Make API call with explicit handling
+        const response = await fetch('/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
+          },
+          body: JSON.stringify(data),
+          credentials: 'include'
         });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create project');
+        }
+        
+        const result = await response.json();
         console.log("Project created successfully:", result);
         return result;
       } catch (error) {
