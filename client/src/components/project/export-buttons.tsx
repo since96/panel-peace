@@ -55,6 +55,28 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
       const doc = new jsPDF();
       let yPosition = 20;
       
+      // Add studio logo - create a simple logo if not provided
+      // Drawing a simple comic-style logo
+      const logoX = 170; // Right side of the page
+      const logoY = 15;  // Top of the page
+      
+      // Draw logo box
+      doc.setDrawColor(41, 72, 128); // Dark blue
+      doc.setFillColor(75, 123, 189); // Lighter blue
+      doc.rect(logoX, logoY - 10, 25, 25, 'FD'); // Filled rectangle with border
+      
+      // Add text to logo
+      doc.setTextColor(255, 255, 255); // White
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text("COMIC", logoX + 4, logoY);
+      doc.text("EDITOR", logoX + 4, logoY + 6);
+      doc.setFontSize(14);
+      doc.text("CE", logoX + 7, logoY + 14);
+      
+      // Reset colors for document content
+      doc.setTextColor(0, 0, 0);
+      
       // Create the simple formatted PDF similar to email format
       // PROJECT DETAILS
       doc.setFontSize(16);
