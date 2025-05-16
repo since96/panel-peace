@@ -258,6 +258,9 @@ export default function ProjectDetails() {
 
   const updateProjectMutation = useMutation({
     mutationFn: async (updateData: { id: number; dueDate?: Date; progress?: number; status?: string }) => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to edit projects");
+      }
       const res = await apiRequest("PATCH", `/api/projects/${updateData.id}`, updateData);
       return res.json();
     },
@@ -286,6 +289,9 @@ export default function ProjectDetails() {
   // Mutation for updating workflow step progress
   const updateStepProgressMutation = useMutation({
     mutationFn: async ({ stepId, progress }: { stepId: number, progress: number }) => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to update workflow steps");
+      }
       const res = await apiRequest("PATCH", `/api/workflow-steps/${stepId}`, {
         progress
       });
@@ -310,6 +316,9 @@ export default function ProjectDetails() {
   // Mutation for deleting the project
   const deleteProjectMutation = useMutation({
     mutationFn: async (projectId: number) => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to delete projects");
+      }
       // Get the current user ID (in a real app, this would come from auth context)
       // Using admin (1) as the default
       const currentUserId = 1; 
@@ -343,6 +352,9 @@ export default function ProjectDetails() {
       url: string, 
       description?: string 
     }) => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to add file links");
+      }
       const res = await apiRequest("POST", `/api/workflow-steps/${stepId}/file-links`, {
         url,
         description,
