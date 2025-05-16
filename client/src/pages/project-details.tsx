@@ -884,7 +884,11 @@ export default function ProjectDetails() {
                                           'bg-slate-50 border-slate-200 text-slate-700'
                                         }`}
                                       >
-                                        {formatStatusLabel(step.status)}
+                                        {step.status === 'not_started' && step.progress > 0 
+                                          ? `${step.progress}% Complete` 
+                                          : step.status === 'not_started' 
+                                            ? '0% Complete' 
+                                            : formatStatusLabel(step.status)}
                                       </Badge>
                                     </div>
                                     
