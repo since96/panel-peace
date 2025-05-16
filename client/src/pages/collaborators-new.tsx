@@ -26,12 +26,8 @@ const talentRoles = [
   { id: "cover_artist", label: "Cover Artist" }
 ];
 
-// Define editor roles
-const editorRoles = [
-  { id: "editor", label: "Editor", description: "Manage specific assigned projects" },
-  { id: "senior_editor", label: "Senior Editor", description: "Manage multiple projects and editors" },
-  { id: "editor_in_chief", label: "Editor-in-Chief", description: "Full access to all projects and editorial teams" }
-];
+// No more distinct editor roles needed
+// Editors are now simply users with isEditor=true
 
 export default function Collaborators() {
   const [searchQuery, setSearchQuery] = useState("");
