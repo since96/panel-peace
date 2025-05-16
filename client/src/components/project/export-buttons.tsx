@@ -55,14 +55,14 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
       const doc = new jsPDF();
       let yPosition = 20;
       
-      // Add studio logo - create a studio logo
+      // Add bullpen logo - create a bullpen logo
       const logoX = 170; // Right side of the page
       const logoY = 15;  // Top of the page
       
-      // Get studio name from the project if available
-      const studioName = project.studioName || "Marvel Studios";
+      // Get bullpen name from the project if available
+      const studioName = project.studioName || "Marvel Comics";
       
-      // Draw studio logo box
+      // Draw bullpen logo box
       doc.setDrawColor(200, 16, 46); // Marvel red
       doc.setFillColor(200, 16, 46); // Marvel red
       doc.rect(logoX, logoY - 10, 25, 14, 'FD'); // Filled rectangle with border

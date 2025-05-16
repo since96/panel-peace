@@ -117,8 +117,8 @@ export default function StudiosPage() {
       ) : studios.length === 0 ? (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-10 text-center">
           <BuildingIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-4 text-lg font-medium">No studios found</h3>
-          <p className="mt-2 text-gray-500">Get started by creating a new studio.</p>
+          <h3 className="mt-4 text-lg font-medium">No bullpens found</h3>
+          <p className="mt-2 text-gray-500">Get started by creating a new bullpen.</p>
           <div className="mt-6">
             <CreateStudioDialog />
           </div>
@@ -171,15 +171,15 @@ function BullpenCard({ studio }: { studio: Bullpen }) {
       // Invalidate the studios query to refresh the list
       queryClient.invalidateQueries({ queryKey: ['/api/studios'] });
       toast({
-        title: "Studio deleted",
+        title: "Bullpen deleted",
         description: `${studio.name} has been permanently deleted.`,
       });
     },
     onError: (error) => {
       console.error('Error deleting studio:', error);
       toast({
-        title: "Error deleting studio",
-        description: "There was a problem deleting the studio. Please try again later.",
+        title: "Error deleting bullpen",
+        description: "There was a problem deleting the bullpen. Please try again later.",
         variant: "destructive"
       });
     }
@@ -228,15 +228,15 @@ function BullpenCard({ studio }: { studio: Bullpen }) {
                     className="ml-2 text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete Studio</span>
+                    <span className="sr-only">Delete Bullpen</span>
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Studio</AlertDialogTitle>
+                    <AlertDialogTitle>Delete Bullpen</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to delete <strong>{studio.name}</strong>? This action will permanently delete
-                      the studio, all its projects, and remove all users associated with it.
+                      the bullpen, all its projects, and remove all users associated with it.
                       <br /><br />
                       This action cannot be undone.
                     </AlertDialogDescription>
@@ -251,7 +251,7 @@ function BullpenCard({ studio }: { studio: Bullpen }) {
                       }}
                       disabled={deleteStudioMutation.isPending}
                     >
-                      {deleteStudioMutation.isPending ? 'Deleting...' : 'Delete Studio'}
+                      {deleteStudioMutation.isPending ? 'Deleting...' : 'Delete Bullpen'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
