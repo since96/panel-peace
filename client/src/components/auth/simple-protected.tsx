@@ -21,8 +21,9 @@ export function SimpleProtected({ children }: SimpleProtectedProps) {
       return;
     }
 
-    // If not authenticated from API check, redirect to login page
-    if (!isLoading && !isAuthenticated) {
+    // Only redirect to login if not authenticated after loading completes
+    // We're adding a path check to make sure we only redirect for protected routes
+    if (!isLoading && !isAuthenticated && !window.location.pathname.match(/^\/$|^\/landing\/?$/)) {
       console.log('Not authenticated in SimpleProtected, redirecting to login page');
       window.location.replace('/simple-login');
     } else if (!isLoading && isAuthenticated) {
