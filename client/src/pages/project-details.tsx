@@ -445,6 +445,9 @@ export default function ProjectDetails() {
       assignedTo?: number | null;
       assignees?: string[];
     }) => {
+      if (!hasEditAccess) {
+        throw new Error("You don't have permission to update workflow steps");
+      }
       const { stepId, ...updateData } = data;
       console.log("Sending update:", updateData);
       const res = await apiRequest("PATCH", `/api/workflow-steps/${stepId}`, updateData);
@@ -551,6 +554,21 @@ export default function ProjectDetails() {
         <title>{`${project.title} ${project.issue} - Comic Editor Pro`}</title>
         <meta name="description" content={`Manage and collaborate on ${project.title} ${project.issue}. View progress, feedback, and assets for this comic book project.`} />
       </Helmet>
+      
+      {!hasEditAccess && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4 max-w-7xl mx-auto">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                <span className="font-medium">View-only access:</span> You can see all details but cannot make changes to this project.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
@@ -724,6 +742,8 @@ export default function ProjectDetails() {
                             // Show dialog to add new file link for project-wide reference
                             setShowFileLinkDialog(true);
                           }}
+                          disabled={!hasEditAccess}
+                          title={!hasEditAccess ? "View-only access" : "Add a file link"}
                         >
                           <LinkIcon className="h-4 w-4" />
                           Add Link
