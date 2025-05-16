@@ -40,6 +40,7 @@ import { FeedbackItemCard } from '@/components/ui/custom/feedback-item';
 import { DeadlineItem } from '@/components/ui/custom/deadline-item';
 import { CompletionTracker } from '@/components/ui/custom/completion-tracker';
 import ProjectEditors from '@/components/project/project-editors';
+import { ExportButtons } from '@/components/project/export-buttons';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -202,6 +203,12 @@ export default function ProjectDetails() {
   // Get all users to display in talent assignment dropdown
   const { data: users, isLoading: isUsersLoading } = useQuery<User[]>({
     queryKey: ['/api/users'],
+    enabled: !!id,
+  });
+  
+  // Get project editors for export functionality
+  const { data: projectEditors, isLoading: isProjectEditorsLoading } = useQuery<any[]>({
+    queryKey: [`/api/projects/${id}/editors`],
     enabled: !!id,
   });
   
@@ -553,6 +560,12 @@ export default function ProjectDetails() {
               >
                 {editing ? 'Cancel Edit' : 'Edit Project'}
               </Button>
+              {project && !isProjectEditorsLoading && (
+                <ExportButtons 
+                  project={project} 
+                  collaborators={projectEditors || []} 
+                />
+              )}
               <Button 
                 variant="destructive" 
                 size="sm" 
