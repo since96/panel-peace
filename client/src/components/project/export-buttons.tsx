@@ -55,24 +55,34 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
       const doc = new jsPDF();
       let yPosition = 20;
       
-      // Add studio logo - create a simple logo if not provided
-      // Drawing a simple comic-style logo
+      // Add studio logo - create a studio logo
       const logoX = 170; // Right side of the page
       const logoY = 15;  // Top of the page
       
-      // Draw logo box
-      doc.setDrawColor(41, 72, 128); // Dark blue
-      doc.setFillColor(75, 123, 189); // Lighter blue
-      doc.rect(logoX, logoY - 10, 25, 25, 'FD'); // Filled rectangle with border
+      // Get studio name from the project if available
+      const studioName = project.studioName || "Marvel Studios";
       
-      // Add text to logo
+      // Draw studio logo box
+      doc.setDrawColor(200, 16, 46); // Marvel red
+      doc.setFillColor(200, 16, 46); // Marvel red
+      doc.rect(logoX, logoY - 10, 25, 14, 'FD'); // Filled rectangle with border
+      
+      // Add text to studio logo
       doc.setTextColor(255, 255, 255); // White
-      doc.setFontSize(9);
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text("COMIC", logoX + 4, logoY);
-      doc.text("EDITOR", logoX + 4, logoY + 6);
-      doc.setFontSize(14);
-      doc.text("CE", logoX + 7, logoY + 14);
+      if (studioName.toLowerCase().includes('marvel')) {
+        doc.text("MARVEL", logoX + 2.5, logoY);
+      } else {
+        // Adapt text size to fit in box
+        if (studioName.length > 10) {
+          doc.setFontSize(7);
+          doc.text(studioName.substring(0, 12), logoX + 1, logoY - 3);
+          doc.text(studioName.substring(12, 24), logoX + 1, logoY + 1);
+        } else {
+          doc.text(studioName, logoX + 2, logoY);
+        }
+      }
       
       // Reset colors for document content
       doc.setTextColor(0, 0, 0);
