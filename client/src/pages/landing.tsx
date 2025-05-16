@@ -66,10 +66,15 @@ export default function Landing() {
                   Comic Editor
                 </div>
               ) : (
-                <div className="text-center flex items-center">
+                <motion.div 
+                  className="text-center flex items-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1 }}
+                >
                   <span className="text-2xl md:text-4xl font-medium">Comic Editor</span>
                   <span className="text-2xl md:text-4xl font-bold text-accent ml-4">HAPPY</span>
-                </div>
+                </motion.div>
               )}
             </motion.div>
             
@@ -85,9 +90,9 @@ export default function Landing() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0 }}
-              transition={{ duration: 1, delay: 2 }}
+              transition={{ duration: 1, delay: 3 }}
               onAnimationComplete={() => {
-                setTimeout(() => setAnimationComplete(true), 500);
+                setTimeout(() => setAnimationComplete(true), 1000);
               }}
             />
           </div>
