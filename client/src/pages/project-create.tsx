@@ -301,19 +301,95 @@ export default function ProjectCreate() {
     setIsSubmitting(true);
     
     try {
-      // Add the studio ID from the form or URL parameter
-      const formDataWithStudio = {
-        ...data,
+      // Manually create a simple project object with only string and number values
+      // This avoids browser-specific issues with complex objects like Date
+      const projectData = {
+        title: data.title,
+        issue: data.issue || "",
+        description: data.description || "",
+        status: data.status || "in_progress",
+        progress: data.progress || 0,
         studioId: Number(studioId || 0),
+        
+        // Comic metrics
+        coverCount: Number(data.coverCount || 1),
+        interiorPageCount: Number(data.interiorPageCount || 22),
+        fillerPageCount: Number(data.fillerPageCount || 0),
+        
+        // Talent metrics
+        pencilerPagesPerWeek: Number(data.pencilerPagesPerWeek || 5),
+        inkerPagesPerWeek: Number(data.inkerPagesPerWeek || 7),
+        coloristPagesPerWeek: Number(data.coloristPagesPerWeek || 10),
+        lettererPagesPerWeek: Number(data.lettererPagesPerWeek || 15),
+        
+        // Batch metrics
+        pencilBatchSize: Number(data.pencilBatchSize || 5),
+        inkBatchSize: Number(data.inkBatchSize || 5),
+        letterBatchSize: Number(data.letterBatchSize || 5),
+        
+        // Approval metrics
+        approvalDays: Number(data.approvalDays || 2),
       };
       
-      // Use the sanitizeFormData utility to handle browser compatibility issues
-      const sanitizedData = sanitizeFormData(formDataWithStudio);
+      // Handle dates manually to avoid browser inconsistencies
+      if (data.dueDate) {
+        // Convert date to ISO string for consistent handling
+        projectData.dueDate = typeof data.dueDate === 'string' 
+          ? data.dueDate 
+          : data.dueDate.toISOString();
+      }
       
-      console.log("Sanitized data for submission:", sanitizedData);
+      if (data.plotDeadline) {
+        projectData.plotDeadline = typeof data.plotDeadline === 'string'
+          ? data.plotDeadline
+          : data.plotDeadline.toISOString();
+      }
       
-      // Use the mutation with sanitized data
-      createProjectMutation.mutate(sanitizedData);
+      if (data.coverDeadline) {
+        projectData.coverDeadline = typeof data.coverDeadline === 'string'
+          ? data.coverDeadline
+          : data.coverDeadline.toISOString();
+      }
+      
+      console.log("Submitting project data:", projectData);
+      
+      // Use a direct fetch request for maximum browser compatibility
+      fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
+        credentials: 'include'
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => {
+            throw new Error(text || `Error ${response.status}: Failed to create comic`);
+          });
+        }
+        return response.json();
+      })
+      .then(result => {
+        console.log("Project created successfully:", result);
+        toast({
+          title: "Comic Created",
+          description: "Your comic has been created successfully",
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+        navigate(`/projects/${result.id}`);
+      })
+      .catch(error => {
+        console.error("Error creating project:", error);
+        toast({
+          title: "Error creating comic",
+          description: error.message || "Failed to create comic. Please try again.",
+          variant: "destructive",
+        });
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
     } catch (error) {
       console.error("Unexpected error in form submit:", error);
       toast({
