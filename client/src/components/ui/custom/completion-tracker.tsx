@@ -17,6 +17,8 @@ export function CompletionTracker({
   totalCount,
   onProgressUpdate
 }: CompletionTrackerProps) {
+  // Force refresh the component with updated totalCount
+  console.log(`CompletionTracker initialized with stepId=${stepId}, totalCount=${totalCount}`);
   const [selectedCount, setSelectedCount] = useState<number>(Math.round(currentProgress * totalCount / 100));
   
   // Binary completion for plot and script steps only

@@ -1491,6 +1491,7 @@ export default function ProjectDetails() {
             <div>
               {hasEditAccess ? (
                 <CompletionTracker 
+                  key={`tracker-${selectedStepForTracker.id}-${project?.interiorPageCount || 0}`}
                   stepId={selectedStepForTracker.id}
                   stepType={selectedStepForTracker.stepType}
                   currentProgress={selectedStepForTracker.progress}
