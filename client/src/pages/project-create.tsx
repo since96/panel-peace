@@ -4,8 +4,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProjectSchema, Studio } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeFormData, safeApiSubmit } from "@/lib/browser-helpers";
 import { z } from "zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -141,37 +142,16 @@ export default function ProjectCreate() {
   });
   
   const createProjectMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (formData: any) => {
       try {
-        // Add mandatory studioId if not present (this is a fallback for safety)
-        if (!data.studioId) {
-          data.studioId = 998; // Default to Marvel Comics
+        // Check for required bullpen ID
+        if (!formData.studioId || formData.studioId <= 0) {
+          throw new Error("A valid Bullpen ID is required");
         }
         
-        console.log("Making POST request to /api/projects with data:", data);
-        
-        // Import the API module synchronously to avoid browser-specific dynamic import issues
-        const api = await import('../lib/api');
-        // Make API call with explicit handling
-        const response = await fetch('/api/projects', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
-          },
-          body: JSON.stringify(data),
-          credentials: 'include'
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to create project');
-        }
-        
-        const result = await response.json();
-        console.log("Project created successfully:", result);
-        return result;
-      } catch (error) {
+        // Use the browser-helpers utility for safe API submission
+        return await safeApiSubmit('/api/projects', formData);
+      } catch (error: any) {
         console.error("Project creation error:", error);
         throw error;
       }
@@ -238,79 +218,81 @@ export default function ProjectCreate() {
     setIsSubmitting(true);
     
     try {
-      // Create a copy of the data for the mutation that we can safely modify
-      const submissionData = { ...data };
-      
-      // Ensure we have the studio ID (should be 998 if not provided)
-      console.log(`Final submission with studio ID: ${studioId}`);
-      
-      // Convert date fields to string format for API submission
-      // The server expects strings that it can parse into database timestamps
-      const apiData = {
-        ...submissionData,
-        // Always ensure the studioId is set as a number
+      // Create a simplified version of the data with explicit types
+      // This avoids browser-specific Date object handling issues
+      const simplifiedData = {
+        title: data.title,
+        issue: data.issue || "",
+        description: data.description || "",
+        status: data.status || "in_progress",
+        progress: data.progress || 0,
+        createdBy: 1, // Default user ID
         studioId: Number(studioId || 0),
-        // Convert date fields to ISO strings for the API
-        dueDate: submissionData.dueDate ? submissionData.dueDate.toISOString() : undefined,
-        plotDeadline: submissionData.plotDeadline ? submissionData.plotDeadline.toISOString() : undefined,
-        coverDeadline: submissionData.coverDeadline ? submissionData.coverDeadline.toISOString() : undefined
+        
+        // Comic book metrics
+        coverCount: Number(data.coverCount || 1),
+        interiorPageCount: Number(data.interiorPageCount || 22),
+        fillerPageCount: Number(data.fillerPageCount || 0),
+        
+        // Talent speed metrics
+        pencilerPagesPerWeek: Number(data.pencilerPagesPerWeek || 5),
+        inkerPagesPerWeek: Number(data.inkerPagesPerWeek || 7),
+        coloristPagesPerWeek: Number(data.coloristPagesPerWeek || 10),
+        lettererPagesPerWeek: Number(data.lettererPagesPerWeek || 15),
+        
+        // Batch processing metrics
+        pencilBatchSize: Number(data.pencilBatchSize || 5),
+        inkBatchSize: Number(data.inkBatchSize || 5),
+        letterBatchSize: Number(data.letterBatchSize || 5),
+        
+        // Approval metrics
+        approvalDays: Number(data.approvalDays || 2),
       };
       
-      // Debug the API data
-      console.log("API data being sent:", JSON.stringify(apiData, null, 2));
+      // Handle dates separately to avoid browser inconsistencies
+      if (data.dueDate) {
+        try {
+          const dateStr = typeof data.dueDate === 'string' 
+            ? data.dueDate 
+            : data.dueDate.toISOString();
+          // @ts-ignore
+          simplifiedData.dueDate = dateStr;
+        } catch (e) {
+          console.error("Error formatting dueDate:", e);
+        }
+      }
       
-      // Use a standard approach that works across all browsers
-      // Creating a cross-browser implementation for network requests
-      fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
-        },
-        credentials: 'include',
-        body: JSON.stringify(apiData)
-      })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(data => {
-            throw new Error(data.message || `Error creating project (${response.status})`);
-          });
+      if (data.plotDeadline) {
+        try {
+          const dateStr = typeof data.plotDeadline === 'string' 
+            ? data.plotDeadline 
+            : data.plotDeadline.toISOString();
+          // @ts-ignore
+          simplifiedData.plotDeadline = dateStr;
+        } catch (e) {
+          console.error("Error formatting plotDeadline:", e);
         }
-        return response.json();
-      })
-      .then(data => {
-        // Success handler
-        console.log("Project created successfully:", data);
-        toast({
-          title: "Project created",
-          description: "Your project has been created successfully",
-        });
-        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-        navigate(`/projects/${data.id}`);
-      })
-      .catch(error => {
-        // Error handler
-        console.error('Project creation error:', error);
-        
-        // Extract error message if available
-        let errorMessage = "Failed to create project. Please try again.";
-        
-        // Better error handling for different error types
-        if (error.message) {
-          errorMessage = error.message;
+      }
+      
+      if (data.coverDeadline) {
+        try {
+          const dateStr = typeof data.coverDeadline === 'string' 
+            ? data.coverDeadline 
+            : data.coverDeadline.toISOString();
+          // @ts-ignore
+          simplifiedData.coverDeadline = dateStr;
+        } catch (e) {
+          console.error("Error formatting coverDeadline:", e);
         }
-        
-        toast({
-          title: "Error creating project",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      }
+      
+      console.log("API data being sent:", JSON.stringify(simplifiedData, null, 2));
+      
+      // Use createProjectMutation directly which should work cross-browser
+      createProjectMutation.mutate(simplifiedData);
+      
     } catch (error) {
-      console.error("Unexpected error:", error);
+      console.error("Unexpected error in project creation form submit:", error);
       toast({
         title: "Error creating project",
         description: "An unexpected error occurred. Please try again.",
