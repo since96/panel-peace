@@ -218,83 +218,24 @@ export default function ProjectCreate() {
     setIsSubmitting(true);
     
     try {
-      // Create a simplified version of the data with explicit types
-      // This avoids browser-specific Date object handling issues
-      const simplifiedData = {
-        title: data.title,
-        issue: data.issue || "",
-        description: data.description || "",
-        status: data.status || "in_progress",
-        progress: data.progress || 0,
-        createdBy: 1, // Default user ID
+      // Add the studio ID from the form or URL parameter
+      const formDataWithStudio = {
+        ...data,
         studioId: Number(studioId || 0),
-        
-        // Comic book metrics
-        coverCount: Number(data.coverCount || 1),
-        interiorPageCount: Number(data.interiorPageCount || 22),
-        fillerPageCount: Number(data.fillerPageCount || 0),
-        
-        // Talent speed metrics
-        pencilerPagesPerWeek: Number(data.pencilerPagesPerWeek || 5),
-        inkerPagesPerWeek: Number(data.inkerPagesPerWeek || 7),
-        coloristPagesPerWeek: Number(data.coloristPagesPerWeek || 10),
-        lettererPagesPerWeek: Number(data.lettererPagesPerWeek || 15),
-        
-        // Batch processing metrics
-        pencilBatchSize: Number(data.pencilBatchSize || 5),
-        inkBatchSize: Number(data.inkBatchSize || 5),
-        letterBatchSize: Number(data.letterBatchSize || 5),
-        
-        // Approval metrics
-        approvalDays: Number(data.approvalDays || 2),
       };
       
-      // Handle dates separately to avoid browser inconsistencies
-      if (data.dueDate) {
-        try {
-          const dateStr = typeof data.dueDate === 'string' 
-            ? data.dueDate 
-            : data.dueDate.toISOString();
-          // @ts-ignore
-          simplifiedData.dueDate = dateStr;
-        } catch (e) {
-          console.error("Error formatting dueDate:", e);
-        }
-      }
+      // Use the sanitizeFormData utility to handle browser compatibility issues
+      // This will properly handle Date objects and other complex types
+      const sanitizedData = sanitizeFormData(formDataWithStudio);
       
-      if (data.plotDeadline) {
-        try {
-          const dateStr = typeof data.plotDeadline === 'string' 
-            ? data.plotDeadline 
-            : data.plotDeadline.toISOString();
-          // @ts-ignore
-          simplifiedData.plotDeadline = dateStr;
-        } catch (e) {
-          console.error("Error formatting plotDeadline:", e);
-        }
-      }
+      console.log("Sanitized data for submission:", sanitizedData);
       
-      if (data.coverDeadline) {
-        try {
-          const dateStr = typeof data.coverDeadline === 'string' 
-            ? data.coverDeadline 
-            : data.coverDeadline.toISOString();
-          // @ts-ignore
-          simplifiedData.coverDeadline = dateStr;
-        } catch (e) {
-          console.error("Error formatting coverDeadline:", e);
-        }
-      }
-      
-      console.log("API data being sent:", JSON.stringify(simplifiedData, null, 2));
-      
-      // Use createProjectMutation directly which should work cross-browser
-      createProjectMutation.mutate(simplifiedData);
-      
+      // Use the mutation with sanitized data
+      createProjectMutation.mutate(sanitizedData);
     } catch (error) {
-      console.error("Unexpected error in project creation form submit:", error);
+      console.error("Unexpected error in form submit:", error);
       toast({
-        title: "Error creating project",
+        title: "Error creating comic",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
