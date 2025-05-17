@@ -12,6 +12,7 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
 import Projects from "@/pages/projects";
 import ProjectCreate from "@/pages/project-create";
+import SimpleProjectCreate from "@/pages/simple-project-create";
 import ProjectDetails from "@/pages/project-details";
 import ScriptEditor from "@/pages/script-editor";
 import PanelEditor from "@/pages/panel-editor";
@@ -71,6 +72,11 @@ function Router() {
             <Route path="/projects/new">
               <SimpleProtected>
                 <ProjectCreate />
+              </SimpleProtected>
+            </Route>
+            <Route path="/projects/simple-new">
+              <SimpleProtected>
+                <SimpleProjectCreate />
               </SimpleProtected>
             </Route>
             <Route path="/projects/:id">
