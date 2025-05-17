@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Studio } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
@@ -9,13 +9,75 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, X } from "lucide-react";
+import { Save, X, CalendarIcon } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format as formatDate } from "date-fns";
+import { safeApiSubmit } from "@/lib/api";
+
+// Define form schema and types for type safety
+const createProjectSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  issue: z.string().optional(),
+  description: z.string().optional(),
+  studioId: z.number().positive("A bullpen must be selected"),
+  status: z.string().default("in_progress"),
+  progress: z.number().default(0),
+  coverCount: z.number().min(1, "Must have at least 1 cover").default(1),
+  interiorPageCount: z.number().min(1, "Must have at least 1 interior page").default(22),
+  fillerPageCount: z.number().default(0),
+  pencilerPagesPerWeek: z.number().min(1, "Must be at least 1").default(5),
+  inkerPagesPerWeek: z.number().min(1, "Must be at least 1").default(7),
+  coloristPagesPerWeek: z.number().min(1, "Must be at least 1").default(10),
+  lettererPagesPerWeek: z.number().min(1, "Must be at least 1").default(15),
+  pencilBatchSize: z.number().min(1, "Must be at least 1").default(5),
+  inkBatchSize: z.number().min(1, "Must be at least 1").default(5),
+  letterBatchSize: z.number().min(1, "Must be at least 1").default(5),
+  approvalDays: z.number().min(1, "Must be at least 1").default(2),
+  dueDate: z.date().optional().nullable(),
+  plotDeadline: z.date().optional().nullable(),
+  coverDeadline: z.date().optional().nullable(),
+  // ... add any other fields
+});
+
+type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
 
 export default function ProjectCreate() {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Create form with validation
+  const form = useForm<CreateProjectFormValues>({
+    resolver: zodResolver(createProjectSchema),
+    defaultValues: {
+      title: "",
+      issue: "",
+      description: "",
+      status: "in_progress",
+      progress: 0,
+      coverCount: 1,
+      interiorPageCount: 22,
+      fillerPageCount: 0,
+      pencilerPagesPerWeek: 5,
+      inkerPagesPerWeek: 7,
+      coloristPagesPerWeek: 10,
+      lettererPagesPerWeek: 15,
+      pencilBatchSize: 5,
+      inkBatchSize: 5,
+      letterBatchSize: 5,
+      approvalDays: 2,
+      dueDate: null,
+      plotDeadline: null,
+      coverDeadline: null,
+    },
+  });
   
   // Query for available bullpens
   const { data: studios, isLoading: isLoadingStudios } = useQuery<Studio[]>({
