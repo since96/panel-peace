@@ -1370,9 +1370,22 @@ export default function ProjectDetails() {
                       issue: formData.get('issue') as string,
                     };
                     
-                    // Update project
-                    updateProjectMutation.mutate(data);
-                    setEditingMetrics(false);
+                    // Update project and trigger workflow reinitialization
+                    updateProjectMutation.mutate(data, {
+                      onSuccess: () => {
+                        // Ask if they want to reinitialize workflow steps
+                        if (workflowSteps && workflowSteps.length > 0) {
+                          const reinitialize = confirm(
+                            "Would you like to reinitialize the workflow steps to reflect the new page counts? " +
+                            "This will update step descriptions but preserve progress, comments, and assignments."
+                          );
+                          if (reinitialize) {
+                            initializeWorkflowMutation.mutate();
+                          }
+                        }
+                        setEditingMetrics(false);
+                      }
+                    });
                   }}>
                     <div className="space-y-3">
                       <div className="space-y-1">

@@ -791,17 +791,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dueDateChanged = 'dueDate' in parsedData.data && 
         parsedData.data.dueDate !== null && parsedData.data.dueDate !== undefined &&
         (!project.dueDate || parsedData.data.dueDate.getTime() !== new Date(project.dueDate).getTime());
+        
+      // Check if page counts or other metrics that affect workflow have changed
+      const interiorPagesChanged = 'interiorPageCount' in parsedData.data && 
+        parsedData.data.interiorPageCount !== undefined && 
+        parsedData.data.interiorPageCount !== project.interiorPageCount;
+        
+      const fillerPagesChanged = 'fillerPageCount' in parsedData.data && 
+        parsedData.data.fillerPageCount !== undefined && 
+        parsedData.data.fillerPageCount !== project.fillerPageCount;
+        
+      const coverCountChanged = 'coverCount' in parsedData.data && 
+        parsedData.data.coverCount !== undefined && 
+        parsedData.data.coverCount !== project.coverCount;
 
       const updatedProject = await storage.updateProject(id, parsedData.data);
       
-      // If due date changed and there are workflow steps, reinitialize them
-      if (dueDateChanged) {
-        console.log("Project due date: " + parsedData.data.dueDate);
+      // If important metrics changed and there are workflow steps, reinitialize them
+      if (dueDateChanged || interiorPagesChanged || fillerPagesChanged || coverCountChanged) {
+        console.log("Project metrics changed. Checking if workflow needs to be reinitialized.");
+        console.log("Interior pages changed:", interiorPagesChanged, 
+                    "New value:", parsedData.data.interiorPageCount, 
+                    "Old value:", project.interiorPageCount);
+                    
         // Check if there are already workflow steps for this project
         const existingSteps = await storage.getWorkflowStepsByProject(id);
         if (existingSteps.length > 0) {
-          // Reinitialize workflow with the new due date
-          await storage.initializeProjectWorkflow(id);
+          // Store progress and assignment information to preserve it
+          const progressMap = new Map();
+          const assignmentMap = new Map();
+          const statusMap = new Map();
+          
+          for (const step of existingSteps) {
+            progressMap.set(step.stepType, step.progress);
+            statusMap.set(step.stepType, step.status);
+            
+            // Get assignments for this step
+            const assignments = await storage.getAssignmentsByWorkflowStep(step.id);
+            if (assignments.length > 0) {
+              assignmentMap.set(step.stepType, assignments);
+            }
+          }
+          
+          // Reinitialize workflow with updated metrics
+          const newSteps = await storage.initializeProjectWorkflow(id);
+          
+          // Restore progress and assignments to new steps
+          for (const newStep of newSteps) {
+            // Restore progress if it existed
+            if (progressMap.has(newStep.stepType)) {
+              await storage.updateWorkflowStep(newStep.id, {
+                progress: progressMap.get(newStep.stepType),
+                status: statusMap.get(newStep.stepType)
+              });
+            }
+            
+            // Restore assignments if they existed
+            if (assignmentMap.has(newStep.stepType)) {
+              const assignments = assignmentMap.get(newStep.stepType);
+              for (const assignment of assignments) {
+                await storage.createWorkflowStepAssignment({
+                  workflowStepId: newStep.id,
+                  userId: assignment.userId,
+                  assignedAt: new Date(),
+                  assignedBy: assignment.assignedBy
+                });
+              }
+            }
+          }
         }
       }
 
