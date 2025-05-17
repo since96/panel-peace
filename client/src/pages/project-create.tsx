@@ -214,6 +214,89 @@ export default function ProjectCreate() {
     }
   });
   
+  // Chrome-compatible direct form submission
+  const handleDirectSubmit = async () => {
+    try {
+      // Get form values manually to avoid Date object issues in Chrome
+      const title = form.getValues('title');
+      const bullpenId = Number(studioId || 0);
+      
+      if (!title || !bullpenId) {
+        toast({
+          title: "Missing information",
+          description: "Title and Bullpen selection are required",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setIsSubmitting(true);
+      
+      // Create a very minimal payload with just the essential fields
+      const basicFormData = {
+        title: title,
+        studioId: bullpenId,
+        issue: form.getValues('issue') || "",
+        description: form.getValues('description') || "",
+        
+        // Use sensible defaults for all other fields
+        status: "in_progress",
+        progress: 0,
+        createdBy: 1,
+        coverCount: 1,
+        interiorPageCount: 22,
+        fillerPageCount: 0,
+        pencilerPagesPerWeek: 5,
+        inkerPagesPerWeek: 7,
+        coloristPagesPerWeek: 10,
+        lettererPagesPerWeek: 15,
+        pencilBatchSize: 5,
+        inkBatchSize: 5,
+        letterBatchSize: 5,
+        approvalDays: 2
+      };
+
+      console.log("Making direct API request with minimal data:", basicFormData);
+      
+      // Make a direct fetch request to bypass any potential library issues
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(basicFormData),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to create comic");
+      }
+      
+      const result = await response.json();
+      
+      toast({
+        title: "Comic created",
+        description: "Your comic has been created successfully",
+      });
+      
+      // Refresh projects list and navigate to the new project
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      navigate(`/projects/${result.id}`);
+      
+    } catch (error) {
+      console.error("Error in direct submit:", error);
+      toast({
+        title: "Error creating comic",
+        description: "Failed to create comic. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Regular form submission handler for non-Chrome browsers
   const onSubmit = (data: CreateProjectFormValues) => {
     setIsSubmitting(true);
     
@@ -225,7 +308,6 @@ export default function ProjectCreate() {
       };
       
       // Use the sanitizeFormData utility to handle browser compatibility issues
-      // This will properly handle Date objects and other complex types
       const sanitizedData = sanitizeFormData(formDataWithStudio);
       
       console.log("Sanitized data for submission:", sanitizedData);
@@ -782,14 +864,25 @@ export default function ProjectCreate() {
                   </div>
                 </div>
                 
-                <div className="flex justify-end space-x-2 pt-4 border-t">
+                <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
                   <Button type="button" variant="outline" onClick={handleCancel}>
                     <X className="mr-2 h-4 w-4" />
                     Cancel
                   </Button>
+                  
+                  <Button 
+                    type="button" 
+                    onClick={handleDirectSubmit}
+                    disabled={isSubmitting} 
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    {isSubmitting ? "Creating..." : "Create Comic (Chrome)"}
+                  </Button>
+                  
                   <Button type="submit" disabled={isSubmitting}>
                     <Save className="mr-2 h-4 w-4" />
-                    {isSubmitting ? "Creating..." : "Create Project"}
+                    {isSubmitting ? "Creating..." : "Create Comic (Firefox/Safari)"}
                   </Button>
                 </div>
               </form>
