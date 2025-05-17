@@ -1278,9 +1278,42 @@ export class MemStorage implements IStorage {
     const coverDuration = Math.max(7, Math.ceil(coverCount / 1) * 7); // At least a week, more if multiple covers
     const scriptDuration = 14; // Script typically takes 2 weeks after plot
     
-    // Use manual deadlines if set, otherwise calculate them
-    const plotEndDate = project.plotDeadline || addDays(today, plotDuration);
-    const coverEndDate = project.coverDeadline || addDays(today, coverDuration);
+    // Ensure all dates are properly converted to Date objects
+    let plotEndDate: Date; 
+    let coverEndDate: Date;
+    
+    // Safely convert deadline strings/dates to Date objects
+    if (project.plotDeadline) {
+      try {
+        plotEndDate = new Date(project.plotDeadline);
+        // Check if valid date
+        if (isNaN(plotEndDate.getTime())) {
+          console.log("Invalid plot deadline, using calculated date");
+          plotEndDate = addDays(today, plotDuration);
+        }
+      } catch (e) {
+        console.log("Error parsing plot deadline:", e);
+        plotEndDate = addDays(today, plotDuration);
+      }
+    } else {
+      plotEndDate = addDays(today, plotDuration);
+    }
+    
+    if (project.coverDeadline) {
+      try {
+        coverEndDate = new Date(project.coverDeadline);
+        // Check if valid date
+        if (isNaN(coverEndDate.getTime())) {
+          console.log("Invalid cover deadline, using calculated date");
+          coverEndDate = addDays(today, coverDuration);
+        }
+      } catch (e) {
+        console.log("Error parsing cover deadline:", e);
+        coverEndDate = addDays(today, coverDuration);
+      }
+    } else {
+      coverEndDate = addDays(today, coverDuration);
+    }
     
     // Calculate script deadline based on plot completion
     const scriptEndDate = addDays(plotEndDate, scriptDuration);
@@ -1352,9 +1385,23 @@ export class MemStorage implements IStorage {
     const productionStartDate = addDays(colorEndDate, 7); // Start production same time as final editorial
     const productionEndDate = addDays(colorEndDate, 14); // Due two weeks after colors
     
-    // Comparison with project due date
-    const projectDueDate = project.dueDate ? new Date(project.dueDate) : null;
-    console.log(`Project due date: ${projectDueDate?.toISOString()}`);
+    // Safely handle project due date (check if it's a valid date)
+    let projectDueDate = null;
+    if (project.dueDate) {
+      try {
+        projectDueDate = new Date(project.dueDate);
+        // Verify it's a valid date
+        if (isNaN(projectDueDate.getTime())) {
+          console.log("Invalid project due date, treating as null");
+          projectDueDate = null;
+        } else {
+          console.log(`Project due date: ${projectDueDate.toISOString()}`);
+        }
+      } catch (e) {
+        console.log("Error parsing project due date:", e);
+        projectDueDate = null;
+      }
+    }
     console.log(`Calculated completion date: ${productionEndDate.toISOString()}`);
     
     if (projectDueDate && productionEndDate > projectDueDate) {
