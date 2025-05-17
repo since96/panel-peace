@@ -831,26 +831,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Check if there are already workflow steps for this project
         const existingSteps = await storage.getWorkflowStepsByProject(id);
         if (existingSteps.length > 0) {
-          // Store progress and assignment information to preserve it
+          // Store progress information to preserve it
           const progressMap = new Map();
-          const assignmentMap = new Map();
           const statusMap = new Map();
           
           for (const step of existingSteps) {
             progressMap.set(step.stepType, step.progress);
             statusMap.set(step.stepType, step.status);
-            
-            // Get assignments for this step
-            const assignments = await storage.getAssignmentsByWorkflowStep(step.id);
-            if (assignments.length > 0) {
-              assignmentMap.set(step.stepType, assignments);
-            }
           }
           
           // Reinitialize workflow with updated metrics
           const newSteps = await storage.initializeProjectWorkflow(id);
           
-          // Restore progress and assignments to new steps
+          // Restore progress to new steps
           for (const newStep of newSteps) {
             // Restore progress if it existed
             if (progressMap.has(newStep.stepType)) {
@@ -858,19 +851,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 progress: progressMap.get(newStep.stepType),
                 status: statusMap.get(newStep.stepType)
               });
-            }
-            
-            // Restore assignments if they existed
-            if (assignmentMap.has(newStep.stepType)) {
-              const assignments = assignmentMap.get(newStep.stepType);
-              for (const assignment of assignments) {
-                await storage.createWorkflowStepAssignment({
-                  workflowStepId: newStep.id,
-                  userId: assignment.userId,
-                  assignedAt: new Date(),
-                  assignedBy: assignment.assignedBy
-                });
-              }
             }
           }
         }
