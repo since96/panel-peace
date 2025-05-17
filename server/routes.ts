@@ -710,7 +710,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Create the project
+      // Create the project with all metrics
       const newProject = await storage.createProject({
         title: requestData.title || "Untitled Project",
         studioId: requestData.studioId, 
@@ -720,7 +720,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: requestData.description || null,
         issue: requestData.issue || null,
         coverImage: null,
-        dueDate: dueDate
+        dueDate: dueDate,
+        // Add all the page count and metrics fields
+        interiorPageCount: requestData.interiorPageCount || 22,
+        coverCount: requestData.coverCount || 1,
+        fillerPageCount: requestData.fillerPageCount || 0,
+        pencilerPagesPerWeek: requestData.pencilerPagesPerWeek || 5,
+        inkerPagesPerWeek: requestData.inkerPagesPerWeek || 7,
+        coloristPagesPerWeek: requestData.coloristPagesPerWeek || 10,
+        lettererPagesPerWeek: requestData.lettererPagesPerWeek || 15,
+        pencilBatchSize: requestData.pencilBatchSize || 5,
+        inkBatchSize: requestData.inkBatchSize || 5,
+        letterBatchSize: requestData.letterBatchSize || 5,
+        approvalDays: requestData.approvalDays || 2,
+        plotDeadline: requestData.plotDeadline || null,
+        coverDeadline: requestData.coverDeadline || null
       });
       
       console.log(`PROJECT CREATE: Successfully created project "${newProject.title}" (ID: ${newProject.id}) for studio ${newProject.studioId}`);
