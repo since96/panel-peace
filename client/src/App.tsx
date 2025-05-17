@@ -71,7 +71,7 @@ function Router() {
             </Route>
             <Route path="/projects/new">
               <SimpleProtected>
-                <ProjectCreate />
+                <SimpleProjectCreate />
               </SimpleProtected>
             </Route>
             <Route path="/projects/simple-new">
