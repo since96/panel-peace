@@ -63,7 +63,10 @@ export function SimpleLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-6 w-full max-w-md text-center">
+        <p className="font-bold text-amber-900">THE PANEL PEACE EDITORIAL SOFTWARE IS IN BETA. SAFARI BROWSER PREFERRED. CHROME & FIREFOX BROWSERS EXPERIENCING TEMPORARY GLITCHES</p>
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Panel Peace Login</CardTitle>
