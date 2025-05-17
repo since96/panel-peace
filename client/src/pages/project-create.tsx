@@ -1,51 +1,16 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProjectSchema, Studio } from "@shared/schema";
+import { Studio } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { sanitizeFormData, safeApiSubmit } from "@/lib/browser-helpers";
-import { z } from "zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Save, X } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn, formatDate } from "@/lib/utils";
+import { Save, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-
-const createProjectSchema = insertProjectSchema.extend({
-  title: z.string().min(1, "Title is required"),
-  dueDate: z.date().optional(),
-  plotDeadline: z.date().optional(),
-  coverDeadline: z.date().optional(),
-  // Comic book metrics
-  coverCount: z.number().min(1, "Must have at least 1 cover").default(1),
-  interiorPageCount: z.number().min(1, "Must have at least 1 interior page").default(22),
-  fillerPageCount: z.number().min(0, "Can't have negative pages").default(0),
-  
-  // Talent speed metrics
-  pencilerPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(5),
-  inkerPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(7),
-  coloristPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(10),
-  lettererPagesPerWeek: z.number().min(1, "Must complete at least 1 page per week").default(15),
-  
-  // Batch processing metrics
-  pencilBatchSize: z.number().min(1, "Batch size must be at least 1 page").default(5),
-  inkBatchSize: z.number().min(1, "Batch size must be at least 1 page").default(5),
-  letterBatchSize: z.number().min(1, "Batch size must be at least 1 page").default(5),
-  
-  // Approval metrics
-  approvalDays: z.number().min(1, "Must allow at least 1 day for approvals").default(2),
-});
-
-type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
 
 export default function ProjectCreate() {
   const { toast } = useToast();
