@@ -52,17 +52,29 @@ export default function Projects() {
             <h1 className="text-2xl font-bold text-slate-900">Studio Comics</h1>
             <p className="text-slate-500 mt-1">Manage your comic book titles and issues</p>
           </div>
-          <div className="mt-4 md:mt-0">
+          <div className="mt-4 md:mt-0 flex flex-col sm:flex-row gap-2">
             {studioId ? (
-              <Button 
-                className="flex items-center gap-2"
-                asChild
-              >
-                <Link to={`/projects/new?studioId=${studioId}`}>
-                  <Plus className="h-4 w-4" />
-                  <span>New Comic</span>
-                </Link>
-              </Button>
+              <>
+                <Button 
+                  className="flex items-center gap-2"
+                  asChild
+                >
+                  <Link to={`/projects/new?studioId=${studioId}`}>
+                    <Plus className="h-4 w-4" />
+                    <span>New Comic (Firefox/Safari)</span>
+                  </Link>
+                </Button>
+                
+                <Button 
+                  className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                  asChild
+                >
+                  <Link to={`/projects/simple-new?studioId=${studioId}`}>
+                    <Plus className="h-4 w-4" />
+                    <span>New Comic (Chrome)</span>
+                  </Link>
+                </Button>
+              </>
             ) : (
               <SelectStudioDialog />
             )}

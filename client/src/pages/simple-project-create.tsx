@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Save, X } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import type { Studio } from "@shared/schema";
 
 export default function SimpleProjectCreate() {
   const [title, setTitle] = useState("");
@@ -21,7 +22,7 @@ export default function SimpleProjectCreate() {
   const queryClient = useQueryClient();
 
   // Fetch studios for dropdown
-  const { data: studios = [], isLoading: isLoadingStudios } = useQuery({
+  const { data: studios = [], isLoading: isLoadingStudios } = useQuery<Studio[]>({
     queryKey: ["/api/studios"],
   });
 
@@ -153,7 +154,7 @@ export default function SimpleProjectCreate() {
                       <SelectValue placeholder="Select a bullpen" />
                     </SelectTrigger>
                     <SelectContent>
-                      {studios.map((studio: any) => (
+                      {studios.map((studio) => (
                         <SelectItem key={studio.id} value={String(studio.id)}>
                           {studio.name}
                         </SelectItem>
