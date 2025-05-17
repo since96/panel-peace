@@ -46,7 +46,7 @@ export function CurrentProjects() {
               </div>
               <h3 className="text-lg font-medium text-slate-600 mb-1">No comics yet</h3>
               <p className="text-sm text-slate-500 mb-4">Create your first comic book to get started</p>
-              <Link href="/projects/new" className="inline-flex items-center text-sm font-medium text-primary">
+              <Link href="/projects/simple-new" className="inline-flex items-center text-sm font-medium text-primary">
                 <i className="ri-add-line mr-1"></i>
                 <span>Create a new comic</span>
               </Link>

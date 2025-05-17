@@ -51,7 +51,8 @@ export function SelectStudioDialog() {
   
   const handleStudioSelect = (studioId: number) => {
     setOpen(false);
-    navigate(`/projects/new?studioId=${studioId}`);
+    // Use the simplified project creation page for all browsers
+    navigate(`/projects/simple-new?studioId=${studioId}`);
   };
   
   const handleCreateStudio = () => {
