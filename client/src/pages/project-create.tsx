@@ -179,7 +179,7 @@ export default function ProjectCreate() {
     }
   });
   
-  // Chrome-compatible direct form submission
+  // Direct form submission - for handling browser compatibility
   const handleDirectSubmit = async () => {
     try {
       // Get form values manually to avoid Date object issues in Chrome
@@ -261,7 +261,7 @@ export default function ProjectCreate() {
     }
   };
   
-  // Regular form submission handler for non-Chrome browsers
+  // Regular form submission handler 
   const onSubmit = (data: CreateProjectFormValues) => {
     setIsSubmitting(true);
     
@@ -911,20 +911,16 @@ export default function ProjectCreate() {
                     Cancel
                   </Button>
                   
-                  <Button 
-                    type="button" 
-                    onClick={handleDirectSubmit}
-                    disabled={isSubmitting} 
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Save className="mr-2 h-4 w-4" />
-                    {isSubmitting ? "Creating..." : "Create Comic (Chrome)"}
-                  </Button>
-                  
                   <Button type="submit" disabled={isSubmitting}>
                     <Save className="mr-2 h-4 w-4" />
-                    {isSubmitting ? "Creating..." : "Create Comic (Firefox/Safari)"}
+                    {isSubmitting ? "Creating..." : "Create Comic"}
                   </Button>
+                </div>
+                
+                <div className="mt-4 text-sm text-slate-500 p-3 bg-slate-50 rounded border border-slate-200">
+                  <p className="font-medium mb-1">Browser Compatibility Note:</p>
+                  <p>We have experienced issues with creating comics in some browsers. For the best experience, 
+                  please use Safari or DuckDuckGo browser.</p>
                 </div>
               </form>
             </Form>
