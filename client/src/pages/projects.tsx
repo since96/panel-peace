@@ -126,7 +126,7 @@ export default function Projects() {
                     className="flex items-center gap-2"
                     asChild
                   >
-                    <Link to={`/projects/new?studioId=${studioId}`}>
+                    <Link to={`/projects/simple-new?studioId=${studioId}`}>
                       <Plus className="h-4 w-4" />
                       <span>Create New Comic</span>
                     </Link>

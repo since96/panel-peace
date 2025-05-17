@@ -179,7 +179,7 @@ export default function ProjectCreate() {
     }
   });
   
-  // Direct form submission - for handling browser compatibility
+  // Chrome-compatible direct form submission
   const handleDirectSubmit = async () => {
     try {
       // Get form values manually to avoid Date object issues in Chrome
