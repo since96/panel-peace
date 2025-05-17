@@ -51,7 +51,6 @@ export function SelectStudioDialog() {
   
   const handleStudioSelect = (studioId: number) => {
     setOpen(false);
-    // Use the full project creation page with all production parameters
     navigate(`/projects/new?studioId=${studioId}`);
   };
   

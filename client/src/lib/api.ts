@@ -125,39 +125,3 @@ export async function apiDelete(url: string) {
     method: 'DELETE'
   });
 }
-
-/**
- * Safe API submit that catches and handles errors
- */
-export async function safeApiSubmit(
-  url: string, 
-  data: any, 
-  method: 'POST' | 'PUT' | 'PATCH' = 'POST',
-  onSuccess?: (data: any) => void,
-  onError?: (error: any) => void
-) {
-  try {
-    let result;
-    switch (method) {
-      case 'POST':
-        result = await apiPost(url, data);
-        break;
-      case 'PUT':
-        result = await apiPut(url, data);
-        break;
-      case 'PATCH':
-        result = await apiPatch(url, data);
-        break;
-    }
-    
-    if (onSuccess) {
-      onSuccess(result);
-    }
-    return result;
-  } catch (error) {
-    if (onError) {
-      onError(error);
-    }
-    throw error;
-  }
-}
