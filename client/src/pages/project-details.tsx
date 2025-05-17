@@ -308,7 +308,17 @@ export default function ProjectDetails() {
   });
 
   const updateProjectMutation = useMutation({
-    mutationFn: async (updateData: { id: number; dueDate?: Date; progress?: number; status?: string; title?: string }) => {
+    mutationFn: async (updateData: { 
+      id: number; 
+      dueDate?: Date; 
+      progress?: number; 
+      status?: string; 
+      title?: string;
+      interiorPageCount?: number;
+      coverCount?: number;
+      fillerPageCount?: number;
+      issue?: string;
+    }) => {
       if (!hasEditAccess) {
         throw new Error("You don't have permission to edit projects");
       }
