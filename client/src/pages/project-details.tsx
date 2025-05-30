@@ -742,7 +742,17 @@ export default function ProjectDetails() {
               )}
               {project && !isProjectEditorsLoading && workflowSteps && (
                 <ExportButtons 
-                  project={{...project, workflowSteps}} 
+                  project={{
+                    ...project, 
+                    workflowSteps: workflowSteps.map(step => ({
+                      ...step,
+                      // Include both primary assignee and collaborators in the team info
+                      team: [
+                        ...(step.assignedTo ? [users?.find(u => u.id === step.assignedTo)] : []),
+                        ...(step.assignees?.map(id => users?.find(u => u.id.toString() === id)) || [])
+                      ].filter(Boolean)
+                    }))
+                  }} 
                   collaborators={projectEditors || []} 
                 />
               )}

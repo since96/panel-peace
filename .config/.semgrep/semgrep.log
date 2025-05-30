@@ -1,0 +1,206 @@
+2025-05-14 21:19:06,988 - semgrep.notifications - WARNING - METRICS: Using configs from the Registry (like --config=p/ci) reports pseudonymous rule metrics to semgrep.dev.
+To disable Registry rule metrics, use "--metrics=off".
+Using configs only from local files (like --config=xyz.yml) does not enable metrics.
+
+More information: https://semgrep.dev/docs/metrics
+
+2025-05-14 21:19:06,990 - semgrep.run_scan - DEBUG - semgrep version 1.2.0
+2025-05-14 21:19:06,994 - semgrep.git - DEBUG - Failed to get project url from 'git ls-remote': Command failed with exit code: 128
+-----
+Command failed with output:
+fatal: No remote configured to list refs from.
+
+
+Failed to run 'git ls-remote --get-url'. Possible reasons:
+
+- the git binary is not available
+- the current working directory is not a git repository
+- the baseline commit is not a parent of the current commit
+    (if you are running through semgrep-app, check if you are setting `SEMGREP_BRANCH` or `SEMGREP_BASELINE_COMMIT` properly)
+- the current working directory is not marked as safe
+    (fix with `git config --global --add safe.directory $(pwd)`)
+
+Try running the command yourself to debug the issue.
+2025-05-14 21:19:06,994 - semgrep.config_resolver - DEBUG - Loading local config from /home/runner/workspace/.config/.semgrep/semgrep_rules.json
+2025-05-14 21:19:06,997 - semgrep.config_resolver - DEBUG - Done loading local config from /home/runner/workspace/.config/.semgrep/semgrep_rules.json
+2025-05-14 21:19:07,001 - semgrep.config_resolver - DEBUG - Saving rules to /tmp/semgrep-_gbwa_pl.rules
+2025-05-14 21:19:07,274 - semgrep.semgrep_core - DEBUG - Failed to open resource semgrep-core-proprietary: [Errno 2] No such file or directory: '/tmp/_MEI3ygx5i/semgrep/bin/semgrep-core-proprietary'.
+2025-05-14 21:19:08,031 - semgrep.rule_lang - DEBUG - semgrep-core validation response: valid=True
+2025-05-14 21:19:08,032 - semgrep.rule_lang - DEBUG - semgrep-core validation succeeded
+2025-05-14 21:19:08,032 - semgrep.rule_lang - DEBUG - RPC validation succeeded
+2025-05-14 21:19:08,032 - semgrep.config_resolver - DEBUG - loaded 1 configs in 1.0379271507263184
+2025-05-14 21:19:08,378 - semgrep.run_scan - VERBOSE - running 1250 rules from 1 config /home/runner/workspace/.config/.semgrep/semgrep_rules.json_0
+2025-05-14 21:19:08,378 - semgrep.run_scan - VERBOSE - No .semgrepignore found. Using default .semgrepignore rules. See the docs for the list of default ignores: https://semgrep.dev/docs/cli-usage/#ignore-files
+2025-05-14 21:19:08,381 - semgrep.run_scan - VERBOSE - Rules:
+2025-05-14 21:19:08,381 - semgrep.run_scan - VERBOSE - <SKIPPED DATA (too many entries; use --max-log-list-entries)>
+2025-05-14 21:19:09,218 - semgrep.core_runner - DEBUG - Passing whole rules directly to semgrep_core
+2025-05-14 21:19:09,500 - semgrep.core_runner - DEBUG - Running Semgrep engine with command:
+2025-05-14 21:19:09,500 - semgrep.core_runner - DEBUG - /tmp/_MEI3ygx5i/semgrep/bin/opengrep-core -json -rules /tmp/tmp9655mcd3.json -j 8 -targets /tmp/tmpa72y35h4 -timeout 5 -timeout_threshold 3 -max_memory 0 -fast
+2025-05-14 21:19:34,843 - semgrep.core_runner - DEBUG - --- semgrep-core stderr ---
+[00.09][[34mINFO[0m]: Executed as: /tmp/_MEI3ygx5i/semgrep/bin/opengrep-core -json -rules /tmp/tmp9655mcd3.json -j 8 -targets /tmp/tmpa72y35h4 -timeout 5 -timeout_threshold 3 -max_memory 0 -fast
+[00.09][[34mINFO[0m]: Version: 1.2.0
+[00.09][[34mINFO[0m]: Parsing rules in /tmp/tmp9655mcd3.json
+[00.93][[34mINFO[0m]: scan: processing 442 files (skipping 0), with 487 rules (skipping 0 )
+[04.42][[31mERROR[0m]: exception on temp_project_details_2.tsx (Parsing_error.Syntax_error (temp_project_details_2.tsx:1:10 "<DialogHeader>\n            <DialogTitle>Adjust Deadline</DialogTitle>\n            <DialogDescription>\n              Update the deadline for this workflow step.\n            </DialogDescription>\n        ... (truncated)"))
+[0m[04.78][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring file: temp/fixed-project-details.tsx func: ProjectDetails:6414]
+[0m[06.58][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.typescript.react.security.audit.react-href-var file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[06.60][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: temp/fixed-project-details.tsx func: ProjectDetails:6414]
+[0m[07.10][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.remote-property-injection file: temp/fixed-project-details.tsx func: ProjectDetails:6414]
+[0m[07.53][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[08.00][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[08.33][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.express-ssrf file: temp/fixed-project-details.tsx func: ProjectDetails:6414]
+[0m[08.71][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.insecure-object-assign file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[08.83][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: client/src/pages/asset-library.tsx func: AssetLibrary:27591]
+[0m[09.05][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: temp/fixed-project-details.tsx func: ProjectDetails:6414]
+[0m[09.31][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.tainted-sql-string file: client/src/pages/asset-library.tsx func: AssetLibrary:27591]
+[0m[09.70][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: client/src/pages/asset-library.tsx func: AssetLibrary:27591]
+[0m[09.85][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.tainted-sql-string file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[09.89][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.remote-property-injection file: client/src/pages/asset-library.tsx func: AssetLibrary:27591]
+[0m[10.63][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[11.19][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring file: client/src/pages/feedback-details.tsx func: FeedbackDetails:39939]
+[0m[11.76][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: client/src/pages/feedback-details.tsx func: FeedbackDetails:39939]
+[0m[11.88][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.xss.direct-response-write file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[12.16][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.express-ssrf file: client/src/pages/feedback-details.tsx func: FeedbackDetails:39939]
+[0m[12.23][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.path-traversal.path-join-resolve-traversal file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[12.26][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.remote-property-injection file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[12.37][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: client/src/pages/feedback-details.tsx func: FeedbackDetails:39939]
+[0m[12.42][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[12.49][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.cors-misconfiguration file: client/src/pages/feedback-details.tsx func: FeedbackDetails:39939]
+[0m[12.69][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[12.99][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.tainted-sql-string file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[13.26][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.express-ssrf file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[13.26][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[13.43][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: client/src/components/project/project-editors.tsx func: ProjectEditors:58626]
+[0m[13.58][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.x-frame-options-misconfiguration file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[13.72][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: server/replitAuth.ts func: setupAuth:58470]
+[0m[13.84][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.xss.direct-response-write file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[13.84][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[14.07][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.remote-property-injection file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[14.08][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.express-data-exfiltration file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[14.25][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.express-path-join-resolve-traversal file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[14.31][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.sqli.node-postgres-sqli file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[14.31][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.express-open-redirect file: server/replitAuth.ts func: setupAuth:58470]
+[0m[14.50][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.x-frame-options-misconfiguration file: server/replitAuth.ts func: setupAuth:58470]
+[0m[14.57][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.cors-misconfiguration file: client/src/pages/project-details.tsx func: ProjectDetails:9595]
+[0m[14.57][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.x-frame-options-misconfiguration file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[14.57][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[14.67][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: server/replitAuth.ts func: setupAuth:58470]
+[0m[14.77][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[14.82][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.tainted-sql-string file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[14.82][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.cors-misconfiguration file: server/replitAuth.ts func: setupAuth:58470]
+[0m[14.98][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.express-wkhtmltoimage-injection file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[15.17][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[15.32][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.cors-misconfiguration file: client/src/pages/collaborators-updated.tsx func: Collaborators:45857]
+[0m[15.57][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.remote-property-injection file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[15.82][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.x-frame-options-misconfiguration file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[16.07][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[16.51][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.cors-misconfiguration file: client/src/pages/publication.tsx func: Publication:68578]
+[0m[16.83][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/routes.ts func: registerRoutes:77005]
+[0m[16.98][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/routes.ts func: registerRoutes:77005]
+[0m[17.14][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/routes.ts func: registerRoutes:77005]
+[0m[17.42][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/routes.ts func: registerRoutes:77005]
+[0m[17.58][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/routes.ts func: registerRoutes:77005]
+[0m[18.09][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/routes.ts func: registerRoutes:77005]
+[0m[18.57][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/routes.ts func: registerRoutes:77005]
+[0m[18.85][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.path-traversal.path-join-resolve-traversal file: client/src/pages/collaborators.tsx func: Collaborators:83545]
+[0m[18.98][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.tainted-sql-string file: client/src/pages/project-create.tsx func: ProjectCreate:82852]
+[0m[19.12][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring file: server/storage.ts func: initializeProjectWorkflow:88542]
+[0m[19.17][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.tainted-sql-string file: server/routes.ts func: registerRoutes:77005]
+[0m[19.23][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-require file: server/storage.ts func: initializeProjectWorkflow:88542]
+[0m[19.34][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.tainted-sql-string file: server/routes.ts func: registerRoutes:77005]
+[0m[19.43][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.cors-misconfiguration file: client/src/pages/project-create.tsx func: ProjectCreate:82852]
+[0m[19.72][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.xss.direct-response-write file: client/src/pages/collaborators.tsx func: Collaborators:83545]
+[0m[20.02][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.lang.security.audit.detect-non-literal-fs-filename file: server/storage.ts func: initializeProjectWorkflow:88542]
+[0m[20.10][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: server/routes.ts func: registerRoutes:77005]
+[0m[20.16][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: server/routes.ts func: registerRoutes:77005]
+[0m[20.29][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: server/routes.ts func: registerRoutes:77005]
+[0m[20.57][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.injection.raw-html-format file: server/routes.ts func: registerRoutes:77005]
+[0m[21.23][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.xss.direct-response-write file: server/routes.ts func: registerRoutes:77005]
+[0m[21.59][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.xss.direct-response-write file: server/routes.ts func: registerRoutes:77005]
+[0m[22.09][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.express-ssrf file: server/routes.ts func: registerRoutes:77005]
+[0m[22.87][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.audit.express-open-redirect file: server/routes.ts func: registerRoutes:77005]
+[0m[23.69][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.x-frame-options-misconfiguration file: server/routes.ts func: registerRoutes:77005]
+[0m[24.09][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: server/routes.ts func: registerRoutes:77005]
+[0m[24.40][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.require-request file: server/routes.ts func: registerRoutes:77005]
+[0m[25.00][[33mWARNING[0m]: Fixpoint timeout while performing taint analysis [rule: config..semgrep.vendored-rules.javascript.express.security.cors-misconfiguration file: server/routes.ts func: registerRoutes:77005]
+[0m[25.30][[34mINFO[0m]: Custom ignore pattern: None
+[25.30][[34mINFO[0m]: Custom ignore pattern: None
+--- end semgrep-core stderr ---
+2025-05-14 21:19:34,851 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('client/index.html'), 'config..semgrep.vendored-rules.html.security.audit.missing-integrity') match_id = 0ee74fd49637bebe183eca7188dbde26e386314e62cc2e7ba1ee60b377b638243fcd84e6c6fa04886198ccacfa6a711bfbcc61a28f9ddc913d5b3c53083cbc90_0
+2025-05-14 21:19:34,852 - semgrep.rule_match - DEBUG - match_key = (' type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" (?is).*integrity= (google-analytics\\.com|fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|googletagmanager\\.com) .*rel\\s*=\\s*[\'"]?preconnect.* href="... :// ..." href="//..." href=\'... :// ...\' href=\'//...\' src="... :// ..." src="//..." src=\'... :// ...\' src=\'//...\' <link  type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" > <script  type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" >...</script>', PosixPath('client/index.html'), 'config..semgrep.vendored-rules.html.security.audit.missing-integrity') match_id = 0728b64e224596592d04447ba8a642ff94e1fb9fcc07be26d49dc7e7f6898e638ad16ffcaca086932c58f4c6400fe32603323afef02cf9bfebcb0e4a53562a40_0
+2025-05-14 21:19:34,852 - semgrep.rule_match - DEBUG - match_key = (' type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" (?is).*integrity= (google-analytics\\.com|fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|googletagmanager\\.com) .*rel\\s*=\\s*[\'"]?preconnect.* href="... :// ..." href="//..." href=\'... :// ...\' href=\'//...\' src="... :// ..." src="//..." src=\'... :// ...\' src=\'//...\' <link  type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" > <script  type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" >...</script>', PosixPath('client/index.html'), 'config..semgrep.vendored-rules.html.security.audit.missing-integrity') match_id = 0728b64e224596592d04447ba8a642ff94e1fb9fcc07be26d49dc7e7f6898e638ad16ffcaca086932c58f4c6400fe32603323afef02cf9bfebcb0e4a53562a40_0
+2025-05-14 21:19:34,853 - semgrep.rule_match - DEBUG - match_key = (' type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" (?is).*integrity= (google-analytics\\.com|fonts\\.googleapis\\.com|fonts\\.gstatic\\.com|googletagmanager\\.com) .*rel\\s*=\\s*[\'"]?preconnect.* href="... :// ..." href="//..." href=\'... :// ...\' href=\'//...\' src="... :// ..." src="//..." src=\'... :// ...\' src=\'//...\' <link  type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" > <script  type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" >...</script>', PosixPath('client/index.html'), 'config..semgrep.vendored-rules.html.security.audit.missing-integrity') match_id = 0728b64e224596592d04447ba8a642ff94e1fb9fcc07be26d49dc7e7f6898e638ad16ffcaca086932c58f4c6400fe32603323afef02cf9bfebcb0e4a53562a40_0
+2025-05-14 21:19:34,853 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('client/src/pages/project-details.tsx'), 'config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring') match_id = d0bfa39380db8198b8def220e7376e9701909845a1a4c523604057af5959faadedc9eeba75b31cc1ab3d88134cd9b05df45e5f607c1c1a6538efcaa588210b0b_0
+2025-05-14 21:19:34,854 - semgrep.rule_match - DEBUG - match_key = ('"..." + "..."\n $X + $Y $X.concat($Y) `...${...}...`\n $X.concat("...")\n `Error fetching links for step step.id: $UTIL = require(\'util\')\n...\n $UTIL.format(`Error fetching links for step step.id:,error,...)\n console.error(`Error fetching links for step step.id:,error,...)\n', PosixPath('client/src/pages/project-details.tsx'), 'config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring') match_id = c7f3e96ced854843a8f147b85d85d35db344b3fce74ad72841cb77bfa7505b8c177402f5e77634d63b6d66b7a259c4820bdff27b9655c1184e4a840b49cc7b1a_0
+2025-05-14 21:19:34,854 - semgrep.rule_match - DEBUG - match_key = ('"..." + "..."\n $X + $Y $X.concat($Y) `...${...}...`\n $X.concat("...")\n `Error fetching links for step step.id: $UTIL = require(\'util\')\n...\n $UTIL.format(`Error fetching links for step step.id:,error,...)\n console.error(`Error fetching links for step step.id:,error,...)\n', PosixPath('client/src/pages/project-details.tsx'), 'config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring') match_id = c7f3e96ced854843a8f147b85d85d35db344b3fce74ad72841cb77bfa7505b8c177402f5e77634d63b6d66b7a259c4820bdff27b9655c1184e4a840b49cc7b1a_0
+2025-05-14 21:19:34,855 - semgrep.rule_match - DEBUG - match_key = ('"..." + "..."\n $X + $Y $X.concat($Y) `...${...}...`\n $X.concat("...")\n `Error fetching links for step step.id: $UTIL = require(\'util\')\n...\n $UTIL.format(`Error fetching links for step step.id:,error,...)\n console.error(`Error fetching links for step step.id:,error,...)\n', PosixPath('client/src/pages/project-details.tsx'), 'config..semgrep.vendored-rules.javascript.lang.security.audit.unsafe-formatstring') match_id = c7f3e96ced854843a8f147b85d85d35db344b3fce74ad72841cb77bfa7505b8c177402f5e77634d63b6d66b7a259c4820bdff27b9655c1184e4a840b49cc7b1a_0
+2025-05-14 21:19:34,855 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('server/direct-auth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = 7ebad0612761fb9e726b6591498f09245646cb5f3bd597dd984420c947e4d5fee0fca5933b7450d41131c2df4efe07f09bbbd1ca88c3fa1f22500e066bf4d370_0
+2025-05-14 21:19:34,856 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/direct-auth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = f8a93c3a3b3efa878611d24f2f14c39800f7730cd39c2015b5bbf7bba9c0a6f129346bc07d1bc09a858989089440ec4546d35ce075692878cf6c405e9fd70904_0
+2025-05-14 21:19:34,856 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/direct-auth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = f8a93c3a3b3efa878611d24f2f14c39800f7730cd39c2015b5bbf7bba9c0a6f129346bc07d1bc09a858989089440ec4546d35ce075692878cf6c405e9fd70904_0
+2025-05-14 21:19:34,857 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/direct-auth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = f8a93c3a3b3efa878611d24f2f14c39800f7730cd39c2015b5bbf7bba9c0a6f129346bc07d1bc09a858989089440ec4546d35ce075692878cf6c405e9fd70904_0
+2025-05-14 21:19:34,857 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('server/replitAuth.ts'), 'config..semgrep.vendored-rules.javascript.passport-jwt.security.hardcoded-passport-secret') match_id = 085ef789fe40506da658ffa1cb294567b3b2d01baaaf238b8435a9ad9298ce0e74a1a1403346ba4e99d3239e86f679715a1dbbe7d5a2d2546e0daba077c92955_0
+2025-05-14 21:19:34,858 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('server/replitAuth.ts'), 'config..semgrep.vendored-rules.javascript.passport-jwt.security.hardcoded-passport-secret') match_id = 085ef789fe40506da658ffa1cb294567b3b2d01baaaf238b8435a9ad9298ce0e74a1a1403346ba4e99d3239e86f679715a1dbbe7d5a2d2546e0daba077c92955_0
+2025-05-14 21:19:34,858 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('server/replitAuth.ts'), 'config..semgrep.vendored-rules.javascript.passport-jwt.security.hardcoded-passport-secret') match_id = 085ef789fe40506da658ffa1cb294567b3b2d01baaaf238b8435a9ad9298ce0e74a1a1403346ba4e99d3239e86f679715a1dbbe7d5a2d2546e0daba077c92955_0
+2025-05-14 21:19:34,859 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('server/replitAuth.ts'), 'config..semgrep.vendored-rules.javascript.passport-jwt.security.hardcoded-passport-secret') match_id = 085ef789fe40506da658ffa1cb294567b3b2d01baaaf238b8435a9ad9298ce0e74a1a1403346ba4e99d3239e86f679715a1dbbe7d5a2d2546e0daba077c92955_0
+2025-05-14 21:19:34,859 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('server/simpleAuth.new.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = c3a773738aa251faac9d3180d7e6ed7a8f8791d199c8bb885c749e7dda3fd2c4abaa6643e84b50f5e55b42cf6ba9eedabb8978e9d0b41af10ae87c9a6ef75479_0
+2025-05-14 21:19:34,860 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/simpleAuth.new.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = 8b430d2b9a62b39e59f942be154cc94f66e40286724c8cb985de4636dea4670b16158b40faeb041fa8f11f2b1f9e9656a6afc25c9f2cae839b17548c02b0e428_0
+2025-05-14 21:19:34,860 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/simpleAuth.new.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = 8b430d2b9a62b39e59f942be154cc94f66e40286724c8cb985de4636dea4670b16158b40faeb041fa8f11f2b1f9e9656a6afc25c9f2cae839b17548c02b0e428_0
+2025-05-14 21:19:34,861 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/simpleAuth.new.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = 8b430d2b9a62b39e59f942be154cc94f66e40286724c8cb985de4636dea4670b16158b40faeb041fa8f11f2b1f9e9656a6afc25c9f2cae839b17548c02b0e428_0
+2025-05-14 21:19:34,861 - semgrep.rule_match - DEBUG - match_key = ('', PosixPath('server/simpleAuth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = a2917122c994090d501a656a2b9f0f8e5e3713c12d90b3bda1f0c82e7d7571decafcce881d89018a6a7700b68f7e202f6a2facc486b72632a1b9c400e7b05c91_0
+2025-05-14 21:19:34,862 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/simpleAuth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = 242c1f64d3b7e3c0cd135f28f5a288193d652a98e083ec785e8f27469f2416cb51671eab5303632b0d463802222b4850dfea276bc3ea2074b0a13f15679a2549_0
+2025-05-14 21:19:34,862 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/simpleAuth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = 242c1f64d3b7e3c0cd135f28f5a288193d652a98e083ec785e8f27469f2416cb51671eab5303632b0d463802222b4850dfea276bc3ea2074b0a13f15679a2549_0
+2025-05-14 21:19:34,863 - semgrep.rule_match - DEBUG - match_key = ('(?i)(?:administrator_login_password|password)(?:[0-9a-z\\-_\\t .]{0,20})(?:[\\s|\']|[\\s|"]){0,3}(?:=|>|:{1,3}=|\\|\\|:|<=|=>|:|\\?=)(?:\'|\\"|\\s|=|\\x60){0,5}("[a-z0-9=_\\-]{8,20}")(?:[\'|\\"|\\n|\\r|\\s|\\x60|;]|$)', PosixPath('server/simpleAuth.ts'), 'config..semgrep.vendored-rules.generic.secrets.gitleaks.hashicorp-tf-password') match_id = 242c1f64d3b7e3c0cd135f28f5a288193d652a98e083ec785e8f27469f2416cb51671eab5303632b0d463802222b4850dfea276bc3ea2074b0a13f15679a2549_0
+2025-05-14 21:19:34,865 - semgrep.core_runner - DEBUG - semgrep ran in 0:00:25.647058 on 159 files
+2025-05-14 21:19:34,867 - semgrep.core_runner - DEBUG - findings summary: 2 warning, 0 error, 4 info
+2025-05-14 21:19:34,871 - semgrep.app.auth - DEBUG - Getting API token from settings file
+2025-05-14 21:19:34,871 - semgrep.app.auth - DEBUG - No API token found in settings file
+2025-05-14 21:19:34,871 - semgrep.semgrep_core - DEBUG - Failed to open resource semgrep-core-proprietary: [Errno 2] No such file or directory: '/tmp/_MEI3ygx5i/semgrep/bin/semgrep-core-proprietary'.
+2025-05-14 21:19:34,982 - semgrep.output - VERBOSE - 
+========================================
+Files skipped:
+========================================
+
+  Always skipped by Opengrep:
+
+   • <none>
+
+  Skipped by .gitignore:
+  (Disable by passing --no-git-ignore)
+
+   • <all files not listed by `git ls-files` were skipped>
+
+  Skipped by .semgrepignore:
+  - https://semgrep.dev/docs/ignoring-files-folders-code/#understand-semgrep-defaults
+
+   • <none>
+
+  Skipped by --include patterns:
+
+   • <none>
+
+  Skipped by --exclude patterns:
+
+   • <none>
+
+  Files skipped due to insufficient read permissions:
+
+   • <none>
+
+  Skipped by limiting to files smaller than 1000000 bytes:
+  (Adjust with the --max-target-bytes flag)
+
+   • <none>
+
+  Partially analyzed due to parsing or internal Opengrep errors
+
+   • tailwind.config.ts (1 lines skipped)
+   • temp_project_details_1.tsx (1003 lines skipped)
+   • temp_project_details_2.tsx
+
+2025-05-14 21:19:34,983 - semgrep.output - INFO - Some files were skipped or only partially analyzed.
+  Scan was limited to files tracked by git.
+  Partially scanned: 3 files only partially analyzed due to parsing or internal Opengrep errors
+
+Ran 443 rules on 159 files: 6 findings.
+2025-05-14 21:19:34,983 - semgrep.app.version - DEBUG - Version cache does not exist
+2025-05-14 21:19:35,006 - semgrep.metrics - VERBOSE - Not sending pseudonymous metrics since metrics are configured to OFF and registry usage is False

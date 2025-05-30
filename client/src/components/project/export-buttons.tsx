@@ -24,6 +24,34 @@ import { formatDate } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+interface TeamMember {
+  id: number;
+  username: string;
+  fullName: string | null;
+  email: string;
+  role: string | null;
+  phone?: string | null;
+}
+
+interface WorkflowStep {
+  id: number;
+  title: string;
+  description?: string;
+  status: string;
+  progress: number;
+  dueDate?: Date;
+  team?: TeamMember[];
+}
+
+interface Project {
+  id: number;
+  title: string;
+  issue?: string;
+  description?: string;
+  workflowSteps: WorkflowStep[];
+  studioName?: string;
+}
+
 interface ProjectEditor {
   id: number;
   projectId: number;
@@ -41,7 +69,7 @@ interface ProjectEditor {
 }
 
 export interface ExportButtonsProps {
-  project: any;
+  project: Project;
   collaborators: ProjectEditor[];
 }
 
@@ -131,13 +159,27 @@ export function ExportButtons({ project, collaborators }: ExportButtonsProps) {
           // Format the status text (e.g., "in_progress" → "In Progress")
           const formattedStatus = step.status
             .split('_')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
             
           // Show both status and percentage for all steps
           statusText = `Status: ${formattedStatus} (${step.progress || 0}% Complete)`;
           doc.text(statusText, 14, yPosition);
-          yPosition += 10;
+          yPosition += 6;
+
+          // Add team members for this step
+          if (step.team && step.team.length > 0) {
+            doc.text('Team:', 14, yPosition);
+            yPosition += 6;
+            step.team.forEach((member: TeamMember) => {
+              if (member) {
+                doc.text(`  • ${member.fullName || member.username} (${member.role || 'Team Member'})`, 14, yPosition);
+                yPosition += 6;
+              }
+            });
+          }
+          
+          yPosition += 4;
         }
       } else {
         doc.setFontSize(12);
@@ -266,7 +308,7 @@ ${project.workflowSteps && project.workflowSteps.length > 0
       // Format the status text (e.g., "in_progress" → "In Progress")
       const formattedStatus = step.status
         .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
         
       return `${step.title.toUpperCase()}
