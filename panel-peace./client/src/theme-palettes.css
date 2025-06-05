@@ -1,0 +1,324 @@
+/* Panel Peace - Theme Palettes
+ * This file contains alternative color schemes that can be applied to the application
+ * To use a palette, uncomment its section and comment out the others
+ */
+
+/* CURRENT PALETTE - Default Panel Peace (backup of original) */
+.theme-default {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 239 84% 67%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 252 100% 82%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 24 98% 53%;
+  --accent-foreground: 60 9.1% 97.8%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  --chart-1: 239 84% 67%;
+  --chart-2: 252 100% 82%;
+  --chart-3: 24 98% 53%;
+  --chart-4: 131 41% 46%;
+  --chart-5: 202 80% 40%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 20 14.3% 4.1%;
+  --sidebar-primary: 239 84% 67%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 24 98% 53%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 20 5.9% 90%;
+  --sidebar-ring: 20 14.3% 4.1%;
+  --success: 142 71% 45%;
+  --warning: 38 92% 50%;
+  --danger: 0 84.2% 60.2%;
+}
+
+/* PALETTE 1 - Dark Mode Comic */
+.theme-dark-comic {
+  --background: 220 13% 18%;
+  --foreground: 210 20% 98%;
+  --muted: 220 13% 28%;
+  --muted-foreground: 220 10% 70%;
+  --popover: 220 13% 20%;
+  --popover-foreground: 210 20% 98%;
+  --card: 220 13% 23%;
+  --card-foreground: 210 20% 98%;
+  --border: 220 13% 30%;
+  --input: 220 13% 30%;
+  --primary: 263 70% 60%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 199 76% 55%;
+  --secondary-foreground: 210 20% 98%;
+  --accent: 332 80% 56%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 20% 98%;
+  --ring: 263 70% 60%;
+  --radius: 0.5rem;
+  --chart-1: 263 70% 60%;
+  --chart-2: 199 76% 55%;
+  --chart-3: 332 80% 56%;
+  --chart-4: 35 84% 58%;
+  --chart-5: 165 70% 40%;
+  --sidebar-background: 220 13% 15%;
+  --sidebar-foreground: 210 20% 98%;
+  --sidebar-primary: 263 70% 60%;
+  --sidebar-primary-foreground: 210 20% 98%;
+  --sidebar-accent: 332 80% 56%;
+  --sidebar-accent-foreground: 210 20% 98%;
+  --sidebar-border: 220 13% 30%;
+  --sidebar-ring: 263 70% 60%;
+  --success: 142 71% 45%;
+  --warning: 35 84% 58%;
+  --danger: 0 84% 60%;
+}
+
+/* PALETTE 2 - Vintage Press */
+.theme-vintage-press {
+  --background: 36 33% 97%;
+  --foreground: 40 10% 15%;
+  --muted: 36 20% 92%;
+  --muted-foreground: 40 10% 40%;
+  --popover: 36 33% 97%;
+  --popover-foreground: 40 10% 15%;
+  --card: 36 33% 99%;
+  --card-foreground: 40 10% 15%;
+  --border: 36 20% 85%;
+  --input: 36 20% 85%;
+  --primary: 15 75% 40%;
+  --primary-foreground: 36 33% 97%;
+  --secondary: 42 87% 55%;
+  --secondary-foreground: 40 10% 15%;
+  --accent: 273 60% 40%;
+  --accent-foreground: 36 33% 97%;
+  --destructive: 0 70% 45%;
+  --destructive-foreground: 36 33% 97%;
+  --ring: 15 75% 40%;
+  --radius: 0.25rem;
+  --chart-1: 15 75% 40%;
+  --chart-2: 42 87% 55%;
+  --chart-3: 273 60% 40%;
+  --chart-4: 195 65% 40%;
+  --chart-5: 150 60% 35%;
+  --sidebar-background: 40 15% 20%;
+  --sidebar-foreground: 36 33% 97%;
+  --sidebar-primary: 15 75% 40%;
+  --sidebar-primary-foreground: 36 33% 97%;
+  --sidebar-accent: 42 87% 55%;
+  --sidebar-accent-foreground: 40 10% 15%;
+  --sidebar-border: 40 15% 30%;
+  --sidebar-ring: 15 75% 40%;
+  --success: 142 60% 40%;
+  --warning: 42 87% 55%;
+  --danger: 0 70% 45%;
+}
+
+/* PALETTE 3 - Modern Superhero */
+.theme-superhero {
+  --background: 210 50% 98%;
+  --foreground: 210 50% 10%;
+  --muted: 210 40% 93%;
+  --muted-foreground: 210 40% 40%;
+  --popover: 210 50% 98%;
+  --popover-foreground: 210 50% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 50% 10%;
+  --border: 210 40% 90%;
+  --input: 210 40% 90%;
+  --primary: 220 85% 57%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 350 80% 65%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 40 95% 55%;
+  --accent-foreground: 210 50% 10%;
+  --destructive: 0 85% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 220 85% 57%;
+  --radius: 0.5rem;
+  --chart-1: 220 85% 57%;
+  --chart-2: 350 80% 65%;
+  --chart-3: 40 95% 55%;
+  --chart-4: 170 80% 40%;
+  --chart-5: 250 70% 60%;
+  --sidebar-background: 220 70% 17%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 220 85% 57%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 350 80% 65%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 220 50% 25%;
+  --sidebar-ring: 220 85% 57%;
+  --success: 160 75% 40%;
+  --warning: 40 95% 55%;
+  --danger: 0 85% 60%;
+}
+
+/* PALETTE 4 - Manga Studio */
+.theme-manga-studio {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 10%;
+  --muted: 240 10% 95%;
+  --muted-foreground: 240 5% 45%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 10%;
+  --border: 240 10% 90%;
+  --input: 240 10% 90%;
+  --primary: 195 85% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 320 75% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 80% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 195 85% 45%;
+  --radius: 0.25rem;
+  --chart-1: 195 85% 45%;
+  --chart-2: 320 75% 50%;
+  --chart-3: 0 0% 10%;
+  --chart-4: 45 95% 50%;
+  --chart-5: 270 70% 50%;
+  --sidebar-background: 240 10% 20%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 195 85% 45%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 320 75% 50%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 240 10% 30%;
+  --sidebar-ring: 195 85% 45%;
+  --success: 165 80% 40%;
+  --warning: 45 95% 50%;
+  --danger: 0 80% 55%;
+}
+
+/* PALETTE 5 - Golden Age */
+.theme-golden-age {
+  --background: 0 0% 100%;
+  --foreground: 25 10% 15%;
+  --muted: 25 20% 95%;
+  --muted-foreground: 25 10% 35%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 25 10% 15%;
+  --card: 45 30% 98%;
+  --card-foreground: 25 10% 15%;
+  --border: 45 20% 85%;
+  --input: 45 20% 85%;
+  --primary: 355 80% 46%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 45 90% 50%;
+  --secondary-foreground: 25 10% 15%;
+  --accent: 220 70% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 355 80% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 45 90% 50%;
+  --radius: 0.25rem;
+  --chart-1: 355 80% 46%;
+  --chart-2: 45 90% 50%;
+  --chart-3: 220 70% 50%;
+  --chart-4: 170 65% 40%;
+  --chart-5: 270 60% 55%;
+  --sidebar-background: 45 30% 20%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-primary: 355 80% 46%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 45 90% 50%;
+  --sidebar-accent-foreground: 25 10% 15%;
+  --sidebar-border: 45 30% 30%;
+  --sidebar-ring: 355 80% 46%;
+  --success: 160 70% 45%;
+  --warning: 45 90% 50%;
+  --danger: 355 80% 46%;
+}
+
+/* PALETTE 6 - Midnight Editor */
+.theme-midnight {
+  --background: 230 25% 10%;
+  --foreground: 210 40% 98%;
+  --muted: 230 25% 15%;
+  --muted-foreground: 210 40% 65%;
+  --popover: 230 25% 12%;
+  --popover-foreground: 210 40% 98%;
+  --card: 230 25% 13%;
+  --card-foreground: 210 40% 98%;
+  --border: 230 25% 20%;
+  --input: 230 25% 20%;
+  --primary: 200 98% 50%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 310 95% 60%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 160 80% 45%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 92% 55%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 200 98% 50%;
+  --radius: 0.5rem;
+  --chart-1: 200 98% 50%;
+  --chart-2: 310 95% 60%;
+  --chart-3: 160 80% 45%;
+  --chart-4: 35 90% 60%;
+  --chart-5: 270 85% 65%;
+  --sidebar-background: 230 30% 8%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 200 98% 50%;
+  --sidebar-primary-foreground: 210 40% 98%;
+  --sidebar-accent: 310 95% 60%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 230 25% 18%;
+  --sidebar-ring: 200 98% 50%;
+  --success: 160 80% 45%;
+  --warning: 35 90% 60%;
+  --danger: 0 92% 55%;
+}
+
+/* PALETTE 7 - Deep Space */
+.theme-deep-space {
+  --background: 240 30% 8%;
+  --foreground: 240 20% 98%;
+  --muted: 240 30% 12%;
+  --muted-foreground: 240 20% 65%;
+  --popover: 240 30% 10%;
+  --popover-foreground: 240 20% 98%;
+  --card: 240 30% 11%;
+  --card-foreground: 240 20% 98%;
+  --border: 240 30% 16%;
+  --input: 240 30% 16%;
+  --primary: 260 90% 65%;
+  --primary-foreground: 240 20% 98%;
+  --secondary: 180 85% 50%;
+  --secondary-foreground: 240 20% 98%;
+  --accent: 330 85% 55%;
+  --accent-foreground: 240 20% 98%;
+  --destructive: 0 90% 60%;
+  --destructive-foreground: 240 20% 98%;
+  --ring: 260 90% 65%;
+  --radius: 0.5rem;
+  --chart-1: 260 90% 65%;
+  --chart-2: 180 85% 50%;
+  --chart-3: 330 85% 55%;
+  --chart-4: 35 85% 55%;
+  --chart-5: 140 75% 45%;
+  --sidebar-background: 245 35% 6%;
+  --sidebar-foreground: 240 20% 98%;
+  --sidebar-primary: 260 90% 65%;
+  --sidebar-primary-foreground: 240 20% 98%;
+  --sidebar-accent: 330 85% 55%;
+  --sidebar-accent-foreground: 240 20% 98%;
+  --sidebar-border: 245 35% 14%;
+  --sidebar-ring: 260 90% 65%;
+  --success: 140 75% 45%;
+  --warning: 35 85% 55%;
+  --danger: 0 90% 60%;
+}
