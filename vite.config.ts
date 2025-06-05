@@ -28,10 +28,18 @@ export default defineConfig({
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
   },
-
   build: {
-    outDir: 'client/dist',
-    emptyOutDir: true
+    outDir: "client/dist",
+    emptyOutDir: true,
+    sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+      },
+      output: {
+        manualChunks: undefined
+      }
+    }
   }
 });
 
