@@ -13,6 +13,21 @@ export default defineConfig({
   },
   build: {
     outDir: "../server/public",
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          vendor: [
+            'react',
+            'react-dom',
+            'react-helmet-async',
+            'axios',
+            '@tanstack/react-query',
+            'wouter'
+          ]
+        }
+      }
+    }
   }
 }); 
