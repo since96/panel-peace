@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "npm install && cd client && npm install && vite build --outDir ../server/public && cd .. && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist/server",
+    "prebuild": "cd client && npm install",
+    "build": "cd client && npm run build && cd .. && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist/server",
     "start": "NODE_ENV=production node dist/server/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"
