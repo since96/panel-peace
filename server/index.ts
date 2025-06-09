@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupDirectAuth } from "./direct-auth";
 import { setupStudioAuth } from "./studio-auth";
+import path from "path";
 
 const app = express();
 app.use(express.json());
@@ -60,26 +61,37 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Setup static file serving and client routing
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // Serve static files from the public directory
+    app.use(express.static(path.join(__dirname, 'public')));
+    
+    // Handle client-side routing - send index.html for all non-API routes
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api')) {
+        return next();
+      }
+      res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
   }
 
-  // ALWAYS serve the app on port 3000
-  // this serves both the API and the client
-  const port = 3000;
-  const host = '0.0.0.0';
-  server.listen({
-    port,
-    host,
-    ipv6Only: false,
-  }, () => {
-    log(`Server running at:`);
-    log(`- Local: http://localhost:${port}`);
-    log(`- Network: http://${host}:${port}`);
-  });
+  // Only start the server if not in Vercel
+  if (process.env.VERCEL !== '1') {
+    const port = process.env.PORT || 3000;
+    const host = '0.0.0.0';
+    server.listen({
+      port,
+      host,
+      ipv6Only: false,
+    }, () => {
+      log(`Server running at:`);
+      log(`- Local: http://localhost:${port}`);
+      log(`- Network: http://${host}:${port}`);
+    });
+  }
 })();
+
+// Export the Express app for Vercel
+export default app;
